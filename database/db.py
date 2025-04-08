@@ -1,0 +1,49 @@
+# database/db.py
+
+import sqlite3
+from datetime import datetime
+
+class UsuarioDB:
+    def __init__(self, db_name="cloud_store.db"):
+        self.db_name = db_name
+        self.criar_tabela_usuarios()
+
+    def conectar(self):
+        return sqlite3.connect(self.db_name)
+
+    def criar_tabela_usuarios(self):
+        with self.conectar() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS usuarios (
+                    id INTEGER PRIMARY KEY,
+                    login TEXT UNIQUE,
+                    nome TEXT,
+                    email TEXT,
+                    avatar_url TEXT,
+                    data_login TEXT
+                )
+            """)
+            conn.commit()
+
+    def salvar_usuario(self, user_data):
+        with self.conectar() as conn:
+            cursor = conn.cursor()
+
+            now = datetime.now().isoformat()
+            login = user_data.get("login")
+            nome = user_data.get("name") or login
+            email = user_data.get("email")
+            avatar_url = user_data.get("avatar_url")
+
+            cursor.execute("""
+                INSERT INTO usuarios (login, nome, email, avatar_url, data_login)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(login) DO UPDATE SET
+                    nome=excluded.nome,
+                    email=excluded.email,
+                    avatar_url=excluded.avatar_url,
+                    data_login=excluded.data_login
+            """, (login, nome, email, avatar_url, now))
+
+            conn.commit()
