@@ -13,7 +13,7 @@ st.set_page_config(page_title="CyberDS Login", layout="centered")
 
 st.title("🔐 Login com Google - Cibersegurança + DataScience")
 
-query_params = st.query_params
+query_params = st.uery_params
 code = query_params.get("code", [None])[0]
 
 if "user" not in st.session_state:
