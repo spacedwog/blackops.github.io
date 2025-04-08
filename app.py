@@ -1,56 +1,80 @@
-# app.py
-import json
 import streamlit as st
-from blackboard import blackboard
-from nodemcu import enviar_para_esp8266
-from database import create_or_update_user, get_user
-from oauth import get_google_auth_url, get_tokens, get_user_info
+from auth.blackboard import BlackboardValidator
+from auth.oauth import OAuthGitHub
+from dashboard.github_dashboard import GitHubDashboard
+from database.db import UsuarioDB
 
-with open("config.json") as f:
-    config = json.load(f)
+class GitHubDashboardApp:
+    def __init__(self):
+        self.db = UsuarioDB()
+        self.auth = OAuthGitHub()
+        self.validator = BlackboardValidator()
+        self.user_data = None
 
-st.set_page_config(page_title="CyberDS Login", layout="centered")
-st.title("🔐 Login com Google - Cibersegurança + DataScience")
+    def run(self):
+        st.set_page_config(page_title="GitHub OAuth Dashboard", page_icon="🐙")
+        st.title("🔐 Login com GitHub")
 
-query_params = st.query_params
-code = query_params.get("code", [None])[0]
-st.write(f"🔑 Código recebido: {code}")
+        if "login_realizado" not in st.session_state:
+            st.session_state.login_realizado = False
 
-if "user" not in st.session_state:
-    st.session_state.user = None
+        if not st.session_state.login_realizado:
+            login_input = st.text_input("Digite seu login do GitHub:", key="login_input")
 
-if code and not st.session_state.user:
-    tokens = get_tokens(code, config)
-    access_token = tokens.get("access_token")
+            self.user_data = self.auth.callback()
 
-    if access_token:
-        user = get_user_info(access_token)
-        st.session_state.user = user
-        create_or_update_user(user)
-        st.experimental_set_query_params()  # limpa a URL
-        st.success(f"Bem-vindo, {user['name']} ({user['email']})")
-    else:
-        st.error("Falha ao obter token de acesso. Verifique o console para mais detalhes.")
+            if self.user_data:
+                if self.validator.validar_usuario(self.user_data, login_input):
+                    self.db.salvar_usuario(self.user_data)
+                    st.session_state.login_realizado = True
+                    st.rerun()
+                else:
+                    st.error("❌ Acesso negado: usuário inválido.")
+            else:
+                self.auth.login_button()
 
-if not st.session_state.user:
-    auth_url = get_google_auth_url(config)
-    st.link_button("🔑 Login com Google", url=auth_url)
-else:
-    user = st.session_state.user
-    st.image(user["picture"], width=100)
-    st.write(f"Bem-vindo, {user['name']} ({user['email']})")
+        else:
+            if not self.user_data:
+                self.user_data = self.auth.get_user_from_token()
 
-    st.subheader("📊 Análise e Interação")
-    if st.button("Enviar alerta para NodeMCU"):
-        resposta = enviar_para_esp8266("alert", {"user": user["id"], "evento": "login"})
-        st.write("Resposta ESP:", resposta)
+            if self.user_data:
+                self.dashboard = GitHubDashboard(self.user_data)
 
-    st.subheader("📁 Seus Dados")
-    data = get_user(user["id"])
-    st.json({
-        "ID": data[0],
-        "Email": data[1],
-        "Nome": data[2],
-        "Foto": data[3],
-        "Status Blackboard": blackboard.get(user["id"], "status")
-    })
+                abas = st.tabs([
+                    "👤 Perfil",
+                    "📦 Repositórios",
+                    "📈 Data Science",
+                    "🧱 Firewall e Relay",
+                    "🛡️ Cibersegurança"
+                ])
+
+                with abas[0]:
+                    self.dashboard.exibir_perfil()
+
+                with abas[1]:
+                    self.dashboard.exibir_repositorios()
+
+                with abas[2]:
+                    self.dashboard.exibir_data_science()
+
+                with abas[3]:
+                    self.dashboard.exibir_relay_firewall()
+
+                with abas[4]:
+                    self.auth.exibir_cyberseguranca()
+
+                if st.button("🚪 Logout"):
+                    st.session_state.login_realizado = False
+                    st.session_state.access_token = None
+                    st.rerun()
+
+            else:
+                st.warning("⚠️ Sessão expirada. Faça login novamente.")
+                st.session_state.login_realizado = False
+                st.session_state.access_token = None
+                st.rerun()
+
+# Executa a aplicação
+if __name__ == "__main__":
+    app = GitHubDashboardApp()
+    app.run()
