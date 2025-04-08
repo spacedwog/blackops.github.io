@@ -2,5 +2,5 @@
   "client_id": "190055810354-pt406rna8vrntifnp5i4jk35ets9k09q.apps.googleusercontent.com",
   "client_secret": "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",
   "redirect_uri": "http://localhost:8501",
-  "scope": ["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"]
+  "scope": ["openid", "email", "profile"]
 }

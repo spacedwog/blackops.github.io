@@ -1,13 +1,10 @@
-class Blackboard:
-    def __init__(self):
-        self.memory = {}
+# blackboard.py
+blackboard = {}
 
-    def set(self, user_id, key, value):
-        if user_id not in self.memory:
-            self.memory[user_id] = {}
-        self.memory[user_id][key] = value
+def set(user_id, key, value):
+    if user_id not in blackboard:
+        blackboard[user_id] = {}
+    blackboard[user_id][key] = value
 
-    def get(self, user_id, key):
-        return self.memory.get(user_id, {}).get(key, None)
-
-blackboard = Blackboard()
+def get(user_id, key):
+    return blackboard.get(user_id, {}).get(key, None)
