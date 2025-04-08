@@ -1,2 +1,3 @@
+# Requisitos (requirements.txt)
 streamlit
 requests
