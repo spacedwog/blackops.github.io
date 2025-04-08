@@ -1,36 +1,50 @@
 import streamlit as st
-from streamlit_drawable_canvas import st_canvas
-from modules import ciberseguranca, data_science, google_connect
+import json
+from oauth import get_google_auth_url, get_tokens, get_user_info
 from blackboard import blackboard
+from database import db
+from nodemcu import enviar_para_esp8266
 
-st.set_page_config(page_title="Sistema Integrado", layout="wide")
+# Carrega config
+with open("config.json") as f:
+    config = json.load(f)
 
-st.sidebar.image("assets/logo.png", width=150)
-page = st.sidebar.selectbox("Menu", ["Canvas", "Cibersegurança", "Data Science", "Google", "ESP8266"])
+st.set_page_config(page_title="CyberDS Login", layout="centered")
 
-if page == "Canvas":
-    canvas_result = st_canvas(
-        fill_color="rgba(255, 0, 0, 0.3)",
-        stroke_width=3,
-        stroke_color="#000",
-        background_color="#eee",
-        update_streamlit=True,
-        height=400,
-        width=600,
-        drawing_mode="freedraw"
-    )
-    if canvas_result.json_data:
-        blackboard.set("canvas_data", canvas_result.json_data)
+st.title("🔐 Login com Google - Cibersegurança + DataScience")
 
-elif page == "Cibersegurança":
-    ciberseguranca.exibir_interface(blackboard)
+query_params = st.query_params()
+code = query_params.get("code", [None])[0]
 
-elif page == "Data Science":
-    data_science.exibir_interface(blackboard)
+if "user" not in st.session_state:
+    st.session_state.user = None
 
-elif page == "Google":
-    google_connect.exibir_interface(blackboard)
+if code and not st.session_state.user:
+    tokens = get_tokens(code, config)
+    user = get_user_info(tokens["access_token"])
+    st.session_state.user = user
+    db.upsert_user(user)
+    blackboard.set(user["id"], "status", "autenticado")
 
-elif page == "ESP8266":
-    from nodemcu_interface import controle_esp
-    controle_esp()
+if not st.session_state.user:
+    auth_url = get_google_auth_url(config)
+    st.markdown(f"[Login com Google]({auth_url})")
+else:
+    user = st.session_state.user
+    st.image(user["picture"], width=100)
+    st.write(f"Bem-vindo, {user['name']} ({user['email']})")
+
+    st.subheader("📊 Análise e Interação")
+    if st.button("Enviar alerta para NodeMCU"):
+        resposta = enviar_para_esp8266("alert", {"user": user["id"], "evento": "login"})
+        st.write("Resposta ESP:", resposta)
+
+    st.subheader("📁 Seus Dados")
+    data = db.get_user(user["id"])
+    st.json({
+        "ID": data[0],
+        "Email": data[1],
+        "Nome": data[2],
+        "Foto": data[3],
+        "Status Blackboard": blackboard.get(user["id"], "status")
+    })

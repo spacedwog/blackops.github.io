@@ -1,5 +1,2 @@
 streamlit
-streamlit-drawable-canvas
 requests
-scikit-learn
-pandas
