@@ -1,8 +1,9 @@
-streamlit
-requests
-psutil
-socket
-requests-oauthlib
-python-dotenv
-statsmodels
 serial
+pytest
+psutil
+pyserial
+requests
+streamlit
+statsmodels
+python-dotenv
+requests-oauthlib

@@ -43,40 +43,24 @@ class GitHubDashboard:
             self.exibir_relay_firewall()
 
     def exibir_perfil(self):
-
         aba1, aba2, aba3 = st.tabs(["👤 Perfil", "📦 Repositórios Públicos", "🗃️ Lista Detalhada de Repositórios"])
-
         with aba1:
             st.title("🔙 GitHub Dashboard")
             col1, col2 = st.columns([1, 3])
             with col1:
                 st.image(self.user_data.get("avatar_url"), width=120)
-        with col2:
-            st.subheader(self.user_data.get("name") or self.user_data.get("login"))
-            st.caption(f"[📍 {self.user_data.get('login')}]({self.user_data.get('html_url')})")
-            if self.user_data.get("location"):
-                st.text(f"📧 {self.user_data['location']}")
-            if self.user_data.get("email"):
-                st.text(f"📧 {self.user_data['email']}")
-            if self.user_data.get("bio"):
-                st.markdown(f"> _{self.user_data['bio']}_")
-
+            with col2:
+                st.subheader(self.user_data.get("name") or self.user_data.get("login"))
+                st.caption(f"[📍 {self.user_data.get('login')}]({self.user_data.get('html_url')})")
+                if self.user_data.get("location"):
+                    st.text(f"📍 {self.user_data['location']}")
+                if self.user_data.get("email"):
+                    st.text(f"📧 {self.user_data['email']}")
+                if self.user_data.get("bio"):
+                    st.markdown(f"> _{self.user_data['bio']}_")
         with aba2:
             self.exibir_repositorios_publicos()
-
         with aba3:
-            self.exibir_lista_repositorios()
-
-    def exibir_repositorios(self):
-        st.subheader("📦 Repositórios")
-        st.write("Selecione uma aba para exibir os repositórios.")
-        
-        aba1, aba2 = st.tabs(["📦 Repositórios Públicos", "🗃️ Lista Detalhada de Repositórios"])
-
-        with aba1:
-            self.exibir_repositorios_publicos()
-
-        with aba2:
             self.exibir_lista_repositorios()
 
     def exibir_repositorios_publicos(self):
@@ -93,6 +77,19 @@ class GitHubDashboard:
                     st.warning("⚠️ Dados de repositórios inválidos recebidos da API.")
             else:
                 st.error(f"❌ Erro ao acessar repositórios: {response.status_code}")
+
+    def exibir_repositorios(self):
+        st.subheader("📦 Repositórios")
+        st.write("Selecione uma aba para exibir os repositórios.")
+        
+        aba1, aba2 = st.tabs(["📦 Repositórios Públicos", "🗃️ Lista Detalhada de Repositórios"])
+
+        with aba1:
+            self.exibir_repositorios_publicos()
+
+        with aba2:
+            self.exibir_lista_repositorios()
+                
 
     def exibir_lista_repositorios(self):
         st.subheader("🗃️ Lista Detalhada de Repositórios")
@@ -117,14 +114,12 @@ class GitHubDashboard:
 
     def exibir_data_science(self):
         aba1, aba2 = st.tabs(["📈 Data Science: Regression Table - Info", "📈 Data Science: Regression Table - Plot"])
-
         with aba1:
-            self.exibir_regressao_resumo()
-
+            self.exibir_data_science_resumo()
         with aba2:
-            self.exibir_regressao_plot()    
+            self.exibir_data_science_plot()
 
-    def exibir_regressao_resumo(self):
+    def exibir_data_science_resumo(self):
         st.subheader("📈 Data Science: Regression Table - Info")
         try:
             repos = self.user_data.get("public_repos", 0)
@@ -142,7 +137,7 @@ class GitHubDashboard:
         except Exception as e:
             st.error(f"Erro ao exibir regressão: {e}")
 
-    def exibir_regressao_plot(self):
+    def exibir_data_science_plot(self):
         st.subheader("📈 Data Science: Regression Table - Plot")
         try:
             repos = self.user_data.get("public_repos", 0)
@@ -158,9 +153,9 @@ class GitHubDashboard:
         except Exception as e:
             st.error(f"Erro ao exibir gráfico de regressão: {e}")
 
-    
-
     def exibir_relay_firewall(self):
+        log = []
+
         st.subheader("🚀 Cibersegurança: Relay e Firewall")
         status = st.empty()
         reiniciar = st.button("💡 Reiniciar Relé")
@@ -170,6 +165,7 @@ class GitHubDashboard:
 
         try:
             if reiniciar:
+                st.write("Reiniciando relé...")
                 log = ["✅ Comando enviado: RESTART"]
                 self.enviar_comando(porta_serial, baud_rate, b"RESTART\n", log)
                 status.success("Relé Reiniciado com sucesso! ✅")
@@ -183,7 +179,8 @@ class GitHubDashboard:
                 raw_response = ser.readline()
                 latencia = time.time() - start
 
-            self.exibir_resultado(raw_response, latencia, log)
+            if log:
+                self.exibir_resultado(raw_response, latencia, log)
 
         except serial.SerialException as se:
             st.error(f"Erro de conexão serial: {se}")
@@ -200,11 +197,10 @@ class GitHubDashboard:
     def enviar_comando(self, porta, baud_rate, comando, log):
         with serial.Serial(porta, baud_rate, timeout=1) as ser:
             ser.write(comando)
-            log.append(f"✅ Comando enviado: {comando}")
+            log.append(f"✅ Comando enviado (interno): {comando.decode().strip()}")
 
     def exibir_resultado(self, raw_response, latencia, log):
         response_str = self.decodificar_resposta(raw_response, log)
-
         abas = st.tabs(["📱 Resposta", "📦 Bytes Recebidos", "🧾 Log de Decodificação", "🧪 Análise XOR"])
 
         with abas[0]:
@@ -241,7 +237,6 @@ class GitHubDashboard:
         with abas[3]:
             self.exibir_analise_xor(raw_response)
 
-
     def decodificar_resposta(self, raw, log):
         try:
             response = raw.decode("utf-8")
@@ -264,7 +259,6 @@ class GitHubDashboard:
 
     def exibir_analise_xor(self, raw_response):
         st.subheader("🧪 Análise XOR Brute Force - Tabela Redimensional")
-
         palavras_chave = ["OK", "FIREWALL", "ACCESS", "RESTART", "DENIED", "GRANTED", "SECURE"]
         tabela_xor = []
 
@@ -288,16 +282,14 @@ class GitHubDashboard:
         if tabela_xor:
             df_xor = pd.DataFrame(tabela_xor).sort_values(by=["Qtd Palavras-chave", "Printable Ratio"], ascending=False)
 
-            # Insights
             melhor_linha = df_xor.iloc[0]
             st.markdown("### 🔍 Insights")
             st.success(f"""
-            🔑 **Melhor chave identificada:** `{melhor_linha['Key']}`  
-            📌 **Palavras detectadas:** `{melhor_linha['Palavra-chave Detectada']}`  
-            🧾 **Texto decodificado:** `{melhor_linha['Texto Decodificado']}`  
-            💡 **Razão de caracteres imprimíveis:** `{melhor_linha['Printable Ratio']:.2f}`
+                🔑 **Melhor chave identificada:** `{melhor_linha['Key']}`  
+                📌 **Palavras detectadas:** `{melhor_linha['Palavra-chave Detectada']}`  
+                🧾 **Texto decodificado:** `{melhor_linha['Texto Decodificado']}`  
+                💡 **Razão de caracteres imprimíveis:** `{melhor_linha['Printable Ratio']:.2f}`
             """)
-
             st.markdown("### 📊 Tabela Completa de Correspondências XOR")
             st.dataframe(df_xor.reset_index(drop=True))
         else:
