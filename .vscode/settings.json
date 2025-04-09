@@ -1,0 +1,8 @@
+{
+    "python.analysis.extraPaths": [
+        "./dashboard"
+    ],
+    "files.associations": {
+        "istream": "cpp"
+    }
+}
