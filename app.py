@@ -1,4 +1,3 @@
-import logging
 import pandas as pd
 import streamlit as st
 from database.db import UsuarioDB
@@ -9,7 +8,6 @@ from dashboard.github_dashboard import GitHubDashboard
 # OCR e imagem
 import os
 import cv2
-import uuid
 import tempfile
 import pytesseract
 
@@ -21,75 +19,52 @@ class GitHubDashboardApp:
         self.auth = OAuthGitHub()
         self.validator = BlackboardValidator()
         self.user_data = None
-        
-    def ler_rfid_via_camera(self, tentativas_max=3):
-        st.info("📷 Posicione o cartão RFID com o código visível.")
+
+    def ler_rfid_via_camera(self):
+        st.info("📷 Posicione o cartão RFID com código visível.")
         if st.button("🔍 Escanear Cartão RFID"):
+            cap = cv2.VideoCapture(0)
+            st_frame = st.empty()
 
-            # Gera um nome de arquivo temporário fixo para sobrescrita
-            temp_image_path = os.path.join(tempfile.gettempdir(), f"rfid_temp_{uuid.uuid4().hex}.png")
-
-            sucesso = False
-            uid_detectado = None
-
-            for tentativa in range(1, tentativas_max + 1):
-                st.write(f"🔄 Tentativa {tentativa} de {tentativas_max}...")
-
-                cap = cv2.VideoCapture(0)
-                st_frame = st.empty()
-
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_image:
                 for _ in range(30):
                     ret, frame = cap.read()
                     if ret:
-                        st_frame.image(frame, channels="BGR", caption=f"Tentativa {tentativa}")
+                        st_frame.image(frame, channels="BGR", caption="Imagem capturada")
+                cv2.imwrite(temp_image.name, frame)
                 cap.release()
 
-                # Salva a imagem capturada (sobrescrevendo o mesmo arquivo)
-                cv2.imwrite(temp_image_path, frame)
+            # Agora fora do `with`, o arquivo está liberado para uso/remover
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            _, thresh = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
+            config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
+            texto = pytesseract.image_to_string(thresh, config=config).strip().upper()
 
-                # Processa OCR
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                _, thresh = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
-                config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
-                texto = pytesseract.image_to_string(thresh, config=config).strip().upper()
-
-                if texto:
-                    uid_detectado = texto
-                    st.success(f"✅ UID detectado: `{uid_detectado}`")
-                    sucesso = True
-                    break
+            if texto:
+                st.success(f"✅ UID detectado: `{texto}`")
+                uid_detectado = texto
+                if not self.db.get_usuario_por_uid(uid_detectado):
+                    st.info("🔒 Cartão não registrado. Registrando novo usuário.")
+                    nome = self.user_data.get("name")
+                    login_github = self.user_data.get("login")
+                    nivel = "Usuario"
+                    self.db.registrar_cartao(uid_detectado, nome, login_github, nivel)
+                    st.success("✅ Cartão registrado com sucesso!")
                 else:
-                    st.warning("⚠️ Não foi possível reconhecer o texto nesta tentativa.")
-
-            # Remove o arquivo temporário ao final
-            if os.path.exists(temp_image_path):
-                os.remove(temp_image_path)
-
-            if not sucesso:
-                st.error("❌ Falha ao ler o cartão RFID após múltiplas tentativas.")
-                return
-
-            # Processa o UID detectado
-            if not self.db.get_usuario_por_uid(uid_detectado):
-                st.info("🔒 Cartão não registrado. Registrando novo usuário.")
-                nome = self.user_data.get("name")
-                login_github = self.user_data.get("login")
-                nivel = "Usuario"
-                self.db.registrar_cartao(uid_detectado, nome, login_github, nivel)
-                st.success("✅ Cartão registrado com sucesso!")
-            else:
-                usuario = self.db.get_usuario_por_uid(uid_detectado)
-                df = pd.DataFrame([{
-                    "Nome": usuario[1],
-                    "Login": usuario[2],
-                    "Nível": usuario[3],
-                    "Último Acesso": usuario[4]
-                }])
-                st.table(df)
-                if usuario[2] == self.user_data.get("login"):
+                    usuario = self.db.get_usuario_por_uid(uid_detectado)
+                    df = pd.DataFrame([{
+                        "Nome": usuario[1],
+                        "Login": usuario[2],
+                        "Nível": usuario[3],
+                        "Último Acesso": usuario[4]
+                    }])
+                    st.table(df)
                     st.success(f"✅ Bem-vindo, {usuario[1]}!")
-                else:
-                    st.error("❌ Acesso negado: usuário inválido.")
+            else:
+                st.error("❌ Não foi possível reconhecer o texto.")
+
+            # Agora podemos remover com segurança
+            os.remove(temp_image.name)
 
 
     def run(self):
@@ -100,18 +75,12 @@ class GitHubDashboardApp:
             st.session_state.login_realizado = False
 
         if not st.session_state.login_realizado:
-            
-            st.text_input("Digite seu login do GitHub:", key="login_input")
+            login_input = st.text_input("Digite seu login do GitHub:", key="login_input")
 
             self.user_data = self.auth.callback()
 
-            login_input_valido = st.session_state.get("login_input", "").strip()
-
-            st.info(f"Login input (session_state): {login_input_valido}")
-
-            if self.user_data and login_input_valido:
-                st.info(f"User data: {self.user_data}")
-                if self.validator.validar_usuario(self.user_data, login_input_valido):
+            if self.user_data:
+                if self.validator.validar_usuario(self.user_data, login_input):
                     self.db.salvar_usuario(self.user_data)
                     st.session_state.login_realizado = True
                     st.rerun()
