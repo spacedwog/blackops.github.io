@@ -55,7 +55,7 @@ def test_modelo_regressao(dashboard):
     with patch("streamlit.subheader"), patch("streamlit.text"), patch("streamlit.write"):
         dashboard.exibir_data_science_resumo()
 
-@patch("serial.Serial")
+@patch("github_dashboard.Serial")
 def test_enviar_comando_serial(mock_serial, dashboard):
     ser_mock = MagicMock()
     mock_serial.return_value.__enter__.return_value = ser_mock
