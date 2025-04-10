@@ -1,3 +1,4 @@
+import time
 import socket
 import requests
 import dns.resolver
@@ -13,20 +14,21 @@ class OAuthGitHub:
 
     @classmethod
     def login_button(cls):
-        if st.button("🔐 Login com GitHub"):
-            if "code" not in st.query_params:
-                params = {
-                    "client_id": OAUTH_CLIENT_ID,
-                    "redirect_uri": REDIRECT_URI,
-                    "scope": "read:user user:email",
-                    "state": "secure_random_string"
-                }
-                auth_url = f"{cls.AUTH_URL}?{urlencode(params)}"
-                st.markdown(f"[🔗 Redirecionando... clique aqui se não for automático]({auth_url})")
-                st.markdown(
-                    f"""<meta http-equiv="refresh" content="0;URL='{auth_url}'" />""",
-                    unsafe_allow_html=True
-                )
+        if "access_token" not in st.session_state:
+            if st.button("🔐 Login com GitHub"):
+                if "code" not in st.query_params:
+                    params = {
+                        "client_id": OAUTH_CLIENT_ID,
+                        "redirect_uri": REDIRECT_URI,
+                        "scope": "read:user user:email",
+                        "state": "secure_random_string"
+                    }
+                    auth_url = f"{cls.AUTH_URL}?{urlencode(params)}"
+                    st.markdown(f"[🔗 Redirecionando... clique aqui se não for automático]({auth_url})")
+                    st.markdown(
+                        f"""<meta http-equiv="refresh" content="0;URL='{auth_url}'" />""",
+                        unsafe_allow_html=True
+                    )
 
     @classmethod
     def callback(cls):
@@ -53,19 +55,35 @@ class OAuthGitHub:
             return None
 
         st.session_state["access_token"] = access_token
+        st.session_state["tokken_expiry"] = time.time() + 3600
         return cls.get_user_from_token()
+    
+    @classmethod
+    def get_login_input(cls):
+        return st.session_state.get("login")
 
     @classmethod
     def get_user_from_token(cls):
         token = st.session_state.get("access_token")
-        if not token:
-            return None
+        expiry = st.session_state.get("tokken_expiry")
+
+        if not token or time.time() > expiry:
+            # Token ausente ou expirado
+            st.session_state.pop("access_token", None)
+            st.session_state.pop("token_expiry", None)
+            st.warning("⚠️ Sessão expirada. Redirecionando para login...")
+            cls.login_button()  # força re-login
+            st.stop()
 
         headers = {"Authorization": f"Bearer {token}"}
         response = requests.get(cls.USER_API_URL, headers=headers)
 
         if response.status_code != 200:
-            return None
+            st.warning("⚠️ Token inválido ou expirado. Refaça o login.")
+            st.session_state.pop("access_token", None)
+            st.session_state.pop("token_expiry", None)
+            cls.login_button()
+            st.stop()
 
         st.query_params.clear()
         return response.json()

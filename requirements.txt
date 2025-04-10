@@ -1,8 +1,9 @@
+pio
 serial
 pytest
 psutil
-pyserial
 requests
+pyserial
 streamlit
 statsmodels
 python-dotenv

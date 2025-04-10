@@ -8,6 +8,7 @@ class UsuarioDB:
         self.db_name = db_name
         self.criar_tabela_usuarios()
         self.criar_tabela_rfid()
+        self.criar_tabela_auditoria()
 
     def conectar(self):
         return sqlite3.connect(self.db_name)
@@ -39,8 +40,23 @@ class UsuarioDB:
                     ultimo_acesso DATETIME
                 );
             """)
+            conn.commit()   
+
+    def criar_tabela_auditoria(self):
+        with self.conectar() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS auditoria (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario TEXT,
+                    acao TEXT,
+                    status TEXT,
+                    detalhes TEXT,
+                    timestamp DATETIME
+                );
+            """)
             conn.commit()
-    
+
     def salvar_usuario(self, user_data):
         with self.conectar() as conn:
             cursor = conn.cursor()
