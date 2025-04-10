@@ -1,4 +1,5 @@
 import platform
+import subprocess
 import pandas as pd
 import streamlit as st
 from database.db import UsuarioDB
@@ -9,7 +10,7 @@ from dashboard.github_dashboard import GitHubDashboard
 # OCR e imagem
 import os
 import cv2
-import tempfile
+import time
 import pytesseract
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -30,58 +31,113 @@ elif platform.system() == "Linux":
         pytesseract.pytesseract.tesseract_cmd = path_linux
 
 class GitHubDashboardApp:
+
     def __init__(self):
         self.db = UsuarioDB()
         self.auth = OAuthGitHub()
-        self.validator = BlackboardValidator()
+        self.blackboard = BlackboardValidator()
         self.user_data = None
 
     def ler_rfid_via_camera(self):
         st.info("📷 Posicione o cartão RFID com código visível.")
+
         if st.button("🔍 Escanear Cartão RFID"):
-            cap = cv2.VideoCapture(0)
-            st_frame = st.empty()
+            imagem = self.capturar_imagem_camera(duracao=5)
 
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_image:
-                for _ in range(30):
-                    ret, frame = cap.read()
-                    if ret:
-                        st_frame.image(frame, channels="BGR", caption="Imagem capturada")
-                cv2.imwrite(temp_image.name, frame)
-                cap.release()
+            if imagem is not None:
+                uid_detectado = self.extrair_uid_da_imagem(imagem)
 
-            # Agora fora do `with`, o arquivo está liberado para uso/remover
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            _, thresh = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
-            config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
-            texto = pytesseract.image_to_string(thresh, config=config).strip().upper()
-
-            if texto:
-                st.success(f"✅ UID detectado: `{texto}`")
-                uid_detectado = texto
-                if not self.db.get_usuario_por_uid(uid_detectado):
-                    st.info("🔒 Cartão não registrado. Registrando novo usuário.")
-                    nome = self.user_data.get("name")
-                    login_github = self.user_data.get("login")
-                    nivel = "Usuario"
-                    self.db.registrar_cartao(uid_detectado, nome, login_github, nivel)
-                    st.success("✅ Cartão registrado com sucesso!")
+                if uid_detectado:
+                    self.processar_uid_detectado(uid_detectado)
                 else:
-                    usuario = self.db.get_usuario_por_uid(uid_detectado)
-                    df = pd.DataFrame([{
-                        "Nome": usuario[1],
-                        "Login": usuario[2],
-                        "Nível": usuario[3],
-                        "Último Acesso": usuario[4]
-                    }])
-                    st.table(df)
-                    st.success(f"✅ Bem-vindo, {usuario[1]}!")
+                    st.error("❌ Não foi possível reconhecer o texto do cartão.")
             else:
-                st.error("❌ Não foi possível reconhecer o texto.")
+                st.error("❌ Falha ao capturar imagem da câmera.")
 
-            # Agora podemos remover com segurança
-            os.remove(temp_image.name)
+    def capturar_imagem_camera(self, duracao=5):
+        cap = cv2.VideoCapture(0)
+        st_frame = st.empty()
+        frame = None
+        start_time = time.time()
 
+        altura_linha = 0
+        direcao = 1  # 1 para baixo, -1 para cima
+
+        while time.time() - start_time < duracao:
+            ret, frame = cap.read()
+            if not ret:
+                continue
+
+            # Criar uma cópia da imagem para desenhar a linha de scanner
+            frame_com_linha = frame.copy()
+            altura, largura, _ = frame.shape
+
+            # Desenhar a linha verde de scanner
+            cv2.line(frame_com_linha, (0, altura_linha), (largura, altura_linha), (0, 255, 0), 2)
+
+            # Atualizar posição da linha
+            altura_linha += direcao * 10
+            if altura_linha >= altura or altura_linha <= 0:
+                direcao *= -1  # Inverter direção
+
+            # Mostrar o frame com a linha no Streamlit
+            st_frame.image(frame_com_linha, channels="BGR", caption="📡 Escaneando cartão...")
+
+        cap.release()
+        return frame
+    
+    def extrair_uid_da_imagem(self, frame):
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
+        config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
+        texto = pytesseract.image_to_string(thresh, config=config).strip().upper()
+        return texto if texto else None
+    
+    def processar_uid_detectado(self, uid_detectado):
+        st.success(f"✅ UID detectado: `{uid_detectado}`")
+        usuario = self.db.get_usuario_por_uid(uid_detectado)
+
+        if not usuario:
+            st.info("🔒 Cartão não registrado. Registrando novo usuário.")
+            nome = self.user_data.get("name")
+            login_github = self.user_data.get("login")
+            nivel = "Usuario"
+            self.db.registrar_cartao(uid_detectado, nome, login_github, nivel)
+            st.success("✅ Cartão registrado com sucesso!")
+        else:
+            self._exibir_dados_usuario(usuario)
+
+            if usuario[2] == self.user_data.get("login"):
+                self._executar_acesso_autenticado(usuario, uid_detectado)
+            else:
+                st.error("❌ Acesso negado: usuário inválido.")
+
+    def exibir_dados_usuario(self, usuario):
+        df = pd.DataFrame([{
+            "Nome": usuario[1],
+            "Login": usuario[2],
+            "Nível": usuario[3],
+            "Último Acesso": usuario[4]
+        }])
+        st.table(df)
+
+    def executar_acesso_autenticado(self, usuario, uid_detectado):
+        self.mensagem = f"✅ Bem-vindo, {usuario[3]} {usuario[2]}! Seu último acesso foi em {usuario[4]}"
+        st.success(self.mensagem)
+
+        try:
+            comando = "./executar_blackops.ps1"
+            resultado = subprocess.run(
+                ["powershell", "-Command", comando],
+                capture_output=True,
+                text=True,
+                shell=True
+            )
+            st.code(resultado.stdout or resultado.stderr)
+        except Exception as e:
+            st.error(f"Erro ao executar: {e}")
+
+        self.db.atualizar_ultimo_acesso(uid_detectado)
 
     def run(self):
         st.set_page_config(page_title="GitHub OAuth Dashboard", page_icon="🐙")
@@ -96,7 +152,7 @@ class GitHubDashboardApp:
             self.user_data = self.auth.callback()
 
             if self.user_data:
-                if self.validator.validar_usuario(self.user_data, login_input):
+                if self.blackboard.validar_usuario(self.user_data, login_input):
                     self.db.salvar_usuario(self.user_data)
                     st.session_state.login_realizado = True
                     st.rerun()

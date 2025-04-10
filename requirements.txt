@@ -4,8 +4,8 @@ pytest
 psutil
 seaborn
 requests
-pyserial
 streamlit
 statsmodels
 python-dotenv
+pyserial>=3.5
 requests-oauthlib

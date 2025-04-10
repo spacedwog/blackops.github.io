@@ -5,11 +5,9 @@ import requests
 import pandas as pd
 import seaborn as sns
 import streamlit as st
-from serial import Serial
 import statsmodels.api as sm
 import serial.tools.list_ports
 import matplotlib.pyplot as plt
-
 
 class GitHubDashboard:
     def __init__(self, user_data):
@@ -44,24 +42,25 @@ class GitHubDashboard:
             self.exibir_relay_firewall()
 
     def exibir_perfil(self):
-        aba1, aba2, aba3 = st.tabs(["👤 Perfil", "📦 Repositórios Públicos", "🗃️ Lista Detalhada de Repositórios"])
+        st.title("👤 GitHub Dashboard")
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            st.image(self.user_data.get("avatar_url"), width=120)
+        with col2:
+            st.subheader(self.user_data.get("name") or self.user_data.get("login"))
+            st.caption(f"[🔗 {self.user_data.get('login')}]({self.user_data.get('html_url')})")
+            if self.user_data.get("location"):
+                st.text(f"📍 {self.user_data['location']}")
+            if self.user_data.get("email"):
+                st.text(f"📧 {self.user_data['email']}")
+            if self.user_data.get("bio"):
+                st.markdown(f"> _{self.user_data['bio']}_")
+
+    def exibir_repositorios(self):
+        aba1, aba2 = st.tabs(["📦 Repositórios Públicos", "🗃️ Lista Detalhada de Repositórios"])
         with aba1:
-            st.title("🔙 GitHub Dashboard")
-            col1, col2 = st.columns([1, 3])
-            with col1:
-                st.image(self.user_data.get("avatar_url"), width=120)
-            with col2:
-                st.subheader(self.user_data.get("name") or self.user_data.get("login"))
-                st.caption(f"[📍 {self.user_data.get('login')}]({self.user_data.get('html_url')})")
-                if self.user_data.get("location"):
-                    st.text(f"📍 {self.user_data['location']}")
-                if self.user_data.get("email"):
-                    st.text(f"📧 {self.user_data['email']}")
-                if self.user_data.get("bio"):
-                    st.markdown(f"> _{self.user_data['bio']}_")
-        with aba2:
             self.exibir_repositorios_publicos()
-        with aba3:
+        with aba2:
             self.exibir_lista_repositorios()
 
     def exibir_repositorios_publicos(self):
@@ -73,27 +72,14 @@ class GitHubDashboard:
                 repos = response.json()
                 if isinstance(repos, list):
                     for repo in repos[:100]:
-                        st.markdown(f"🗄️ [{repo['name']}]({repo['html_url']}) — ⭐ {repo['stargazers_count']}")
+                        st.markdown(f"📔️ [{repo['name']}]({repo['html_url']}) — ⭐ {repo['stargazers_count']}")
                 else:
-                    st.warning("⚠️ Dados de repositórios inválidos recebidos da API.")
+                    st.warning("\u26a0\ufe0f Dados de repositórios inválidos recebidos da API.")
             else:
                 st.error(f"❌ Erro ao acessar repositórios: {response.status_code}")
 
-    def exibir_repositorios(self):
-        st.subheader("📦 Repositórios")
-        st.write("Selecione uma aba para exibir os repositórios.")
-        
-        aba1, aba2 = st.tabs(["📦 Repositórios Públicos", "🗃️ Lista Detalhada de Repositórios"])
-
-        with aba1:
-            self.exibir_repositorios_publicos()
-
-        with aba2:
-            self.exibir_lista_repositorios()
-                
-
     def exibir_lista_repositorios(self):
-        st.subheader("🗃️ Lista Detalhada de Repositórios")
+        st.subheader("📃 Lista Detalhada de Repositórios")
         repos_url = self.user_data.get("repos_url")
         if repos_url:
             try:
@@ -123,14 +109,14 @@ class GitHubDashboard:
     def exibir_data_science_resumo(self):
         st.subheader("📈 Data Science: Regression Table - Info")
         try:
+            linguagem = self.user_data.get("language", 0)
             repos = self.user_data.get("public_repos", 0)
-            seguidores = self.user_data.get("followers", 0)
             df = pd.DataFrame({
-                "repositorios": [repos + i for i in range(-5, 5)],
-                "seguidores": [seguidores + i for i in range(-5, 5)]
+                "linguagens": [linguagem + i for i in range(-5, 5)],
+                "repositorios": [repos + i for i in range(-5, 5)]
             })
-            X = df["repositorios"]
-            y = df["seguidores"]
+            X = df["linguagens"]
+            y = df["repositorios"]
             X_const = sm.add_constant(X)
             modelo = sm.OLS(y, X_const).fit()
             st.write("**Resumo da Regressão Linear com seus dados do GitHub:**")
@@ -141,15 +127,15 @@ class GitHubDashboard:
     def exibir_data_science_plot(self):
         st.subheader("📈 Data Science: Regression Table - Plot")
         try:
+            linguagem = self.user_data.get("language", 0)
             repos = self.user_data.get("public_repos", 0)
-            seguidores = self.user_data.get("followers", 0)
             df = pd.DataFrame({
-                "repositorios": [repos + i for i in range(-5, 5)],
-                "seguidores": [seguidores + i for i in range(-5, 5)]
+                "linguagens": [linguagem + i for i in range(-5, 5)],
+                "repositorios": [repos + i for i in range(-5, 5)]
             })
             fig, ax = plt.subplots()
-            sns.regplot(x="repositorios", y="seguidores", data=df, ax=ax)
-            ax.set_title("Regressão Linear: Repositórios vs Seguidores (Baseada no seu GitHub)")
+            sns.regplot(x="linguagens", y="repositorios", data=df, ax=ax)
+            ax.set_title("Regressão Linear: Linguagens vs Repositórios (Baseada no seu GitHub)")
             st.pyplot(fig)
         except Exception as e:
             st.error(f"Erro ao exibir gráfico de regressão: {e}")
@@ -199,7 +185,7 @@ class GitHubDashboard:
         try:
             with serial.Serial(porta, baud_rate, timeout=1) as ser:
                 if isinstance(comando, str):
-                    comando = comando.encode()  # Garante que é bytes
+                    comando = comando.encode()
                 ser.write(comando)
                 log.append(f"✅ Comando enviado (interno): {comando.decode().strip()}")
         except serial.SerialException as e:
@@ -292,13 +278,8 @@ class GitHubDashboard:
 
             melhor_linha = df_xor.iloc[0]
             st.markdown("### 🔍 Insights")
-            st.success(f"""
-                🔑 **Melhor chave identificada:** `{melhor_linha['Key']}`  
-                📌 **Palavras detectadas:** `{melhor_linha['Palavra-chave Detectada']}`  
-                🧾 **Texto decodificado:** `{melhor_linha['Texto Decodificado']}`  
-                💡 **Razão de caracteres imprimíveis:** `{melhor_linha['Printable Ratio']:.2f}`
-            """)
-            st.markdown("### 📊 Tabela Completa de Correspondências XOR")
-            st.dataframe(df_xor.reset_index(drop=True))
-        else:
-            st.info("Nenhuma correspondência XOR significativa encontrada.")
+            st.write(f"**Chave Encontrada:** `{melhor_linha['Key']}`")
+            st.write(f"**Texto Decodificado:** `{melhor_linha['Texto Decodificado']}`")
+            st.write(f"**Palavras-chave Detectadas:** `{melhor_linha['Palavra-chave Detectada']}`")
+            st.write(f"**Printable Ratio:** `{melhor_linha['Printable Ratio']:.2f}`")
+            st.write(f"**Qtd Palavras-chave:** `{melhor_linha['Qtd Palavras-chave']}`")
