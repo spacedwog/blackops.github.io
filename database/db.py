@@ -6,12 +6,16 @@ from datetime import datetime
 class UsuarioDB:
     def __init__(self, db_name="cloud_store.db"):
         self.db_name = db_name
-        self.criar_tabela_usuarios()
-        self.criar_tabela_rfid()
-        self.criar_tabela_auditoria()
+        self.criar_tabelas()
 
     def conectar(self):
         return sqlite3.connect(self.db_name)
+    
+    def criar_tabelas(self):
+        self.criar_tabela_usuarios()
+        self.criar_tabela_rfid()
+        self.criar_tabela_auditoria()
+        self.criar_tabela_logs()
 
     def criar_tabela_usuarios(self):
         with self.conectar() as conn:
@@ -57,6 +61,20 @@ class UsuarioDB:
             """)
             conn.commit()
 
+    def criar_tabela_logs(self):
+        with self.conectar() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario TEXT,
+                    acao TEXT,
+                    timestamp DATETIME
+                );
+            """)
+            conn.commit()
+    
+
     def salvar_usuario(self, user_data):
         with self.conectar() as conn:
             cursor = conn.cursor()
@@ -94,3 +112,9 @@ class UsuarioDB:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM rfid_users WHERE uid = ?", (uid,))
             return cursor.fetchone()
+        
+    def atualizar_ultimo_acesso(self, uid):
+        agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with self.conectar() as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE rfid_users SET ultimo_acesso = ? WHERE uid = ?", (agora, uid))

@@ -26,6 +26,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Debug serial module
+        run: |
+          python -c "import serial; print(serial.__file__); print(dir(serial))"
+
+      - name: List possible conflicting files
+        run: find . -name "serial.py"
+
       - name: Rodar testes
         run: |
           pytest

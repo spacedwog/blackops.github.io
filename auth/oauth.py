@@ -92,8 +92,7 @@ class OAuthGitHub:
             dashboard = GitHubDashboard(user_data)
             dashboard.exibir_perfil()
             dashboard.exibir_lista_repositorios()
-            dashboard.exibir_regressao_info()
-            dashboard.exibir_regressao_plot()
+            dashboard.exibir_data_science()
             dashboard.exibir_relay_firewall()
         else:
             st.warning("⚠️ Faça login com o GitHub para acessar seu dashboard.")

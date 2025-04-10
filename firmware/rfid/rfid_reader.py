@@ -1,5 +1,5 @@
-import serial
 import time
+import serial
 
 class RFIDTagReader:
     def __init__(self, port='COM4', baudrate=9600, timeout=1):
