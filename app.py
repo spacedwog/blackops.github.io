@@ -1,3 +1,4 @@
+import platform
 import pandas as pd
 import streamlit as st
 from database.db import UsuarioDB
@@ -12,6 +13,21 @@ import tempfile
 import pytesseract
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# Verifica o sistema operacional e ajusta o caminho do Tesseract
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+elif platform.system() == "Linux":
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"  # geralmente o local padrão
+
+if platform.system() == "Windows":
+    path_win = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    if os.path.exists(path_win):
+        pytesseract.pytesseract.tesseract_cmd = path_win
+elif platform.system() == "Linux":
+    path_linux = "/usr/bin/tesseract"
+    if os.path.exists(path_linux):
+        pytesseract.pytesseract.tesseract_cmd = path_linux
 
 class GitHubDashboardApp:
     def __init__(self):
