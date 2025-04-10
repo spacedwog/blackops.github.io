@@ -2,6 +2,7 @@ pio
 serial
 pytest
 psutil
+seaborn
 requests
 pyserial
 streamlit
