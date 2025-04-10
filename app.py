@@ -100,16 +100,18 @@ class GitHubDashboardApp:
             st.session_state.login_realizado = False
 
         if not st.session_state.login_realizado:
-            login_input = st.text_input("Digite seu login do GitHub:", key="login_input")
+            
+            st.text_input("Digite seu login do GitHub:", key="login_input")
 
-            #self.user_data = self.auth.callback()
+            self.user_data = self.auth.callback()
 
-            st.info(f"Login input: {login_input}")
+            login_input_valido = st.session_state.get("login_input", "").strip()
 
-            if self.user_data:
+            st.info(f"Login input (session_state): {login_input_valido}")
+
+            if self.user_data and login_input_valido:
                 st.info(f"User data: {self.user_data}")
-                st.info(f"Login input: {login_input}")
-                if self.validator.validar_usuario(self.user_data, login_input):
+                if self.validator.validar_usuario(self.user_data, login_input_valido):
                     self.db.salvar_usuario(self.user_data)
                     st.session_state.login_realizado = True
                     st.rerun()
