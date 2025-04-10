@@ -196,9 +196,16 @@ class GitHubDashboard:
         return None
 
     def enviar_comando(self, porta, baud_rate, comando, log):
-        with serial.Serial(porta, baud_rate, timeout=1) as ser:
-            ser.write(comando)
-            log.append(f"✅ Comando enviado (interno): {comando.decode().strip()}")
+        try:
+            with serial.Serial(porta, baud_rate, timeout=1) as ser:
+                if isinstance(comando, str):
+                    comando = comando.encode()  # Garante que é bytes
+                ser.write(comando)
+                log.append(f"✅ Comando enviado (interno): {comando.decode().strip()}")
+        except serial.SerialException as e:
+            log.append(f"❌ Erro ao enviar comando para a porta serial: {str(e)}")
+        except Exception as e:
+            log.append(f"❌ Erro inesperado: {str(e)}")
 
     def exibir_resultado(self, raw_response, latencia, log):
         response_str = self.decodificar_resposta(raw_response, log)
