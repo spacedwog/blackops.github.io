@@ -1,5 +1,6 @@
 import platform
 import subprocess
+import numpy as np
 import pandas as pd
 import streamlit as st
 from database.db import UsuarioDB
@@ -56,6 +57,11 @@ class GitHubDashboardApp:
 
     def capturar_imagem_camera(self, duracao=5):
         cap = cv2.VideoCapture(0)
+
+        # ✅ Configurar resolução HD
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
         st_frame = st.empty()
         frame = None
         start_time = time.time()
@@ -88,7 +94,16 @@ class GitHubDashboardApp:
     
     def extrair_uid_da_imagem(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        _, thresh = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)
+        
+        # ✅ Aplicar filtro de nitidez
+        kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])
+        sharpened = cv2.filter2D(gray, -1, kernel)
+
+        # ✅ Aumentar contraste
+        contrast = cv2.convertScaleAbs(sharpened, alpha=1.5, beta=0)
+
+        _, thresh = cv2.threshold(contrast, 100, 255, cv2.THRESH_BINARY)
+
         config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
         texto = pytesseract.image_to_string(thresh, config=config).strip().upper()
         return texto if texto else None
