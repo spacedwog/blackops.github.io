@@ -5,7 +5,7 @@ import streamlit as st
 
 # Simulação do módulo BlackOps
 class BlackOps:
-    def __init__(self, porta='/dev/ttyUSB0', baud=9600):
+    def __init__(self, porta='COM4', baud=9600):
         try:
             self.ser = serial.Serial(porta, baud, timeout=1)
         except:
@@ -81,7 +81,7 @@ def main():
         st.write("Clique abaixo para ativar o painel BlackOps.")
         if st.button("🚨 Ativar BlackOps"):
             st.session_state["modo"] = "blackops"
-            st.experimental_rerun()
+            st.rerun()
 
     elif st.session_state["modo"] == "blackops":
         ops = BlackOps()
