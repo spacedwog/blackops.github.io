@@ -32,7 +32,7 @@ class BlackOps:
         st.title("🕶️ Painel BlackOps - Cibersegurança Interativa")
         st.subheader("🔐 Acesso restrito")
 
-        tab1, tab2, tab3 = st.tabs(["🔐 Relay/Firewall", "🔎 Análise XOR", "🛠️ Comandos Táticos"])
+        tab1, tab2, tab3, tab4 = st.tabs(["🔐 Relay/Firewall", "🔎 Análise XOR", "🛠️ Comandos Táticos", "⚛️ Lilith AI"])
 
         with tab1:
             st.subheader("Controle de Relay / Firewall")
@@ -63,6 +63,19 @@ class BlackOps:
             if st.button("Executar Comando"):
                 output = self.enviar_comando(comando)
                 st.text_area("Resposta Serial", output, height=150)
+                
+        with tab4:
+            st.subheader("Lilith AI")
+            q1 = st.number_input("Carga 1 (C)", value=1e-9, format="%.2e")
+            q2 = st.number_input("Carga 2 (C)", value=1e-9, format="%.2e")
+            r = st.number_input("Distância (m)", value=0.05)
+
+            if st.button("Calcular Força"):
+                F = self.calcular_forca_eletrica(q1, q2, r)
+                st.success(f"Força Elétrica: {F:.2e} N")
+
+            st.image("imagem/esfera_eletrica_azul.png", caption="Esfera Elétrica Azul", use_column_width=True)
+
 
         st.divider()
         if st.button("🔙 Voltar para tela principal"):

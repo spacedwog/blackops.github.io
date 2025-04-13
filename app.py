@@ -110,6 +110,7 @@ class GitHubDashboardApp:
             nivel = "Usuario"
             self.db.registrar_cartao(uid_detectado, nome, login_github, nivel)
             st.success("✅ Cartão registrado com sucesso!")
+            self.processar_uid_detectado(uid_detectado)
         else:
             self.exibir_dados_usuario(usuario)
 
