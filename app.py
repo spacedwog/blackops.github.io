@@ -41,31 +41,23 @@ class GitHubDashboardApp:
 
     def ler_rfid_via_camera(self):
         st.info("📷 Posicione o cartão RFID com código visível.")
+        streaming_area = st.empty()
 
-        if st.button("🔍 Escanear Cartão RFID"):
-            imagem = self.capturar_imagem_camera(duracao=5)
+        if st.button("🔍 Iniciar Escaneamento ao Vivo"):
+            uid = self.stream_camera_para_rfid(streaming_area, duracao=7)
 
-            if imagem is not None:
-                uid_detectado = self.extrair_uid_da_imagem(imagem)
-
-                if uid_detectado:
-                    self.processar_uid_detectado(uid_detectado)
-                else:
-                    st.error("❌ Não foi possível reconhecer o texto do cartão.")
+            if uid:
+                self.processar_uid_detectado(uid)
             else:
-                st.error("❌ Falha ao capturar imagem da câmera.")
+                st.error("❌ Não foi possível reconhecer o texto do cartão.")
 
-    def capturar_imagem_camera(self, duracao=5):
+    def stream_camera_para_rfid(self, st_frame, duracao=7):
         cap = cv2.VideoCapture(0)
-
-        # ✅ Configurar resolução HD
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-        st_frame = st.empty()
-        frame = None
+        frame_final = None
         start_time = time.time()
-
         altura_linha = 0
         direcao = 1  # 1 para baixo, -1 para cima
 
@@ -74,34 +66,33 @@ class GitHubDashboardApp:
             if not ret:
                 continue
 
-            # Criar uma cópia da imagem para desenhar a linha de scanner
-            frame_com_linha = frame.copy()
+            frame_final = frame.copy()  # Salva o último frame válido
+
+            # Desenha a linha de scanner
             altura, largura, _ = frame.shape
-
-            # Desenhar a linha verde de scanner
-            cv2.line(frame_com_linha, (0, altura_linha), (largura, altura_linha), (0, 255, 0), 2)
-
-            # Atualizar posição da linha
-            altura_linha += direcao * 10
+            cv2.line(frame, (0, altura_linha), (largura, altura_linha), (0, 255, 0), 2)
+            altura_linha += direcao * 15
             if altura_linha >= altura or altura_linha <= 0:
-                direcao *= -1  # Inverter direção
+                direcao *= -1
 
-            # Mostrar o frame com a linha no Streamlit
-            st_frame.image(frame_com_linha, channels="BGR", caption="📡 Escaneando cartão...")
+            # Mostra vídeo no Streamlit
+            st_frame.image(frame, channels="BGR", caption="📡 Escaneando...")
 
         cap.release()
-        return frame
+
+        if frame_final is not None:
+            return self.extrair_uid_da_imagem(frame_final)
+        return None
     
     def extrair_uid_da_imagem(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        
-        # ✅ Aplicar filtro de nitidez
+
+        # Filtro de nitidez
         kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])
         sharpened = cv2.filter2D(gray, -1, kernel)
 
-        # ✅ Aumentar contraste
-        contrast = cv2.convertScaleAbs(sharpened, alpha=1.5, beta=0)
-
+        # Contraste
+        contrast = cv2.convertScaleAbs(sharpened, alpha=1.6, beta=0)
         _, thresh = cv2.threshold(contrast, 100, 255, cv2.THRESH_BINARY)
 
         config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
