@@ -1,7 +1,9 @@
 import time
 import serial
 import binascii
+import numpy as np
 import streamlit as st
+from scipy.constants import epsilon_0
 
 # Simulação do módulo BlackOps
 class BlackOps:
@@ -74,13 +76,31 @@ class BlackOps:
                 F = self.calcular_forca_eletrica(q1, q2, r)
                 st.success(f"Força Elétrica: {F:.2e} N")
 
-            st.image("imagem/esfera_eletrica_azul.png", caption="Esfera Elétrica Azul", use_column_width=True)
+            st.image("imagem/esfera_eletrica_azul.png", caption="Esfera Elétrica Azul", use_container_width=True)
 
 
         st.divider()
         if st.button("🔙 Voltar para tela principal"):
             st.session_state["modo"] = "inicio"
             st.rerun()
+
+    def calcular_forca_eletrica(self, q1: float, q2: float, r: float) -> float:
+        """
+        Calcula a força elétrica entre duas cargas pontuais usando a Lei de Coulomb.
+
+        Parâmetros:
+        q1 (float): carga 1 em Coulombs
+        q2 (float): carga 2 em Coulombs
+        r (float): distância entre as cargas em metros
+
+        Retorna:
+        float: força elétrica em Newtons (N)
+        """
+        if r == 0:
+            raise ValueError("A distância entre as cargas não pode ser zero.")
+        k = 1 / (4 * np.pi * epsilon_0)
+        F = k * q1 * q2 / r**2
+        return F
 
 # Gerenciador de navegação entre páginas
 def main():
