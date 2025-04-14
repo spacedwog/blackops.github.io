@@ -6,7 +6,7 @@ from gtts import gTTS
 import os
 import tempfile
 import requests
-
+import pygame
 from github import Github  # PyGithub
 from transformers import pipeline  # HuggingFace model
 
@@ -19,7 +19,12 @@ def speak(text):
     tts = gTTS(text=text, lang='pt-br')
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
         tts.save(fp.name)
-        playsound(fp.name)
+        pygame.mixer.init()
+        pygame.mixer.music.load(fp.name)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            continue
+        pygame.mixer.quit()
         os.remove(fp.name)
 
 def ask_github_ai(question):
