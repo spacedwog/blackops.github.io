@@ -21,7 +21,7 @@ def activate_voice_control():
         try:
             comando = recognizer.recognize_google(audio, language="pt-BR")
             resposta = f"Comando reconhecido: {comando}"
-            speak(resposta)
+            speak(comando)
             return resposta
         except sr.UnknownValueError:
             erro = "Não entendi o que você disse."
