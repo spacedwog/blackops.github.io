@@ -14,6 +14,18 @@ def load_config():
     config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'settings.yaml')
     with open(config_path, 'r') as file:
         return yaml.safe_load(file)
+    
+def show_comandos_disponiveis():
+    st.markdown("### 🎙️ Comandos de Voz Disponíveis")
+    comandos = [
+        "Qual o último commit do projeto?",
+        "Resuma o repositório OpenAI Whisper.",
+        "Quantas issues estão abertas?",
+        "Quais são as pull requests?",
+        "Em qual linguagem esse repositório está programado?"
+    ]
+    for comando in comandos:
+        st.markdown(f"- `{comando}`")
 
 def show_project_info():
     config = load_config()
@@ -26,15 +38,7 @@ def show_project_info():
     st.markdown(f"**Autor:** `{config['author']}`")
     st.markdown("### 📝 Descrição")
     st.info(config['description'])
-
-    st.markdown("---")
-    st.markdown("✅ Módulos Ativos:")
-    st.markdown("- 🔌 Controle de Relay (GPIO)")
-    st.markdown("- 🌐 Verificador de Firewall e Portas")
-    st.markdown("- 🎙️ Reconhecimento de voz")
-    st.markdown("- 📷 OCR e Transmissão de vídeo")
-    st.markdown("- 🧠 Módulos de IA e Física")
-    st.markdown("- 📊 Interface Streamlit")
+    show_comandos_disponiveis()
 
     st.markdown("---")
     st.header("⚙️ Comandos de Controle")
@@ -61,6 +65,15 @@ def show_project_info():
 
     executar_funcao(funcao)
 
+    st.markdown("---")
+    st.markdown("✅ Módulos Ativos:")
+    st.markdown("- 🔌 Controle de Relay (GPIO)")
+    st.markdown("- 🌐 Verificador de Firewall e Portas")
+    st.markdown("- 🎙️ Reconhecimento de voz")
+    st.markdown("- 📷 OCR e Transmissão de vídeo")
+    st.markdown("- 🧠 Módulos de IA e Física")
+    st.markdown("- 📊 Interface Streamlit")
+
     st.success("Sistema pronto para operação tática.")
 
 def executar_funcao(funcao):
@@ -76,6 +89,7 @@ def executar_funcao(funcao):
         st.code("\n".join(regras))
     elif funcao == 'voice_command':
         resultado = activate_voice_control()
+        st.success(resultado)
         st.info(resultado)
     elif funcao == 'stream_camera':
         stream_camera()
