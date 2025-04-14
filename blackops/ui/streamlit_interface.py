@@ -43,22 +43,38 @@ def show_project_info():
 
     with col1:
         if st.button("Ativar Relay 🔌"):
-            activate_relay()
-            st.success("Relay ativado com sucesso!")
+            funcao = 'activate_relay'
     with col2:
         if st.button("Scan de Portas 🌐"):
-            portas = scan_ports()
-            st.code(f"Portas abertas: {portas}")
+            funcao = 'scan_port'
     with col3:
         if st.button("Verificar Firewall 🔥"):
-            regras = check_firewall_rules()
-            st.code("\n".join(regras))
+            funcao = 'verify_firewall'
     with col4:
         if st.button("Comando de Voz 🎙️"):
-            resultado = activate_voice_control()
-            st.info(resultado)
+            funcao = 'voice_command'
     with col5:
         if st.button("📡 Iniciar Live da Câmera"):
-            stream_camera()
+            funcao = 'stream_camera'
+
+    executar_funcao(funcao)
 
     st.success("Sistema pronto para operação tática.")
+
+def executar_funcao(funcao):
+
+    if funcao == 'activate_relay':
+        activate_relay()
+        st.success("Relay ativado com sucesso!")
+    elif funcao == 'scan_port':
+        portas = scan_ports()
+        st.code(f"Portas abertas: {portas}")
+    elif funcao == 'verify_firewall':
+        regras = check_firewall_rules()
+        st.code("\n".join(regras))
+    elif funcao == 'voice_command':
+        resultado = activate_voice_control()
+        st.info(resultado)
+    elif funcao == 'stream_camera':
+        stream_camera()
+        
