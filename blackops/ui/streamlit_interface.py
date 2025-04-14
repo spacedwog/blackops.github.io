@@ -41,6 +41,8 @@ def show_project_info():
 
     col1, col2, col3, col4, col5 = st.columns(5)
 
+    funcao = None
+
     with col1:
         if st.button("Ativar Relay 🔌"):
             funcao = 'activate_relay'
