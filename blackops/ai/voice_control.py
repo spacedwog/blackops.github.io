@@ -4,7 +4,6 @@
 import speech_recognition as sr
 from gtts import gTTS
 import os
-from playsound import playsound
 import tempfile
 import requests
 
