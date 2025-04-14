@@ -1,17 +1,33 @@
 # -----------------------------
 # ai/voice_control.py
 # -----------------------------
+import pyttsx3
 import speech_recognition as sr
+
+def speak(texto):
+    engine = pyttsx3.init()
+    engine.setProperty("rate", 170)  # Velocidade da fala
+    engine.setProperty("volume", 1.0)
+    engine.say(texto)
+    engine.runAndWait()
 
 def activate_voice_control():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
+        speak("Fale algo.")
         print("Fale algo...")
         audio = recognizer.listen(source)
+
         try:
             comando = recognizer.recognize_google(audio, language="pt-BR")
-            return f"Comando reconhecido: {comando}"
+            resposta = f"Comando reconhecido: {comando}"
+            speak(resposta)
+            return resposta
         except sr.UnknownValueError:
-            return "Não entendi o que você disse."
+            erro = "Não entendi o que você disse."
+            speak(erro)
+            return erro
         except sr.RequestError:
-            return "Erro na API de reconhecimento."
+            erro = "Erro na API de reconhecimento."
+            speak(erro)
+            return erro
