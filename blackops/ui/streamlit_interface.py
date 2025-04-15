@@ -13,11 +13,23 @@ from ai.voice_control import activate_voice_control
 from network.firewall_checker import check_firewall_rules
 
 def load_config():
+    """
+    Carrega o arquivo de configuração YAML.
+
+    Returns:
+        dict: Configurações carregadas do arquivo YAML.
+    """
     config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'settings.yaml')
     with open(config_path, 'r') as file:
         return yaml.safe_load(file)
     
 def show_comandos_disponiveis():
+    """
+    Carrega o arquivo de configuração YAML.
+
+    Returns:
+        dict: Configurações carregadas do arquivo YAML.
+    """
     st.markdown("### 🎙️ Comandos de Voz Disponíveis")
     comandos = [
         "Qual o último commit do projeto?",
@@ -30,6 +42,12 @@ def show_comandos_disponiveis():
         st.markdown(f"- `{comando}`")
 
 def show_project_info():
+    """
+    Carrega o arquivo de configuração YAML.
+
+    Returns:
+        dict: Configurações carregadas do arquivo YAML.
+    """
     config = load_config()
     # Atualização automática a cada 60 segundos
     st_autorefresh(interval=60000, key="github_auto_refresh")
@@ -92,7 +110,12 @@ def show_project_info():
     st.success("Sistema pronto para operação tática.")
 
 def executar_funcao(funcao):
+    """
+    Carrega o arquivo de configuração YAML.
 
+    Returns:
+        dict: Configurações carregadas do arquivo YAML.
+    """
     if funcao == 'activate_relay':
         activate_relay()
         st.success("Relay ativado com sucesso!")

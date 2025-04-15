@@ -1,0 +1,17 @@
+site_name: Projeto BlackOps - Docs
+theme:
+  name: material
+  language: pt
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys; sys.path.append(".")
+
+nav:
+  - Início: index.md
+  - Interface Streamlit: ui.md
+  - Referência Técnica:
+      - Módulo Streamlit: modules/streamlit_interface.md
