@@ -2,6 +2,7 @@ pio
 serial
 pytest
 psutil
+mkdocs
 seaborn
 requests
 streamlit
