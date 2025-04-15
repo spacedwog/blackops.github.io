@@ -4,6 +4,7 @@
 import os
 import yaml
 import streamlit as st
+from typing import Any, Dict, Optional
 from ai.ocr_rfid import stream_camera
 from core.github_utils import get_repo_info
 from network.port_scanner import scan_ports
@@ -12,23 +13,22 @@ from streamlit_autorefresh import st_autorefresh
 from ai.voice_control import activate_voice_control
 from network.firewall_checker import check_firewall_rules
 
-def load_config():
+
+def load_config() -> Dict[str, Any]:
     """
-    Carrega as configurações do sistema via YAML.
+    Carrega o arquivo de configuração YAML.
 
     Returns:
-        Load_Config: Configurações carregadas do arquivo YAML.
+        dict: Configurações carregadas do arquivo YAML.
     """
     config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'settings.yaml')
     with open(config_path, 'r') as file:
         return yaml.safe_load(file)
-    
-def show_comandos_disponiveis():
-    """
-    Exibe comandos de voz, disponíveis.
 
-    Returns:
-        Show_Command: Configurações carregadas do arquivo YAML.
+
+def show_comandos_disponiveis() -> None:
+    """
+    Exibe a lista de comandos de voz disponíveis na interface Streamlit.
     """
     st.markdown("### 🎙️ Comandos de Voz Disponíveis")
     comandos = [
@@ -41,23 +41,19 @@ def show_comandos_disponiveis():
     for comando in comandos:
         st.markdown(f"- `{comando}`")
 
-def show_project_info():
-    """
-    Exibe as informações dos projetos.
 
-    Returns:
-        Show_Project: Configurações carregadas do arquivo YAML.
+def show_project_info() -> None:
+    """
+    Exibe informações do repositório GitHub, comandos e ações interativas na interface Streamlit.
     """
     config = load_config()
-    # Atualização automática a cada 60 segundos
     st_autorefresh(interval=60000, key="github_auto_refresh")
 
     st.markdown("---")
     st.header("📡 Status do Repositório GitHub")
 
-    # Carrega token do ambiente, se disponível
     token = os.getenv("8928341d3b422e184b621364a45885f6a2baa804")
-    repo_name = "openai/whisper"  # Pode ser dinâmico no futuro
+    repo_name = "openai/whisper"
 
     repo_info = get_repo_info(repo_name, token)
 
@@ -65,7 +61,7 @@ def show_project_info():
         st.error(f"Erro ao buscar dados do GitHub: {repo_info['error']}")
     else:
         st.markdown(f"**🔗 Repositório:** `{repo_info['name']}`")
-        st.markdown(f"**📝 Descrição:** {repo_info['description']}")
+        st.markdown(f"**📝 Descrição:** {repo_info['description']}`")
         st.markdown(f"**📦 Linguagem Principal:** `{repo_info['language']}`")
         st.markdown(f"**⭐ Estrelas:** `{repo_info['stars']}`")
         st.markdown(f"**🐞 Issues Abertas:** `{repo_info['open_issues']}`")
@@ -77,8 +73,7 @@ def show_project_info():
     st.header("⚙️ Comandos de Controle")
 
     col1, col2, col3, col4, col5 = st.columns(5)
-
-    funcao = None
+    funcao: Optional[str] = None
 
     with col1:
         if st.button("Ativar Relay 🔌"):
@@ -109,12 +104,13 @@ def show_project_info():
 
     st.success("Sistema pronto para operação tática.")
 
-def executar_funcao(funcao):
-    """
-    Executa as funções dos buttons do dashboard.
 
-    Returns:
-        Execute_Function: Configurações carregadas do arquivo YAML.
+def executar_funcao(funcao: Optional[str]) -> None:
+    """
+    Executa a função associada a um botão da interface Streamlit.
+
+    Args:
+        funcao (Optional[str]): Nome da função a ser executada.
     """
     if funcao == 'activate_relay':
         activate_relay()
@@ -131,4 +127,3 @@ def executar_funcao(funcao):
         st.info(resultado)
     elif funcao == 'stream_camera':
         stream_camera()
-        
