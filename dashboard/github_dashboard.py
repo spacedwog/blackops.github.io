@@ -13,7 +13,13 @@ class GitHubDashboard:
     def __init__(self, user_data):
         self.user_data = user_data
 
-    def show_dashboard(self):
+    def show_dashboard(self) -> None:
+        """
+        Exibe a lista de funcionalidades no aplicative.
+
+        Returns:
+            Show (None): Configurações carregadas do arquivo YAML.
+        """
         tabs = st.tabs([
             "👤 Perfil",
             "📦 Repositórios Públicos",
@@ -41,7 +47,13 @@ class GitHubDashboard:
         with tabs[5]:
             self.exibir_relay_firewall()
 
-    def exibir_perfil(self):
+    def exibir_perfil(self) -> None:
+        """
+        Exibe o perfil do usuário do github.
+
+        Returns:
+            Exibir (None): Configurações carregadas do arquivo YAML.
+        """
         st.title("👤 GitHub Dashboard")
         col1, col2 = st.columns([1, 3])
         with col1:
@@ -56,14 +68,26 @@ class GitHubDashboard:
             if self.user_data.get("bio"):
                 st.markdown(f"> _{self.user_data['bio']}_")
 
-    def exibir_repositorios(self):
+    def exibir_repositorios(self) -> None:
+        """
+        Exibe a lista de repositórios no aplicative.
+
+        Returns:
+            Show (None): Configurações carregadas do arquivo YAML.
+        """
         aba1, aba2 = st.tabs(["📦 Repositórios Públicos", "🗃️ Lista Detalhada de Repositórios"])
         with aba1:
             self.exibir_repositorios_publicos()
         with aba2:
             self.exibir_lista_repositorios()
 
-    def exibir_repositorios_publicos(self):
+    def exibir_repositorios_publicos(self) -> None:
+        """
+        Exibe a lista de repositórios publicos no aplicative.
+
+        Returns:
+            Show (None): Configurações carregadas do arquivo YAML.
+        """
         st.subheader("📦 Repositórios Públicos")
         repos_url = self.user_data.get("repos_url")
         if repos_url:
@@ -78,7 +102,13 @@ class GitHubDashboard:
             else:
                 st.error(f"❌ Erro ao acessar repositórios: {response.status_code}")
 
-    def exibir_lista_repositorios(self):
+    def exibir_lista_repositorios(self) -> None:
+        """
+        Exibe a lista de repositórios detalhados no aplicative.
+
+        Returns:
+            Show (None): Configurações carregadas do arquivo YAML.
+        """
         st.subheader("📃 Lista Detalhada de Repositórios")
         repos_url = self.user_data.get("repos_url")
         if repos_url:
@@ -99,7 +129,13 @@ class GitHubDashboard:
         else:
             st.warning("URL de repositórios não encontrada.")
 
-    def exibir_data_science(self):
+    def exibir_data_science(self) -> None:
+        """
+        Exibe a lista de métodos datascience no aplicative.
+
+        Returns:
+            Show (None): Configurações carregadas do arquivo YAML.
+        """
         aba1, aba2, aba3 = st.tabs([
             "📈 Data Science: Regression Table - Info",
             "📈 Data Science: Regression Table - Plot",
@@ -112,7 +148,13 @@ class GitHubDashboard:
         with aba3:
             self.exibir_series_temporais()
 
-    def exibir_data_science_resumo(self):
+    def exibir_data_science_resumo(self) -> None:
+        """
+        Método DataScience.
+
+        Returns:
+            Show (Resumo): Configurações carregadas do arquivo YAML.
+        """
         st.subheader("📈 Data Science: Regression Table - Info")
         try:
             linguagem = self.user_data.get("language", 0)
@@ -130,7 +172,13 @@ class GitHubDashboard:
         except Exception as e:
             st.error(f"Erro ao exibir regressão: {e}")
 
-    def exibir_data_science_plot(self):
+    def exibir_data_science_plot(self) -> None:
+        """
+        Método DataScience.
+
+        Returns:
+            Show (Plot): Configurações carregadas do arquivo YAML.
+        """
         st.subheader("📈 Data Science: Regression Table - Plot")
         try:
             linguagem = self.user_data.get("language", 0)
@@ -146,7 +194,13 @@ class GitHubDashboard:
         except Exception as e:
             st.error(f"Erro ao exibir gráfico de regressão: {e}")
 
-    def exibir_series_temporais(self):
+    def exibir_series_temporais(self) -> None:
+        """
+        Método DataScience.
+
+        Returns:
+            Show (Temporais): Configurações carregadas do arquivo YAML.
+        """
         st.subheader("📊 Análise de Séries Temporais com seus dados do GitHub")
         try:
             # Simula evolução de repositórios com base no tempo
@@ -176,7 +230,13 @@ class GitHubDashboard:
             st.error(f"Erro ao exibir séries temporais: {e}")
 
 
-    def exibir_relay_firewall(self):
+    def exibir_relay_firewall(self) -> None:
+        """
+        Exibe as informações do relay.
+
+        Returns:
+            Show (Relay): Configurações carregadas do arquivo YAML.
+        """
         log = []
 
         st.subheader("🚀 Cibersegurança: Relay e Firewall")
@@ -210,7 +270,13 @@ class GitHubDashboard:
         except Exception as e:
             st.error(f"Erro inesperado: {e}")
 
-    def detectar_porta_serial(self):
+    def detectar_porta_serial(self) -> None:
+        """
+        Método de detecção da porta serial do aplicativo.
+
+        Returns:
+            Show (Port): Configurações carregadas do arquivo YAML.
+        """
         portas = list(serial.tools.list_ports.comports())
         for p in portas:
             if any(chave in p.description for chave in ["USB", "CH340", "CP210"]):
@@ -218,6 +284,12 @@ class GitHubDashboard:
         return None
 
     def enviar_comando(self, porta, baud_rate, comando, log):
+        """
+        Método que executa a operação de enviar comando.
+
+        Returns:
+            Send (Command): Configurações carregadas do arquivo YAML.
+        """
         try:
             with serial.Serial(porta, baud_rate, timeout=1) as ser:
                 if isinstance(comando, str):
@@ -229,7 +301,13 @@ class GitHubDashboard:
         except Exception as e:
             log.append(f"❌ Erro inesperado: {str(e)}")
 
-    def exibir_resultado(self, raw_response, latencia, log):
+    def exibir_resultado(self, raw_response, latencia, log) -> None:
+        """
+        Exibe o resultado das informações do relay.
+
+        Returns:
+            Show (Relay): Configurações carregadas do arquivo YAML.
+        """
         response_str = self.decodificar_resposta(raw_response, log)
         abas = st.tabs(["📱 Resposta", "📦 Bytes Recebidos", "🧾 Log de Decodificação", "🧪 Análise XOR"])
 
@@ -267,7 +345,13 @@ class GitHubDashboard:
         with abas[3]:
             self.exibir_analise_xor(raw_response)
 
-    def decodificar_resposta(self, raw, log):
+    def decodificar_resposta(self, raw, log) -> None:
+        """
+        Método de descriptografia.
+
+        Returns:
+            Show (Descript): Configurações carregadas do arquivo YAML.
+        """
         try:
             response = raw.decode("utf-8")
             log.append("🔍 Decodificação: UTF-8")
@@ -287,7 +371,13 @@ class GitHubDashboard:
                     log.append(f"🚨 Falha na decodificação base64: {e}")
         return None
 
-    def exibir_analise_xor(self, raw_response):
+    def exibir_analise_xor(self, raw_response) -> None:
+        """
+        Exibe as informações do relay, com base em uma análise XOR.
+
+        Returns:
+            Show (Xor): Configurações carregadas do arquivo YAML.
+        """
         st.subheader("🧪 Análise XOR Brute Force - Tabela Redimensional")
         palavras_chave = ["OK", "FIREWALL", "ACCESS", "RESTART", "DENIED", "GRANTED", "SECURE"]
         tabela_xor = []

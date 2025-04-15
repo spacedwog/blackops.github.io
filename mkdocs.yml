@@ -13,4 +13,5 @@ nav:
   - Início: index.md
   - Interface Streamlit: ui.md
   - Referência Técnica:
-      - Módulo Streamlit: modules/streamlit_interface.md
+      - Módulo App: modules/app_interface.md
+      - Módulo Blackops: modules/blackops_interface.md

@@ -33,6 +33,7 @@ def show_comandos_disponiveis() -> None:
     Returns:
         Show (None): Configurações carregadas do arquivo YAML.
     """
+    st.markdown("---")
     st.markdown("### 🎙️ Comandos de Voz Disponíveis")
     comandos = [
         "Qual o último commit do projeto?",
@@ -52,28 +53,33 @@ def show_project_info() -> None:
     Returns:
         Project (None): Configurações carregadas do arquivo YAML.
     """
+
+    col_status, col_comandos = st.columns(2)
+
     config = load_config()
     st_autorefresh(interval=60000, key="github_auto_refresh")
 
-    st.markdown("---")
-    st.header("📡 Status do Repositório GitHub")
+    with col_status:
+        st.markdown("---")
+        st.header("📡 Status do Repositório GitHub")
 
-    token = os.getenv("8928341d3b422e184b621364a45885f6a2baa804")
-    repo_name = "openai/whisper"
+        token = os.getenv("8928341d3b422e184b621364a45885f6a2baa804")
+        repo_name = "openai/whisper"
 
-    repo_info = get_repo_info(repo_name, token)
+        repo_info = get_repo_info(repo_name, token)
 
-    if "error" in repo_info:
-        st.error(f"Erro ao buscar dados do GitHub: {repo_info['error']}")
-    else:
-        st.markdown(f"**🔗 Repositório:** `{repo_info['name']}`")
-        st.markdown(f"**📝 Descrição:** {repo_info['description']}`")
-        st.markdown(f"**📦 Linguagem Principal:** `{repo_info['language']}`")
-        st.markdown(f"**⭐ Estrelas:** `{repo_info['stars']}`")
-        st.markdown(f"**🐞 Issues Abertas:** `{repo_info['open_issues']}`")
-        st.markdown(f"**🕒 Último Commit:** `{repo_info['last_commit']}`")
-
-    show_comandos_disponiveis()
+        if "error" in repo_info:
+            st.error(f"Erro ao buscar dados do GitHub: {repo_info['error']}")
+        else:
+            st.markdown(f"**🔗 Repositório:** `{repo_info['name']}`")
+            st.markdown(f"**📝 Descrição:** {repo_info['description']}`")
+            st.markdown(f"**📦 Linguagem Principal:** `{repo_info['language']}`")
+            st.markdown(f"**⭐ Estrelas:** `{repo_info['stars']}`")
+            st.markdown(f"**🐞 Issues Abertas:** `{repo_info['open_issues']}`")
+            st.markdown(f"**🕒 Último Commit:** `{repo_info['last_commit']}`")
+            
+    with col_comandos:
+        show_comandos_disponiveis()
 
     st.markdown("---")
     st.header("⚙️ Comandos de Controle")
