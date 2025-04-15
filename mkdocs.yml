@@ -9,6 +9,8 @@ plugins:
         python:
           setup_commands:
             - import sys; sys.path.append(".")
+hooks:
+  post_build: "python site/generate_readme.py"
 nav:
   - Início: index.md
   - Interface Streamlit: ui.md
