@@ -19,7 +19,7 @@ def load_config() -> Dict[str, Any]:
     Carrega o arquivo de configuração YAML.
 
     Returns:
-        dict: Configurações carregadas do arquivo YAML.
+        Load: Configurações carregadas do arquivo YAML.
     """
     config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'settings.yaml')
     with open(config_path, 'r') as file:
@@ -29,6 +29,9 @@ def load_config() -> Dict[str, Any]:
 def show_comandos_disponiveis() -> None:
     """
     Exibe a lista de comandos de voz disponíveis na interface Streamlit.
+
+    Returns:
+        Show (None): Configurações carregadas do arquivo YAML.
     """
     st.markdown("### 🎙️ Comandos de Voz Disponíveis")
     comandos = [
@@ -45,6 +48,9 @@ def show_comandos_disponiveis() -> None:
 def show_project_info() -> None:
     """
     Exibe informações do repositório GitHub, comandos e ações interativas na interface Streamlit.
+
+    Returns:
+        Project (None): Configurações carregadas do arquivo YAML.
     """
     config = load_config()
     st_autorefresh(interval=60000, key="github_auto_refresh")
