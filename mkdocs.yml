@@ -1,16 +1,10 @@
 site_name: Projeto BlackOps - Docs
+site_description: Documentação tática do projeto BlackOps
+site_author: Felip
+site_url: https://blackops.local/
 theme:
   name: material
-  language: pt
-plugins:
-  - search
-  - mkdocstrings:
-      handlers:
-        python:
-          setup_commands:
-            - import sys; sys.path.append(".")
-hooks:
-  post_build: "python site/generate_readme.py"
+  language: pt-BR
 nav:
   - Início: index.md
   - Interface Streamlit: ui.md
@@ -18,3 +12,14 @@ nav:
       - Módulo App: modules/app_interface.md
       - Módulo Blackops: modules/blackops_interface.md
   - Referência: reference.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          setup_commands:
+            - import sys; sys.path.append(".")
+            
+hooks:
+  post_build: "python site/generate_readme.py"
