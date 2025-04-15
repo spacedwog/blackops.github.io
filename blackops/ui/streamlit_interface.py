@@ -115,7 +115,7 @@ def executar_funcao(funcao: Optional[str]) -> None:
     """
     Executa a função associada a um botão da interface Streamlit.
 
-    Args:
+    Returns:
         Funcao (Optional[str]): Nome da função a ser executada.
     """
     if funcao == 'activate_relay':
