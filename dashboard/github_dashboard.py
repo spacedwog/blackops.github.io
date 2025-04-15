@@ -100,11 +100,17 @@ class GitHubDashboard:
             st.warning("URL de repositórios não encontrada.")
 
     def exibir_data_science(self):
-        aba1, aba2 = st.tabs(["📈 Data Science: Regression Table - Info", "📈 Data Science: Regression Table - Plot"])
+        aba1, aba2, aba3 = st.tabs([
+            "📈 Data Science: Regression Table - Info",
+            "📈 Data Science: Regression Table - Plot",
+            "📊 Data Science: Séries Temporais"
+        ])
         with aba1:
             self.exibir_data_science_resumo()
         with aba2:
             self.exibir_data_science_plot()
+        with aba3:
+            self.exibir_series_temporais()
 
     def exibir_data_science_resumo(self):
         st.subheader("📈 Data Science: Regression Table - Info")
@@ -139,6 +145,36 @@ class GitHubDashboard:
             st.pyplot(fig)
         except Exception as e:
             st.error(f"Erro ao exibir gráfico de regressão: {e}")
+
+    def exibir_series_temporais(self):
+        st.subheader("📊 Análise de Séries Temporais com seus dados do GitHub")
+        try:
+            # Simula evolução de repositórios com base no tempo
+            linguagem = self.user_data.get("language", 0)
+            repos = self.user_data.get("public_repos", 0)
+            datas = pd.date_range(end=pd.Timestamp.today(), periods=10)
+
+            df = pd.DataFrame({
+                "data": datas,
+                "linguagens": [linguagem + i for i in range(10)],
+                "repositorios": [repos + i + (i % 3 - 1) for i in range(10)]
+            }).set_index("data")
+
+            # Gráfico de linha simples
+            st.line_chart(df[["repositorios"]])
+
+            # Média móvel
+            df["media_movel"] = df["repositorios"].rolling(window=3).mean()
+            fig, ax = plt.subplots()
+            df["repositorios"].plot(ax=ax, label="Repositórios", marker="o")
+            df["media_movel"].plot(ax=ax, label="Média Móvel (3 dias)", linestyle="--")
+            ax.set_title("Repositórios GitHub - Série Temporal com Média Móvel")
+            ax.legend()
+            st.pyplot(fig)
+
+        except Exception as e:
+            st.error(f"Erro ao exibir séries temporais: {e}")
+
 
     def exibir_relay_firewall(self):
         log = []

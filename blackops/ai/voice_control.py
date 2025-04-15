@@ -24,14 +24,21 @@ def normalizar_comando(comando):
         "comite": "commit",
         "comitê": "commit",
         "commite": "commit",
-        "por request": "pull request",
-        "pau request": "pull request",
-        "resumo do repositório": "resumo",
         "última atualização": "último commit",
         "última modificação": "último commit",
         "requisição de puxar": "pull request",
-        "quantas issues": "quantidade de issues",
-        "problemas abertos": "quantidade de issues"
+        "por request": "pull request",
+        "pau request": "pull request",
+        "resumo do repositório": "resumo",
+        "problemas abertos": "issues",
+        "quantas issues": "issues",
+        "erro": "issues",
+        "linguagem": "linguagem principal",
+        "qual linguagem": "linguagem principal",
+        "quem criou": "criador",
+        "dono do repositório": "criador",
+        "quantas estrelas": "estrelas",
+        "número de estrelas": "estrelas",
     }
 
     for errado, certo in mapeamento.items():
@@ -54,23 +61,28 @@ def speak(text):
     os.remove(temp_path)
 
 def ask_github_ai(question):
-    question = question.lower()
-    
-    # 🔎 Mapeamento por intenção
-    if "último commit" in question:
-        return get_last_commit("openai/whisper")
-    
-    elif "resumo" in question or "explica" in question:
-        return summarize_repo("openai/whisper")
+    repo = g.get_repo("openai/whisper")
 
-    elif "quantas issues" in question or "tem problema" in question:
-        return count_issues("openai/whisper")
+    if "commit" in question:
+        commit = repo.get_commits()[0]
+        return f"O último commit foi de {commit.commit.author.name}: {commit.commit.message}"
 
-    elif "pull request" in question:
-        return list_pull_requests("openai/whisper")
-    
-    elif "linguagem" in question or "programado" in question:
-        return repo_language("openai/whisper")
+    elif "resumo" in question:
+        readme = repo.get_readme().decoded_content.decode()
+        summary = summarizer(readme[:1024], max_length=60, min_length=30, do_sample=False)
+        return summary[0]['summary_text']
+
+    elif "linguagem principal" in question:
+        return f"A linguagem principal do repositório é {repo.language}."
+
+    elif "estrelas" in question:
+        return f"O repositório possui {repo.stargazers_count} estrelas."
+
+    elif "issues" in question:
+        return f"O número de issues abertas é {repo.open_issues_count}."
+
+    elif "criador" in question:
+        return f"O criador do repositório é {repo.owner.login}."
 
     else:
         return "Não entendi a pergunta sobre o GitHub."
