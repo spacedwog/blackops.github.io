@@ -7,7 +7,7 @@ theme:
   language: pt-BR
 nav:
   - Início: index.md
-  - Interface Streamlit: ui.md
+  - Interface do Projeto: ui.md
   - Referência Técnica:
       - Módulo App: modules/app_interface.md
       - Módulo Blackops: modules/blackops_interface.md

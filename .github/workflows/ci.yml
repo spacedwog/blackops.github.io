@@ -26,6 +26,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Build the documentation
+        run: mkdocs build --clean
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: ./site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Debug serial module
         run: |
           python -c "import serial; print(serial.__file__); print(dir(serial))"
