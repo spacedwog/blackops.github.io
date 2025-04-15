@@ -28,7 +28,7 @@ def show_comandos_disponiveis():
     Exibe comandos de voz, disponíveis.
 
     Returns:
-        Show Command: Configurações carregadas do arquivo YAML.
+        Show_Command: Configurações carregadas do arquivo YAML.
     """
     st.markdown("### 🎙️ Comandos de Voz Disponíveis")
     comandos = [
@@ -46,7 +46,7 @@ def show_project_info():
     Exibe as informações dos projetos.
 
     Returns:
-        Show Project: Configurações carregadas do arquivo YAML.
+        Show_Project: Configurações carregadas do arquivo YAML.
     """
     config = load_config()
     # Atualização automática a cada 60 segundos
@@ -114,7 +114,7 @@ def executar_funcao(funcao):
     Executa as funções dos buttons do dashboard.
 
     Returns:
-        Execute Function: Configurações carregadas do arquivo YAML.
+        Execute_Function: Configurações carregadas do arquivo YAML.
     """
     if funcao == 'activate_relay':
         activate_relay()
