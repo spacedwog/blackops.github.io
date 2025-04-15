@@ -17,7 +17,7 @@ def load_config():
     Carrega as configurações do sistema via YAML.
 
     Returns:
-        Load Config: Configurações carregadas do arquivo YAML.
+        Load_Config: Configurações carregadas do arquivo YAML.
     """
     config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'settings.yaml')
     with open(config_path, 'r') as file:
