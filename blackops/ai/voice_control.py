@@ -24,12 +24,12 @@ def normalizar_comando(comando):
         "comite": "commit",
         "comitê": "commit",
         "commite": "commit",
-        "última atualização": "último commit",
-        "última modificação": "último commit",
-        "requisição de puxar": "pull request",
         "por request": "pull request",
         "pau request": "pull request",
         "resumo do repositório": "resumo",
+        "última atualização": "último commit",
+        "última modificação": "último commit",
+        "requisição de puxar": "pull request",
         "quantas issues": "quantidade de issues",
         "problemas abertos": "quantidade de issues"
     }
