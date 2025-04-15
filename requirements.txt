@@ -7,6 +7,7 @@ seaborn
 requests
 streamlit
 statsmodels
+mkdocstrings
 python-dotenv
 pyserial>=3.5
 mkdocs-material

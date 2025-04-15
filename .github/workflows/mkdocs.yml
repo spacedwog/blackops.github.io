@@ -1,0 +1,29 @@
+name: Build and Deploy MkDocs
+
+on:
+  push:
+    branches:
+      - main  # Ou qualquer branch principal que você usar
+  pull_request:
+    branches:
+      - main  # Ou qualquer branch principal que você usar
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs
+          pip install mkdocs-material  # Instala o tema material
+          pip install mkdocstrings  # Instala o plugin mkdocstrings
+          pip install mkdocstrings[python]  # Instala dependências extras
