@@ -5,8 +5,10 @@ import os
 import yaml
 import streamlit as st
 from ai.ocr_rfid import stream_camera
+from core.github_utils import get_repo_info
 from network.port_scanner import scan_ports
 from core.relay_control import activate_relay
+from streamlit_autorefresh import st_autorefresh
 from ai.voice_control import activate_voice_control
 from network.firewall_checker import check_firewall_rules
 
@@ -29,15 +31,28 @@ def show_comandos_disponiveis():
 
 def show_project_info():
     config = load_config()
+    # Atualização automática a cada 60 segundos
+    st_autorefresh(interval=60000, key="github_auto_refresh")
 
-    st.set_page_config(page_title=config['app_name'], layout="centered")
+    st.markdown("---")
+    st.header("📡 Status do Repositório GitHub")
 
-    st.title(f"🔒 {config['app_name']} v{config['version']}")
-    st.subheader("📡 Interface de Cibersegurança Ativa")
+    # Carrega token do ambiente, se disponível
+    token = os.getenv("8928341d3b422e184b621364a45885f6a2baa804")
+    repo_name = "openai/whisper"  # Pode ser dinâmico no futuro
 
-    st.markdown(f"**Autor:** `{config['author']}`")
-    st.markdown("### 📝 Descrição")
-    st.info(config['description'])
+    repo_info = get_repo_info(repo_name, token)
+
+    if "error" in repo_info:
+        st.error(f"Erro ao buscar dados do GitHub: {repo_info['error']}")
+    else:
+        st.markdown(f"**🔗 Repositório:** `{repo_info['name']}`")
+        st.markdown(f"**📝 Descrição:** {repo_info['description']}")
+        st.markdown(f"**📦 Linguagem Principal:** `{repo_info['language']}`")
+        st.markdown(f"**⭐ Estrelas:** `{repo_info['stars']}`")
+        st.markdown(f"**🐞 Issues Abertas:** `{repo_info['open_issues']}`")
+        st.markdown(f"**🕒 Último Commit:** `{repo_info['last_commit']}`")
+
     show_comandos_disponiveis()
 
     st.markdown("---")
