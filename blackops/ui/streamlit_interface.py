@@ -17,7 +17,7 @@ def load_config():
     Carrega as configurações do sistema via YAML.
 
     Returns:
-        dict: Configurações carregadas do arquivo YAML.
+        Load Config: Configurações carregadas do arquivo YAML.
     """
     config_path = os.path.join(os.path.dirname(__file__), '..', 'config', 'settings.yaml')
     with open(config_path, 'r') as file:
@@ -28,7 +28,7 @@ def show_comandos_disponiveis():
     Exibe comandos de voz, disponíveis.
 
     Returns:
-        dict: Configurações carregadas do arquivo YAML.
+        Show Command: Configurações carregadas do arquivo YAML.
     """
     st.markdown("### 🎙️ Comandos de Voz Disponíveis")
     comandos = [
@@ -46,7 +46,7 @@ def show_project_info():
     Exibe as informações dos projetos.
 
     Returns:
-        dict: Configurações carregadas do arquivo YAML.
+        Show Project: Configurações carregadas do arquivo YAML.
     """
     config = load_config()
     # Atualização automática a cada 60 segundos
@@ -114,7 +114,7 @@ def executar_funcao(funcao):
     Executa as funções dos buttons do dashboard.
 
     Returns:
-        dict: Configurações carregadas do arquivo YAML.
+        Execute Function: Configurações carregadas do arquivo YAML.
     """
     if funcao == 'activate_relay':
         activate_relay()
