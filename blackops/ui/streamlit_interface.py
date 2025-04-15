@@ -14,7 +14,7 @@ from network.firewall_checker import check_firewall_rules
 
 def load_config():
     """
-    Carrega o arquivo de configuração YAML.
+    Carrega as configurações do sistema via YAML.
 
     Returns:
         dict: Configurações carregadas do arquivo YAML.
@@ -25,7 +25,7 @@ def load_config():
     
 def show_comandos_disponiveis():
     """
-    Carrega o arquivo de configuração YAML.
+    Exibe comandos de voz, disponíveis.
 
     Returns:
         dict: Configurações carregadas do arquivo YAML.
@@ -43,7 +43,7 @@ def show_comandos_disponiveis():
 
 def show_project_info():
     """
-    Carrega o arquivo de configuração YAML.
+    Exibe as informações dos projetos.
 
     Returns:
         dict: Configurações carregadas do arquivo YAML.
@@ -111,7 +111,7 @@ def show_project_info():
 
 def executar_funcao(funcao):
     """
-    Carrega o arquivo de configuração YAML.
+    Executa as funções dos buttons do dashboard.
 
     Returns:
         dict: Configurações carregadas do arquivo YAML.
