@@ -15,3 +15,4 @@ nav:
   - Referência Técnica:
       - Módulo App: modules/app_interface.md
       - Módulo Blackops: modules/blackops_interface.md
+  - Referência: reference.md
