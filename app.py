@@ -1,3 +1,6 @@
+# -----------------------------
+# ./app.py
+# -----------------------------
 import platform
 import subprocess
 import numpy as np

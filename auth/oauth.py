@@ -1,11 +1,15 @@
+# -----------------------------
+# auth/oauth.py
+# -----------------------------
 import time
 import socket
 import requests
+import subprocess
 import dns.resolver
 import streamlit as st
 from urllib.parse import urlencode
+from dashboard.github_dashboard import GitHubDashboard
 from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI
-from dashboard.github_dashboard import GitHubDashboard  # Certifique-se de que este caminho está correto
 
 class OAuthGitHub:
     AUTH_URL = "https://github.com/login/oauth/authorize"
@@ -112,7 +116,11 @@ class OAuthGitHub:
     @classmethod
     def verificar_dns(cls, dominio="github.com"):
         try:
-            resposta = dns.resolver.resolve(dominio, 'A')
+            resolver = dns.resolver.Resolver()
+            resolver.timeout = 2.0
+            resolver.lifetime = 5.0
+            resolver.nameservers = ['8.8.8.8', '1.1.1.1']
+            resposta = resolver.resolve(dominio, 'A')
             ips = [ip.to_text() for ip in resposta]
             st.write(f"**DNS ({dominio}):** {', '.join(ips)}")
         except Exception as e:
@@ -144,6 +152,20 @@ class OAuthGitHub:
     @classmethod
     def exibir_cyberseguranca(cls):
         st.subheader("🛡️ Cibersegurança: Relatório de Segurança")
+        
+        if st.button("🔌 Gráfico DNS"):
+            try:
+                comando = "./executar_graficodns.ps1"
+                resultado = subprocess.run(
+                    ["powershell", "-Command", comando],
+                    capture_output=True,
+                    text=True,
+                    shell=True
+                )
+                st.code(resultado.stdout or resultado.stderr)
+            except Exception as e:
+                st.error(f"Erro ao executar: {e}")
+                
         cls.verificar_transporte_rede()
         cls.verificar_dns()
         cls.verificar_porta()

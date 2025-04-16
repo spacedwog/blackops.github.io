@@ -8,13 +8,120 @@ import pytesseract
 from PIL import Image
 import streamlit as st
 from io import BytesIO
-from core.github_utils import get_repo_info
 
 def stream_camera():
     cap = cv2.VideoCapture(0)
 
     # Estilo inspirado na Twitch
-    st.markdown("""...""", unsafe_allow_html=True)  # O mesmo CSS que você já colocou
+    st.markdown("""
+        <style>
+        body {
+            background-color: #0e0e10;
+        }
+        .twitch-header {
+            font-size: 32px;
+            font-weight: bold;
+            color: #9146FF;
+            text-align: left;
+            padding: 10px 0;
+        }
+        .live-badge {
+            background-color: red;
+            color: white;
+            border-radius: 5px;
+            padding: 4px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .glitch-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch-frame {
+            border: 6px solid #9146FF;
+            border-radius: 20px;
+            box-shadow: 0 0 20px #9146FF, 0 0 30px #9146FF, 0 0 40px #9146FF;
+            width: 100%;
+            max-width: 720px;
+            animation: neon-pulse 2s infinite alternate;
+        }
+
+        .glitch-frame::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            box-shadow: 0 0 10px #FF00FF, 0 0 20px #00FFFF;
+            mix-blend-mode: screen;
+            animation: glitch 1s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes neon-pulse {
+            0% {
+                box-shadow: 0 0 10px #9146FF, 0 0 20px #9146FF;
+            }
+            100% {
+                box-shadow: 0 0 20px #9146FF, 0 0 40px #9146FF, 0 0 60px #9146FF;
+            }
+        }
+
+        @keyframes glitch {
+            0% {
+                transform: translate(0px, 0px);
+                opacity: 0.75;
+            }
+            20% {
+                transform: translate(-2px, 1px);
+            }
+            40% {
+                transform: translate(2px, -1px);
+            }
+            60% {
+                transform: translate(-1px, 2px);
+            }
+            80% {
+                transform: translate(1px, -2px);
+            }
+            100% {
+                transform: translate(0px, 0px);
+                opacity: 1;
+            }
+        }
+
+        .chat-box {
+            background-color: #18181B;
+            border: 2px solid #2e2e31;
+            border-radius: 10px;
+            padding: 10px;
+            color: white;
+            height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .chat-message {
+            margin-bottom: 5px;
+        }
+                
+        .chat-indent {
+            padding-left: 15px;
+            opacity: 0.85;
+        }
+
+        .chat-username {
+            color: #FF4ECC;
+            font-weight: bold;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
     st.markdown('<div class="twitch-header">🐺 Canal: Spacedwog <span class="live-badge">🔴 LIVE</span></div>', unsafe_allow_html=True)
 
@@ -36,31 +143,6 @@ def stream_camera():
 
         st.markdown("### 💬 Chat da Live")
 
-        # --- GitHub integration ---
-        token = os.getenv("GITHUB_TOKEN")  # Segura via variável de ambiente
-        repo_name = "openai/whisper"
-        repo_info = get_repo_info(repo_name, token)
-
-        # Chat HTML com mensagens fixas
-        st.markdown("""<div class="chat-box">""", unsafe_allow_html=True)
-        
-        # Mensagens GitHub como bot
-        if "error" in repo_info:
-            st.markdown(f"""<div class="chat-message"><span class="chat-username">[github_bot]:</span> Erro: {repo_info['error']}</div>""", unsafe_allow_html=True)
-        else:
-            github_chat = [
-                f"🔗 Repositório: `{repo_info['name']}`",
-                f"📝 Descrição: {repo_info['description']}`",
-                f"📦 Linguagem: `{repo_info['language']}`",
-                f"⭐ Estrelas: `{repo_info['stars']}`",
-                f"🐞 Issues Abertas: `{repo_info['open_issues']}`",
-                f"🕒 Último Commit: `{repo_info['last_commit']}`"
-            ]
-            for line in github_chat:
-                st.markdown(f"""<div class="chat-message"><span class="chat-username">[github_bot]:</span> {line}</div>""", unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
     with col1:
         st.info("🎥 Transmitindo ao vivo com overlay estilo Twitch!")
         video_placeholder = st.empty()
@@ -77,8 +159,8 @@ def stream_camera():
 
         video_placeholder.markdown(
             f"""
-            <div style="display: flex; justify-content: center; align-items: center;">
-                <img src="data:image/jpeg;base64,{image_to_base64(frame_rgb)}" class="stream-frame"/>
+            <div class="glitch-wrapper" style="display: flex; justify-content: center; align-items: center;">
+                <img src="data:image/jpeg;base64,{image_to_base64(frame_rgb)}" class="glitch-frame"/>
             </div>
             """,
             unsafe_allow_html=True

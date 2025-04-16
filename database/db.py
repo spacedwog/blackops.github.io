@@ -1,10 +1,11 @@
+# -----------------------------
 # database/db.py
-
+# -----------------------------
 import sqlite3
 from datetime import datetime
 
 class UsuarioDB:
-    def __init__(self, db_name="cloud_store.db"):
+    def __init__(self, db_name="clusterops.db"):
         self.db_name = db_name
         self.criar_tabelas()
 

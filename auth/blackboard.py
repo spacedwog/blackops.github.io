@@ -1,3 +1,6 @@
+# -----------------------------
+# auth/blackboard.py
+# -----------------------------
 class BlackboardValidator:
     trusted_logins = {"admin123", "user456", "dev789"}  # exemplo
     trusted_domains = {"trusted-domain.com", "secure.org"}

@@ -1,4 +1,6 @@
+# -----------------------------
 # auth/auditoria.py
+# -----------------------------
 import sqlite3
 import datetime
 

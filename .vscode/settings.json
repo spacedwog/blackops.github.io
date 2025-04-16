@@ -4,5 +4,13 @@
     ],
     "files.associations": {
         "istream": "cpp"
-    }
+    },
+    "java.project.sourcePaths": [
+        "blackops"
+    ],
+    "java.project.referencedLibraries": [
+        "c:\\Users\\felip\\Downloads\\json-20240205.jar"
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.format.settings.url": ".vscode/java-formatter.xml"
 }

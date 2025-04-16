@@ -1,0 +1,24 @@
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x000002D3CA7555E0>>
+Assistente: Não entendi a pergunta sobre o GitHub.
+
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x000002D3CACA65D0>>
+Assistente: Não entendi a pergunta sobre o GitHub.
+
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x000002D3CA758780>>
+Assistente: Não entendi a pergunta sobre o GitHub.
+
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x000002D3CA7C8DC0>>
+Assistente: Não entendi a pergunta sobre o GitHub.
+
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x000002D3C98C00A0>>
+Assistente: Não entendi a pergunta sobre o GitHub.
+
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x00000213D0352E00>>
+Assistente: Não entendi a pergunta sobre o GitHub.
+
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x00000213D0FC8F30>>
+Assistente: Total de interações: 50, Acertos: 48, Erros: 2, Precisão: 96.0%.
+
+Usuário: <bound method Github.get_user of <github.MainClass.Github object at 0x00000213D0837960>>
+Assistente: Total de interações: 51, Acertos: 49, Erros: 2, Precisão: 96.08%.
+

@@ -1,7 +1,11 @@
+# -----------------------------
+# dashboard/github_dashboard.py
+# -----------------------------
 import time
 import base64
 import serial
 import requests
+import subprocess
 import pandas as pd
 import seaborn as sns
 import streamlit as st
@@ -243,6 +247,19 @@ class GitHubDashboard:
         status = st.empty()
         reiniciar = st.button("💡 Reiniciar Relé")
 
+        if st.button("🔌 Painel DNS"):
+            try:
+                comando = "./executar_paineldns.ps1"
+                resultado = subprocess.run(
+                    ["powershell", "-Command", comando],
+                    capture_output=True,
+                    text=True,
+                    shell=True
+                )
+                st.code(resultado.stdout or resultado.stderr)
+            except Exception as e:
+                st.error(f"Erro ao executar: {e}")
+
         porta_serial = self.detectar_porta_serial() or "COM4"
         baud_rate = 9600
 
@@ -321,12 +338,11 @@ class GitHubDashboard:
 
             st.text(f"⏱️ Tempo de resposta: {latencia:.2f} segundos")
 
-            if response_str and "OK" in response_str.upper():
-                st.success("🔍 Firewall validado e relay seguro.")
-            elif response_str:
-                st.warning(f"❗ Resposta inesperada: '{response_str}' — verifique o firmware.")
+            if (response_str and "OK" in response_str.upper()):
+                st.success("🔍 Firewall validado, relay seguro e potenciometro funcional.")
             else:
-                st.error("❌ Nenhuma resposta válida foi interpretada.")
+                st.error(f"❌ Nenhuma resposta válida foi interpretada.:{response_str}")
+
 
         with abas[1]:
             st.code(" ".join(f"{b:02x}" for b in raw_response), language="text")

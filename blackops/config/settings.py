@@ -1,3 +1,6 @@
+# -----------------------------
+# config/settings.py
+# -----------------------------
 import os
 import yaml
 
