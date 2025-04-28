@@ -7,9 +7,7 @@ import sqlite3
 import pandas as pd
 import seaborn as sns
 import streamlit as st
-from threading import Thread
 import matplotlib.pyplot as plt
-from flask import Flask, request, jsonify
 from security.monitor import CyberSecurityMonitor
 from ai.voice_control import VoiceGitHubAssistant
 from ui.streamlit_interface import StreamlitInterface
