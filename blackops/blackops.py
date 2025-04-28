@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from security.monitor import CyberSecurityMonitor
 from ai.voice_control import VoiceGitHubAssistant
 from ui.streamlit_interface import StreamlitInterface
+from security.firebase_connector import FirebaseConnector
 
 # Configurações
 DB_PATH = "blackops_data.db"  # Banco de dados local
@@ -26,7 +27,7 @@ def main():
     ])
 
     mongo_uri = "mongodb+srv://twitchcombopunch:6z2h1j3k9F.@clusterops.iodjyeg.mongodb.net/"
-    token = os.getenv("8928341d3b422e184b621364a45885f6a2baa804")
+    token = os.getenv("GITHUB_TOKEN")
     repo_name = "openai/whisper"
 
     streamlit_interface = StreamlitInterface(token=token, mongo_uri=mongo_uri, repo_name=repo_name)
@@ -60,7 +61,7 @@ def main():
     with aba4:
         st.info("🔍 Buscando comandos com 'estatísticas de voz'...")
 
-        resultados = buscar_comandos_localmente("estatísticas de voz")
+        resultados = buscar_comandos_firebase("estatísticas de voz")
 
         if resultados:
             exibir_estatisticas_de_voz(resultados, token, repo_name)
@@ -77,40 +78,13 @@ def main():
 # Funções Auxiliares
 # -----------------------------
 
-def buscar_comandos_localmente(comando_normalizado):
+def buscar_comandos_firebase(comando_normalizado):
     try:
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-
-        cursor.execute(f"""
-            CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                comando_original TEXT,
-                comando_normalizado TEXT,
-                resposta TEXT,
-                repo TEXT,
-                timestamp TEXT
-            )
-        """)
-        conn.commit()
-
-        query = f"""
-            SELECT comando_original, comando_normalizado, resposta, repo, timestamp
-            FROM {TABLE_NAME}
-            WHERE comando_normalizado LIKE ?
-        """
-        cursor.execute(query, (f"%{comando_normalizado}%",))
-        rows = cursor.fetchall()
-
-        colunas = ["comando_original", "comando_normalizado", "resposta", "repo", "timestamp"]
-        resultados = [dict(zip(colunas, row)) for row in rows]
-
-        return resultados
+        firebase = FirebaseConnector(credentials_path="blackops/security/firebase_key.json")
+        return firebase.buscar_comandos(comando_normalizado)
     except Exception as e:
-        st.error(f"Erro ao acessar banco de dados local: {e}")
+        st.error(f"Erro ao acessar Firebase: {e}")
         return []
-    finally:
-        conn.close()
 
 def exibir_estatisticas_de_voz(resultados, github_token=None, repo_name=None):
     total = len(resultados)

@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# SQLite database
+*.db
+
+# Firebase credentials
+firebase_key.json
+
+# Streamlit cache
+.streamlit/
+
+# Logs
+*.log
+
+# VS Code settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# MacOS
+.DS_Store
+
+# CSV exports
+*.csv
+
+# Python test artifacts
+htmlcov/
+.coverage
+.tox/
+.nox/
+.pytest_cache/
+
+# System files
+Thumbs.db
+ehthumbs.db
+
+# Pip dependency resolver
+pip-log.txt
+pip-delete-this-directory.txt

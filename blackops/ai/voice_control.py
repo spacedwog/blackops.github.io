@@ -9,10 +9,11 @@ import sounddevice as sd
 from datetime import datetime
 import speech_recognition as sr
 
+import firebase_admin
 from github import Github
-from pymongo import MongoClient
 from transformers import pipeline
 from deep_translator import GoogleTranslator
+from firebase_admin import credentials, firestore
 
 import socket
 
@@ -27,9 +28,13 @@ class VoiceGitHubAssistant:
         self.repo_name = repo_name
         self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
-        self.mongo_client = MongoClient(mongo_uri)
-        self.db = self.mongo_client["voice_github_assistant"]
-        self.logs = self.db["logs"]
+        cred = credentials.Certificate("https://github.com/firebase/firebase-ios-sdk.git")
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+
+        self.db = firestore.client()
+        self.logs = self.db.collection("logs")
+
 
         # Inicializa um DataFrame para armazenar consultas DNS
         self.dns_consultas = pd.DataFrame(columns=["timestamp", "dominio", "ip", "status"])
@@ -292,8 +297,9 @@ class VoiceGitHubAssistant:
             return f"[Erro no GitHub] {str(e)}"
 
     def salvar_log(self, comando_original, comando_normalizado, resposta, erro=None):
-        self.logs.insert_one({
-            "timestamp": datetime.utcnow(),
+
+        self.logs.add({
+            "timestamp": datetime.now(),
             "repo": self.repo_name,
             "comando_original": comando_original,
             "comando_normalizado": comando_normalizado,

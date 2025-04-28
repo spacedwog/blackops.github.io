@@ -12,5 +12,8 @@
         "c:\\Users\\felip\\Downloads\\json-20240205.jar"
     ],
     "java.configuration.updateBuildConfiguration": "interactive",
-    "java.format.settings.url": ".vscode/java-formatter.xml"
+    "java.format.settings.url": ".vscode/java-formatter.xml",
+    "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
+        "clang-diagnostic-error"
+    ]
 }
