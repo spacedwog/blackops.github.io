@@ -9,11 +9,16 @@ import datetime
 import threading
 import pandas as pd
 import streamlit as st
+import serial.tools.list_ports
 from consultar_dns import DataScienceDNS
 
 class TelaDNS:
     def __init__(self):
         pygame.init()
+        self.serial_port = None
+        self.relay_mensagens = []  # Lista para armazenar mensagens do relay
+        self.iniciar_serial()
+
         self.largura, self.altura = 800, 600
         self.tela = pygame.display.set_mode((self.largura, self.altura))
         pygame.display.set_caption("Consulta DNS Interativa")
@@ -33,6 +38,40 @@ class TelaDNS:
             "[7] Agendar Coletas"
         ]
         self.data_science_dns = DataScienceDNS()
+
+    def iniciar_serial(self):
+        try:
+            # Tenta detectar a porta serial automaticamente
+            portas = list(serial.tools.list_ports.comports())
+            for porta in portas:
+                if "USB" in porta.description or "Serial" in porta.description:
+                    self.serial_port = serial.Serial(porta.device, 19200, timeout=1)
+                    break
+            
+            if self.serial_port and self.serial_port.is_open:
+                print(f"[✓] Conectado na porta {self.serial_port.port}")
+
+                # Cria uma thread para leitura serial
+                threading.Thread(target=self.ler_serial, daemon=True).start()
+            else:
+                print("[!] Nenhuma porta serial encontrada.")
+        except Exception as e:
+            print(f"[Erro] Falha ao conectar no Serial: {e}")
+
+    def ler_serial(self):
+        while True:
+            if self.serial_port and self.serial_port.is_open:
+                try:
+                    linha = self.serial_port.readline().decode('utf-8').strip()
+                    if linha:
+                        print(f"[Serial] {linha}")  # (opcional: debug no terminal)
+                        self.relay_mensagens.append(linha)
+                        
+                        # Se quiser também exibir na interface normal:
+                        self.mensagens.append(linha)
+                except Exception as e:
+                    print(f"[Erro] Leitura Serial: {e}")
+
 
     def ler_relay_serial(self, porta='COM4', baudrate=9600):
         try:
@@ -68,7 +107,13 @@ class TelaDNS:
             for mensagem in self.mensagens[-10:]:
                 msg_surface = self.fonte.render(mensagem, True, (200, 255, 200))
                 self.tela.blit(msg_surface, (50, y))
+                y += 20
+                self.tela.blit(self.fonte.render("Relays:", True, (255, 200, 100)), (50, y))
                 y += 30
+                for relay_msg in self.relay_mensagens[-4:]:  # Últimas 4 mensagens do relay
+                    msg_surface = self.fonte.render(relay_msg, True, (255, 255, 100))
+                    self.tela.blit(msg_surface, (70, y))
+                    y += 30
 
         pygame.display.flip()
 
