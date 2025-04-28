@@ -13,9 +13,9 @@ from consultar_dns import DataScienceDNS
 class TelaDNS:
     def __init__(self):
         pygame.init()
-        self.serial_port = None
-        self.relay_mensagens = []  # Lista para armazenar mensagens do relay
-        self.iniciar_serial()
+        self.serial_relay = None
+        self.iniciar_serial_relay()
+
 
         self.largura, self.altura = 800, 600
         self.tela = pygame.display.set_mode((self.largura, self.altura))
@@ -37,24 +37,12 @@ class TelaDNS:
         ]
         self.data_science_dns = DataScienceDNS()
 
-    def iniciar_serial(self):
+    def iniciar_serial_relay(self, porta='COM4', baudrate=9600):
         try:
-            # Tenta detectar a porta serial automaticamente
-            portas = list(serial.tools.list_ports.comports())
-            for porta in portas:
-                if "USB" in porta.description or "Serial" in porta.description:
-                    self.serial_port = serial.Serial(porta.device, 19200, timeout=1)
-                    break
-            
-            if self.serial_port and self.serial_port.is_open:
-                print(f"[✓] Conectado na porta {self.serial_port.port}")
-
-                # Cria uma thread para leitura serial
-                threading.Thread(target=self.ler_serial, daemon=True).start()
-            else:
-                print("[!] Nenhuma porta serial encontrada.")
+            self.serial_relay = serial.Serial(porta, baudrate, timeout=1)
+            print(f"[✓] Conectado na porta {porta}")
         except Exception as e:
-            print(f"[Erro] Falha ao conectar no Serial: {e}")
+            print(f"[Erro] Falha ao abrir serial {porta}: {e}")
 
     def ler_serial(self):
         while True:
@@ -70,14 +58,12 @@ class TelaDNS:
                 except Exception as e:
                     print(f"[Erro] Leitura Serial: {e}")
 
-
-    def ler_relay_serial(self, porta='COM4', baudrate=9600):
+    def iniciar_serial_relay(self, porta='COM4', baudrate=9600):
         try:
-            with serial.Serial(porta, baudrate, timeout=1) as ser:
-                linha = ser.readline().decode('utf-8').strip()
-                return linha
+            self.serial_relay = serial.Serial(porta, baudrate, timeout=1)
+            print(f"[✓] Conectado na porta {porta}")
         except Exception as e:
-            return f"Erro relay: {e}"
+            print(f"[Erro] Falha ao abrir serial {porta}: {e}")
 
     def desenhar_interface(self):
         self.tela.fill((30, 30, 30))
