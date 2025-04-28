@@ -4,11 +4,9 @@
 import sys
 import pygame
 import serial
-import schedule
 import datetime
 import threading
 import pandas as pd
-import streamlit as st
 import serial.tools.list_ports
 from consultar_dns import DataScienceDNS
 
