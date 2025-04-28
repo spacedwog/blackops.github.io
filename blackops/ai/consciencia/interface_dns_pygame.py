@@ -32,7 +32,7 @@ class TelaDNS:
         self.serial_relay = None
         self.iniciar_serial_relay()
 
-    def iniciar_serial_relay(self, porta='COM4', baudrate=19200):
+    def iniciar_serial_relay(self, porta='COM4', baudrate=9600):
         try:
             self.serial_relay = serial.Serial(porta, baudrate, timeout=1)
             print(f"[✓] Conectado na porta {porta}")
