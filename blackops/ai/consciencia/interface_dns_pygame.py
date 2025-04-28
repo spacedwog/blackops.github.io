@@ -1,22 +1,32 @@
+# -----------------------------
+# consciencia/interface_dns_relay.py
+# -----------------------------
 import sys
 import pygame
 import serial
 import datetime
 import pandas as pd
+import streamlit as st
 from consultar_dns import DataScienceDNS
 
 class TelaDNS:
-    def __init__(self):
+    def __init__(self, porta_serial='COM4', baudrate=9600):
+        # Inicializar Pygame
         pygame.init()
         self.largura, self.altura = 800, 600
         self.tela = pygame.display.set_mode((self.largura, self.altura))
-        pygame.display.set_caption("Consulta DNS Interativa")
+        pygame.display.set_caption("Consulta DNS com Relay Serial")
 
+        # Fonte
         self.fonte = pygame.font.SysFont("consolas", 24)
+
+        # Estado
         self.input_ativo = True
         self.texto_input = ""
         self.mensagens = []
-        self.modo_avancado = False  # << Ativa modo avançado
+        self.modo_avancado = False
+
+        # Opções do menu
         self.menu_opcoes = [
             "[1] Visualizar Estatísticas",
             "[2] Previsão DNS",
@@ -26,30 +36,30 @@ class TelaDNS:
             "[6] Exportar MongoDB",
             "[7] Agendar Coletas"
         ]
+
+        # Classe de Data Science
         self.data_science_dns = DataScienceDNS()
 
-        # >>> NOVO: Inicializa a Serial Relay
-        self.serial_relay = None
-        self.iniciar_serial_relay()
-
-    def iniciar_serial_relay(self, porta='COM4', baudrate=9600):
+        # Inicializar conexão Serial Relay
+        self.porta_serial = porta_serial
+        self.baudrate = baudrate
         try:
-            self.serial_relay = serial.Serial(porta, baudrate, timeout=1)
-            print(f"[✓] Conectado na porta {porta}")
+            self.serial_relay = serial.Serial(self.porta_serial, self.baudrate, timeout=1)
+            self.mensagens.append("[✓] Conexão Serial Relay estabelecida.")
         except Exception as e:
-            print(f"[Erro] Falha ao abrir serial {porta}: {e}")
+            self.serial_relay = None
+            self.mensagens.append(f"[!] Falha ao conectar Serial: {e}")
 
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
-                linha_bytes = self.serial_relay.readline()
-                linha = linha_bytes.decode(errors='ignore').strip()
-                return linha if linha else "[vazio]"
+                linha = self.serial_relay.readline()
+                if linha:
+                    decoded = linha.decode(errors='ignore').strip()
+                    return decoded
             except Exception as e:
-                return f"[Erro] Falha ao ler serial: {e}"
-        else:
-            return "[Erro] Porta Serial não aberta."
-
+                return f"Falha ao ler serial: {e}"
+        return None
 
     def desenhar_interface(self):
         self.tela.fill((30, 30, 30))
@@ -58,12 +68,12 @@ class TelaDNS:
         input_surface = self.fonte.render(self.texto_input, True, (255, 255, 255))
         self.tela.blit(input_surface, (60, 55))
 
-        instr = self.fonte.render("Digite um domínio e pressione Enter | TAB = Avançado", True, (180, 180, 180))
+        instr = self.fonte.render("Digite domínio | TAB = Modo Avançado", True, (180, 180, 180))
         self.tela.blit(instr, (50, 10))
 
         y = 120
         if self.modo_avancado:
-            self.tela.blit(self.fonte.render("🔍 Modo Avançado Ativo:", True, (255, 200, 100)), (50, y))
+            self.tela.blit(self.fonte.render("🔍 Modo Avançado:", True, (255, 200, 100)), (50, y))
             y += 40
             for opcao in self.menu_opcoes:
                 msg_surface = self.fonte.render(opcao, True, (100, 255, 250))
@@ -75,10 +85,11 @@ class TelaDNS:
                 self.tela.blit(msg_surface, (50, y))
                 y += 30
 
-        # >>> NOVO: Mostra o dado do RELAY no canto inferior
-        relay_status = self.ler_relay_serial()
-        relay_surface = self.fonte.render(f"Relay: {relay_status}", True, (255, 180, 120))
-        self.tela.blit(relay_surface, (50, self.altura - 40))
+        # Mostrar status relay lido
+        status_relay = self.ler_relay_serial()
+        if status_relay:
+            relay_surface = self.fonte.render(f"Relay: {status_relay}", True, (255, 255, 100))
+            self.tela.blit(relay_surface, (50, 550))
 
         pygame.display.flip()
 
@@ -90,7 +101,8 @@ class TelaDNS:
 
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
-                    self.encerrar()
+                    if self.serial_relay:
+                        self.serial_relay.close()
                     pygame.quit()
                     sys.exit()
 
@@ -155,11 +167,6 @@ class TelaDNS:
                 self.mensagens.append("[!] Digite um domínio antes de agendar")
         else:
             self.mensagens.append(f"[!] Comando inválido: {comando}")
-
-    def encerrar(self):
-        if self.serial_relay and self.serial_relay.is_open:
-            self.serial_relay.close()
-            print("[✓] Porta serial fechada com sucesso.")
 
 if __name__ == "__main__":
     app = TelaDNS()
