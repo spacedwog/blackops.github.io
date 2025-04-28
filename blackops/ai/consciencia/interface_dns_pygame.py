@@ -16,7 +16,6 @@ class TelaDNS:
         self.serial_relay = None
         self.iniciar_serial_relay()
 
-
         self.largura, self.altura = 800, 600
         self.tela = pygame.display.set_mode((self.largura, self.altura))
         pygame.display.set_caption("Consulta DNS Interativa")
@@ -44,20 +43,6 @@ class TelaDNS:
         except Exception as e:
             print(f"[Erro] Falha ao abrir serial {porta}: {e}")
 
-    def ler_serial(self):
-        while True:
-            if self.serial_port and self.serial_port.is_open:
-                try:
-                    linha = self.serial_port.readline().decode('utf-8').strip()
-                    if linha:
-                        print(f"[Serial] {linha}")  # (opcional: debug no terminal)
-                        self.relay_mensagens.append(linha)
-                        
-                        # Se quiser também exibir na interface normal:
-                        self.mensagens.append(linha)
-                except Exception as e:
-                    print(f"[Erro] Leitura Serial: {e}")
-
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
@@ -67,7 +52,6 @@ class TelaDNS:
                 return f"[Erro] Falha ao ler serial: {e}"
         else:
             return "[Erro] Porta Serial não aberta."
-
 
     def desenhar_interface(self):
         self.tela.fill((30, 30, 30))
