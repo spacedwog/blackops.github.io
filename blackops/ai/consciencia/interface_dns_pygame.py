@@ -34,9 +34,9 @@ class TelaDNS:
         ]
         self.data_science_dns = DataScienceDNS()
 
-    def ler_relay_serial():
+    def ler_relay_serial(self, porta='COM4', baudrate=9600):
         try:
-            with serial.Serial("COM4", 9600, timeout=1) as ser:
+            with serial.Serial(porta, baudrate, timeout=1) as ser:
                 linha = ser.readline().decode('utf-8').strip()
                 return linha
         except Exception as e:
