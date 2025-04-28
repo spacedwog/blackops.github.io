@@ -52,7 +52,7 @@ class TelaDNS:
         instr = self.fonte.render("Digite um domínio e pressione Enter | TAB = Avançado", True, (180, 180, 180))
         self.tela.blit(instr, (50, 10))
 
-        relay_status = self.ler_relay_serial()  # ou ler_relay_serial()
+        relay_status = self.ler_relay_serial("COM4", 9600)  # ou ler_relay_serial()
         relay_surface = self.fonte.render(f"Relay: {relay_status}", True, (255, 180, 180))
         self.tela.blit(relay_surface, (50, 90))
 
