@@ -3,9 +3,7 @@
 # -----------------------------
 
 import os
-import json
 import sqlite3
-import requests 
 import pandas as pd
 import seaborn as sns
 import streamlit as st
@@ -16,49 +14,9 @@ from security.monitor import CyberSecurityMonitor
 from ai.voice_control import VoiceGitHubAssistant
 from ui.streamlit_interface import StreamlitInterface
 
-# Inicializando Flask
-app = Flask(__name__)
-
-# Função para iniciar o Flask em um thread separado
-def run_flask():
-    app.run(host="0.0.0.0", port=5000)
-
 # Configurações
 DB_PATH = "blackops_data.db"  # Banco de dados local
 TABLE_NAME = "comandos"       # Nome da tabela
-API_ENDPOINT = "http://localhost:5000/receive_json"  # URL do endpoint para receber os dados
-
-# Função para enviar dados via POST
-def send_json_post(data):
-    headers = {'Content-Type': 'application/json'}
-    try:
-        response = requests.post(API_ENDPOINT, json=data, headers=headers)
-        if response.status_code == 200:
-            st.success("Dados enviados com sucesso!")
-        else:
-            st.error(f"Erro ao enviar dados: {response.status_code}")
-            st.json(response.json())
-    except requests.exceptions.RequestException as e:
-        st.error(f"Erro de conexão: {e}")
-
-# Rota API para receber dados JSON
-@app.route("/receive_json", methods=["POST"])
-def receive_json():
-    try:
-        data = request.get_json()
-        st.write(f"Dados recebidos: {data}")
-        # Aqui você pode processar os dados conforme necessário
-        return jsonify({"status": "success", "message": "Dados recebidos com sucesso!"}), 200
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400
-
-# Função para gerar a resposta de status
-def get_status():
-    response = {
-                "status": "ok",
-                "message": "BlackOps server is running!"
-                }
-    return json.dumps(response)
 
 def main():
     st.markdown("### ⚫ BLACKOPS IA")
@@ -76,12 +34,6 @@ def main():
     streamlit_interface = StreamlitInterface(token=token, mongo_uri=mongo_uri, repo_name=repo_name)
 
     with aba1:
-        if st.button("🔄 Atualizar Status"):
-            response = get_status()
-            st.text(response)
-        else:
-            st.info("Clique no botão para atualizar o status.")
-
         streamlit_interface.show_project_info()
 
     with aba2:
@@ -120,10 +72,6 @@ def main():
             exibir_comandos_em_tabela(resultados_filtrados)
             exibir_mapa_de_calor(resultados_filtrados)
             exportar_para_csv(resultados_filtrados)
-
-            # Enviar os dados filtrados para um endpoint externo via POST
-            if st.button("📤 Enviar Dados para API"):
-                send_json_post(resultados_filtrados)
         else:
             st.warning("Nenhum comando encontrado.")
 
@@ -241,6 +189,4 @@ def exportar_para_csv(resultados):
 
 # Execução principal
 if __name__ == "__main__":
-    # Rodar o Flask em um thread separado para não bloquear o Streamlit
-    Thread(target=run_flask).start()
     main()
