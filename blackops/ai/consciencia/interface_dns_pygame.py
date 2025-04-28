@@ -3,6 +3,7 @@
 # -----------------------------
 import sys
 import pygame
+import serial
 import schedule
 import datetime
 import threading
@@ -33,6 +34,14 @@ class TelaDNS:
         ]
         self.data_science_dns = DataScienceDNS()
 
+    def ler_relay_serial(porta='COM4', baudrate=9600):
+        try:
+            with serial.Serial(porta, baudrate, timeout=1) as ser:
+                linha = ser.readline().decode('utf-8').strip()
+                return linha
+        except Exception as e:
+            return f"Erro relay: {e}"
+
     def desenhar_interface(self):
         self.tela.fill((30, 30, 30))
         pygame.draw.rect(self.tela, (200, 200, 200), (50, 50, 700, 40), 2)
@@ -42,6 +51,10 @@ class TelaDNS:
 
         instr = self.fonte.render("Digite um domínio e pressione Enter | TAB = Avançado", True, (180, 180, 180))
         self.tela.blit(instr, (50, 10))
+
+        relay_status = self.ler_relay_serial()  # ou ler_relay_serial()
+        relay_surface = self.fonte.render(f"Relay: {relay_status}", True, (255, 180, 180))
+        self.tela.blit(relay_surface, (50, 90))
 
         y = 120
         if self.modo_avancado:
@@ -58,6 +71,7 @@ class TelaDNS:
                 y += 30
 
         pygame.display.flip()
+
 
     def executar(self):
         clock = pygame.time.Clock()
