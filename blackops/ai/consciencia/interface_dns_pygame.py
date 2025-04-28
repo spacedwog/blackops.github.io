@@ -58,12 +58,16 @@ class TelaDNS:
                 except Exception as e:
                     print(f"[Erro] Leitura Serial: {e}")
 
-    def iniciar_serial_relay(self, porta='COM4', baudrate=9600):
-        try:
-            self.serial_relay = serial.Serial(porta, baudrate, timeout=1)
-            print(f"[✓] Conectado na porta {porta}")
-        except Exception as e:
-            print(f"[Erro] Falha ao abrir serial {porta}: {e}")
+    def ler_relay_serial(self):
+        if self.serial_relay and self.serial_relay.is_open:
+            try:
+                linha = self.serial_relay.readline().decode('utf-8').strip()
+                return linha
+            except Exception as e:
+                return f"[Erro] Falha ao ler serial: {e}"
+        else:
+            return "[Erro] Porta Serial não aberta."
+
 
     def desenhar_interface(self):
         self.tela.fill((30, 30, 30))
