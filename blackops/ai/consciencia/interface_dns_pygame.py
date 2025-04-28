@@ -42,12 +42,14 @@ class TelaDNS:
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
-                linha = self.serial_relay.readline().decode('utf-8').strip()
-                return linha
+                linha_bytes = self.serial_relay.readline()
+                linha = linha_bytes.decode(errors='ignore').strip()
+                return linha if linha else "[vazio]"
             except Exception as e:
                 return f"[Erro] Falha ao ler serial: {e}"
         else:
             return "[Erro] Porta Serial não aberta."
+
 
     def desenhar_interface(self):
         self.tela.fill((30, 30, 30))
