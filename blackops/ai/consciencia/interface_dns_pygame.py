@@ -302,7 +302,8 @@ class TelaDNS:
                 self.data_science_dns.consultar_dns('google.com', pd.Timestamp.now())
             self.data_science_dns.previsao_dns()
         elif comando == "3":
-            self.configurar_dominio_customizado()  # Call the new domain configuration method
+            self.modo_config_dominio = True
+            self.mensagens.append("[🔧] Modo de configuração de domínio ativado.")
         elif comando == "0":
             pygame.quit()
             sys.exit()
