@@ -224,9 +224,14 @@ class TelaDNS:
 
     def salvar_dominio(self, dominio):
         """Salva o domínio fornecido em 'dominio.txt'."""
-        with open("dominio.txt", "w", encoding="utf-8") as f:
-            f.write(dominio.strip())
-        self.mensagens.append(f"✅ Domínio '{dominio.strip()}' salvo com sucesso!")
+        caminho = "dominio.txt"
+        try:
+            with open(caminho, "w", encoding="utf-8") as f:
+                f.write(dominio.strip())
+            self.mensagens.append(f"[✓] Domínio salvo: {dominio}")
+        except Exception as e:
+            self.mensagens.append(f"[!] Erro ao salvar domínio: {e}")
+
 
     def executar(self):
         clock = pygame.time.Clock()
@@ -255,20 +260,42 @@ class TelaDNS:
                         self.texto_input = ""
 
                     elif evento.key == pygame.K_TAB:
-                        self.modo_avancado = not self.modo_avancado
+                        self.modo_avancado = not self.modo_avancado and not self.modo_hacker and not self.modo_config_dominio
+                        if self.modo_avancado:
+                            self.modo_hacker = False
+                            self.modo_config_dominio = False
+                            self.codigo_correndo = []
                         self.texto_input = ""
 
                     elif evento.key == pygame.K_BACKSPACE:
                         self.texto_input = self.texto_input[:-1]
                     elif evento.key == pygame.K_h:
-                        self.modo_hacker = not self.modo_hacker
+                        self.modo_hacker = not self.modo_hacker and not self.modo_config_dominio
+                        if self.modo_hacker:
+                            self.codigo_correndo = []
+                            self.modo_avancado = False
+                            self.modo_config_dominio = False
+                            self.texto_input = ""
                         self.texto_input = ""
                     elif evento.key == pygame.K_d:
-                        self.modo_config_dominio = not self.modo_config_dominio
+                        self.modo_config_dominio = not self.modo_config_dominio and not self.modo_hacker
+                        if self.modo_config_dominio:
+                            self.modo_avancado = False
+                            self.modo_hacker = False
+                            self.codigo_correndo = []
+                        else:
+                            self.texto_input = ""
                         self.texto_input = ""
                     else:
                         self.texto_input += evento.unicode
 
+                elif evento.type == pygame.MOUSEBUTTONDOWN:  # Caso o usuário clique com o mouse
+                    if self.modo_config_dominio:  # Se estiver no modo de configuração de domínio
+                        x, y = pygame.mouse.get_pos()  # Pega a posição do clique
+                        # Verifica se o clique foi dentro da área do botão "salvar"
+                        if 600 <= x <= 750 and 140 <= y <= 180:
+                            self.salvar_dominio(self.texto_input)
+                            self.texto_input = ""  # Limpa o campo de texto após salvar
             clock.tick(30)
 
     def processar_entrada_avancada(self, comando):
