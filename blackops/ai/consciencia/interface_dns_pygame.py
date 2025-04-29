@@ -30,6 +30,7 @@ class TelaDNS:
         self.camera = cv2.VideoCapture(0)  # Use 0 para webcam, ou URL para stream IP
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+        self.modo_video = False
 
         self.input_ativo = True
         self.texto_input = ""
@@ -42,7 +43,6 @@ class TelaDNS:
         self.modo_config_dominio = False
         self.resultados_comandos = []
         self.resultados_filtrados = []
-        self.exibir_camera = False
         self.mensagem_voz = ""
 
         self.menu_opcoes = [
@@ -171,7 +171,6 @@ class TelaDNS:
                 (x + i * 10, y + 500),
                 2
             )
-
         pygame.display.flip()
 
     def desenhar_interface(self):
@@ -210,7 +209,7 @@ class TelaDNS:
             dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
             self.tela.blit(dominio_surface, (50, 200))
 
-        elif getattr(self, 'exibir_camera', False):
+        elif getattr(self, 'modo_video', False):
             self.desenhar_video()
             return
 
@@ -328,7 +327,7 @@ class TelaDNS:
                         self.modo_config_dominio = not self.modo_config_dominio
                         self.texto_input = ""
                     elif evento.key == pygame.K_s:
-                        self.exibir_camera = not self.exibir_camera
+                        self.modo_video = not self.modo_video
                         self.texto_input = ""
                     else:
                         self.texto_input += evento.unicode
