@@ -36,7 +36,6 @@ class VoiceAssistant:
         self.db = firestore.client()
         self.logs = self.db.collection("logs")
 
-
         # Inicializa um DataFrame para armazenar consultas DNS
         self.dns_consultas = pd.DataFrame(columns=["timestamp", "dominio", "ip", "status"])
 

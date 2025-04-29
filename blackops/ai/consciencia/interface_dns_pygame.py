@@ -41,10 +41,8 @@ class TelaDNS:
         self.menu_opcoes = [
             "[1] Visualizar Estatísticas",
             "[2] Linha do Tempo",
-            "[3] Filtrar Repositório",
-            "[4] Buscar Palavra-chave",
-            "[5] Exportar CSV",
-            "[6] Executar Voz IA",
+            "[3] Exportar CSV",
+            "[4] Executar Voz IA",
             "[0] Sair"
         ]
 
@@ -276,12 +274,8 @@ class TelaDNS:
                 self.data_science_dns.consultar_dns('google.com', pd.Timestamp.now())
             self.data_science_dns.previsao_dns()
         elif comando == "3":
-            self.data_science_dns.detectar_anomalias()
-        elif comando == "4":
-            self.data_science_dns.clusterizar_dns()
-        elif comando == "5":
             self.data_science_dns.exportar_csv()
-        elif comando == "6":
+        elif comando == "4":
             self.assistente.executar_voz()
         elif comando == "0":
             pygame.quit()
