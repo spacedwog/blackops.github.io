@@ -8,6 +8,7 @@ import pygame
 import serial
 import random
 import datetime
+import numpy as np
 import pandas as pd
 from consultar_dns import DataScienceDNS
 
@@ -22,6 +23,10 @@ class TelaDNS:
         self.fonte = pygame.font.SysFont("consolas", 22)
         self.fonte_valor = pygame.font.SysFont("consolas", 40)
 
+        self.video_surface = pygame.Surface((640, 480))
+        self.neon_ciano = (0, 255, 255)
+        self.neon_rosa = (255, 0, 255)
+        self.neon_verde = (0, 255, 128)
         self.camera = cv2.VideoCapture(0)  # Use 0 para webcam, ou URL para stream IP
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
@@ -131,12 +136,43 @@ class TelaDNS:
         self.tela.blit(texto_valor, texto_rect)
 
     def desenhar_video(self):
+        # Inicializar captura de vídeo (somente uma vez)
+        if not hasattr(self, "camera"):
+            self.camera = cv2.VideoCapture(0)  # webcam padrão
+
         ret, frame = self.camera.read()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # BGR → RGB
-            frame = cv2.resize(frame, (320, 240))  # Redimensiona o vídeo
-            frame_surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))  # Transforma em Surface
-            self.tela.blit(frame_surface, (650, 400))  # Desenha no canto inferior direito
+        if not ret:
+            return
+
+        # Converter BGR (OpenCV) para RGB (Pygame)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.resize(frame, (640, 480))
+        pygame.surfarray.blit_array(self.video_surface, frame.swapaxes(0, 1))
+
+        # Desenhar painel com efeito cyberpunk
+        self.tela.fill((10, 10, 20))  # fundo escuro
+
+        # Moldura neon ao redor do vídeo
+        x, y = 180, 100
+        self.tela.blit(self.video_surface, (x, y))
+        pygame.draw.rect(self.tela, self.neon_ciano, (x - 5, y - 5, 650, 490), 4)
+        pygame.draw.rect(self.tela, self.neon_rosa, (x - 10, y - 10, 660, 500), 2)
+
+        # HUD com título
+        titulo = self.fonte_valor.render("🚨 CYBERPUNK VIDEO STREAM", True, self.neon_verde)
+        self.tela.blit(titulo, (self.largura // 2 - titulo.get_width() // 2, 40))
+
+        # Linhas futuristas (detalhes)
+        for i in range(3):
+            pygame.draw.line(
+                self.tela,
+                self.neon_rosa if i % 2 == 0 else self.neon_ciano,
+                (x + i * 10, y + 480),
+                (x + i * 10, y + 500),
+                2
+            )
+
+        pygame.display.flip()
 
     def desenhar_interface(self):
         if self.modo_hacker:
@@ -174,8 +210,9 @@ class TelaDNS:
             dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
             self.tela.blit(dominio_surface, (50, 200))
 
-        elif self.exibir_camera:
+        elif getattr(self, 'exibir_camera', False):
             self.desenhar_video()
+            return
 
         else:
             self.tela.fill((30, 30, 30))
