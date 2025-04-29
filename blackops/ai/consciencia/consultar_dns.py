@@ -173,7 +173,7 @@ class DataScienceDNS:
         if 'timestamp' not in self.dns_data.columns and self.dns_data.index.name == 'timestamp':
             self.dns_data = self.dns_data.reset_index()
 
-        self.dns_data['timestamp'] = pd.to_datetime(self.dns_data['timestamp'])
+        self.dns_data['timestamp'] = pd.Timestamp.now()
         self.dns_data = self.dns_data.set_index('timestamp')
 
         # Gráfico Matplotlib
