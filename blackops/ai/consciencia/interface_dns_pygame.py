@@ -52,7 +52,7 @@ class TelaDNS:
         except Exception as e:
             self.serial_relay = None
             self.mensagens.append(f"[!] Falha ao conectar Serial: {e}")
-            
+
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
@@ -239,16 +239,19 @@ class TelaDNS:
         """
         self.mensagens.append("[📄] Configurando domínio customizado...")
         self.mensagens.append("Configure os seguintes registros DNS no seu provedor:")
+        
         self.mensagens.append("A Record (IPv4):")
         self.mensagens.append("  185.199.108.153")
         self.mensagens.append("  185.199.109.153")
         self.mensagens.append("  185.199.110.153")
         self.mensagens.append("  185.199.111.153")
+        
         self.mensagens.append("AAAA Record (IPv6):")
         self.mensagens.append("  2606:50c0:8000::153")
         self.mensagens.append("  2606:50c0:8001::153")
         self.mensagens.append("  2606:50c0:8002::153")
         self.mensagens.append("  2606:50c0:8003::153")
+        
         self.mensagens.append("Importante: Evite registros CNAME em conjunto com os A/AAAA acima.")
 
         # Mock DNS validation (replace with actual validation if possible)
@@ -257,6 +260,7 @@ class TelaDNS:
             self.mensagens.append(f"[✓] Dominio '{dominio}' validado com sucesso.")
         else:
             self.mensagens.append("[!] Nenhum domínio fornecido para validar.")
+
 
     def processar_entrada_avancada(self, comando):
         if comando == "RELAY_ON":
