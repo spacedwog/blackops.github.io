@@ -28,7 +28,7 @@ class VoiceGitHubAssistant:
         self.repo_name = repo_name
         self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
-        cred = credentials.Certificate("https://github.com/firebase/firebase-ios-sdk.git")
+        cred = credentials.Certificate("blackops/security/firebase_key.json")
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
 
