@@ -30,13 +30,27 @@ def main():
     token = os.getenv("GITHUB_TOKEN")
     repo_name = "openai/whisper"
 
-    streamlit_interface = StreamlitInterface(token=token, mongo_uri=mongo_uri, repo_name=repo_name)
+    try:
+        # Tentativa de conexão com GitHub
+        streamlit_interface = StreamlitInterface(token=token, mongo_uri=mongo_uri, repo_name=repo_name)
+        github_conectado = True
+    except Exception as e:
+        st.warning("⚠️ Não foi possível conectar ao GitHub. Realizando login no Firebase...")
+        github_conectado = False
+        firebase = FirebaseConnector(credentials_path="blackops/security/firebase_key.json")
+        firebase.login_usuario_default()  # Supondo que este método valide a conexão
 
     with aba1:
-        streamlit_interface.show_project_info()
+        if github_conectado:
+            streamlit_interface.show_project_info()
+        else:
+            st.info("Informações do projeto não disponíveis. GitHub desconectado.")
 
     with aba2:
-        streamlit_interface.show_mongo_viewer()
+        if github_conectado:
+            streamlit_interface.show_mongo_viewer()
+        else:
+            st.info("Visualizador Mongo desabilitado. GitHub desconectado.")
 
     with aba3:
         st.markdown("### 🧫 BLACKOPS MONITOR")
@@ -64,7 +78,7 @@ def main():
         resultados = buscar_comandos_firebase("estatísticas de voz")
 
         if resultados:
-            exibir_estatisticas_de_voz(resultados, token, repo_name)
+            exibir_estatisticas_de_voz(resultados, token if github_conectado else None, repo_name)
             resultados_filtrados = filtrar_por_repositorio(resultados)
             exibir_linha_do_tempo(resultados_filtrados)
             buscar_por_palavra_chave(resultados_filtrados)
@@ -99,9 +113,10 @@ def exibir_estatisticas_de_voz(resultados, github_token=None, repo_name=None):
     col3.metric("Erros", erros)
     col4.metric("Precisão (%)", f"{precisao:.2f}")
 
-    assistente = VoiceGitHubAssistant(github_token=github_token, mongo_uri=None, repo_name=repo_name)
-    assistente.speak(f"Você efetuou {total} comandos, acertou {acertos} e errou {erros} com precisão de {precisao:.2f}%.")
-    assistente.interagir_por_voz()
+    if github_token:
+        assistente = VoiceGitHubAssistant(github_token=github_token, mongo_uri=None, repo_name=repo_name)
+        assistente.speak(f"Você efetuou {total} comandos, acertou {acertos} e errou {erros} com precisão de {precisao:.2f}%.")
+        assistente.interagir_por_voz()
 
 def filtrar_por_repositorio(resultados):
     repos = sorted({r.get("repo", "desconhecido") for r in resultados})
