@@ -138,8 +138,30 @@ class TelaDNS:
             pygame.draw.rect(self.tela, (0, 255, 0), (20, 570, 760, 30), 2)
             input_surface = self.fonte.render(self.texto_input, True, (0, 255, 0))
             self.tela.blit(input_surface, (30, 575))
+                
+        elif self.modo_config_dominio:
+            self.tela.fill((20, 20, 50))
+            titulo = self.fonte.render("🔧 Configuração de Domínio", True, (255, 255, 255))
+            self.tela.blit(titulo, (50, 20))
 
-        elif self.modo_avancado:
+            pygame.draw.rect(self.tela, (255, 255, 255), (50, 80, 700, 40), 2)
+            input_surface = self.fonte.render(self.texto_input, True, (200, 255, 200))
+            self.tela.blit(input_surface, (60, 85))
+
+            instr = self.fonte.render("Insira o domínio desejado e pressione Enter", True, (180, 180, 200))
+            self.tela.blit(instr, (50, 140))
+
+            # Simulando um botão visual "Salvar"
+            pygame.draw.rect(self.tela, (100, 255, 100), (600, 140, 150, 40), 0)
+            btn_text = self.fonte.render("Salvar", True, (0, 0, 0))
+            self.tela.blit(btn_text, (635, 145))
+
+            # Exibe domínio atual
+            dominio_atual = self.obter_dominio()  # Método sugerido
+            dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
+            self.tela.blit(dominio_surface, (50, 200))
+
+        else:
             self.tela.fill((30, 30, 30))
             pygame.draw.rect(self.tela, (200, 200, 200), (50, 50, 700, 40), 2)
 
@@ -167,28 +189,6 @@ class TelaDNS:
             if status_relay:
                 relay_surface = self.fonte.render(f"Relay: {status_relay}", True, (255, 255, 100))
                 self.tela.blit(relay_surface, (50, 550))
-                
-        elif self.modo_config_dominio:
-            self.tela.fill((20, 20, 50))
-            titulo = self.fonte.render("🔧 Configuração de Domínio", True, (255, 255, 255))
-            self.tela.blit(titulo, (50, 20))
-
-            pygame.draw.rect(self.tela, (255, 255, 255), (50, 80, 700, 40), 2)
-            input_surface = self.fonte.render(self.texto_input, True, (200, 255, 200))
-            self.tela.blit(input_surface, (60, 85))
-
-            instr = self.fonte.render("Insira o domínio desejado e pressione Enter", True, (180, 180, 200))
-            self.tela.blit(instr, (50, 140))
-
-            # Simulando um botão visual "Salvar"
-            pygame.draw.rect(self.tela, (100, 255, 100), (600, 140, 150, 40), 0)
-            btn_text = self.fonte.render("Salvar", True, (0, 0, 0))
-            self.tela.blit(btn_text, (635, 145))
-
-            # Exibe domínio atual
-            dominio_atual = self.obter_dominio()  # Método sugerido
-            dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
-            self.tela.blit(dominio_surface, (50, 200))
 
             self.desenhar_esfera()
 
@@ -214,6 +214,20 @@ class TelaDNS:
 
             if len(self.codigo_correndo) > 100:
                 self.codigo_correndo.pop(0)
+
+    def obter_dominio(self):
+        """Lê o domínio salvo em 'dominio.txt'."""
+        caminho = "dominio.txt"
+        if os.path.exists(caminho):
+            with open(caminho, "r", encoding="utf-8") as f:
+                return f.read().strip()
+        return "Nenhum domínio configurado"
+
+    def salvar_dominio(self, dominio):
+        """Salva o domínio fornecido em 'dominio.txt'."""
+        with open("dominio.txt", "w", encoding="utf-8") as f:
+            f.write(dominio.strip())
+        self.mensagens.append(f"✅ Domínio '{dominio.strip()}' salvo com sucesso!")
 
     def executar(self):
         clock = pygame.time.Clock()
