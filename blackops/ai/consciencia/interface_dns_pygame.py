@@ -167,7 +167,7 @@ class TelaDNS:
             input_surface = self.fonte.render(self.texto_input, True, (255, 255, 255))
             self.tela.blit(input_surface, (60, 55))
 
-            instr = self.fonte.render("Digite domínio | TAB = Modo Avançado | H = Hacker", True, (180, 180, 180))
+            instr = self.fonte.render("Digite domínio | TAB = Modo Avançado | D = DNS | H = Hacker", True, (180, 180, 180))
             self.tela.blit(instr, (50, 10))
 
             y = 120
