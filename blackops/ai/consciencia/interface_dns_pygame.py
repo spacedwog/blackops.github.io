@@ -9,7 +9,7 @@ import random
 import datetime
 import pandas as pd
 from consultar_dns import DataScienceDNS
-from voice_control import VoiceGitHubAssistant
+from comando_de_voz import VoiceAssistant
 from security.firebase_connector import FirebaseConnector
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -66,7 +66,7 @@ class TelaDNS:
         self.github_conectado = False
 
         try:
-            self.assistente = VoiceGitHubAssistant(github_token=self.token_github, mongo_uri=None, repo_name=self.repo_name)
+            self.assistente = VoiceAssistant(github_token=self.token_github, mongo_uri=None, repo_name=self.repo_name)
             self.github_conectado = True
             self.mensagens.append("[✓] Conectado ao GitHub.")
         except Exception:
