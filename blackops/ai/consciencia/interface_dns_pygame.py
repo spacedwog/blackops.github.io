@@ -2,6 +2,7 @@
 # consciencia/interface_dns_pygame.py
 # -------------------------------------
 import os
+import cv2
 import sys
 import pygame
 import serial
@@ -21,6 +22,10 @@ class TelaDNS:
         self.fonte = pygame.font.SysFont("consolas", 22)
         self.fonte_valor = pygame.font.SysFont("consolas", 40)
 
+        self.camera = cv2.VideoCapture(0)  # Use 0 para webcam, ou URL para stream IP
+        self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+        self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+
         self.input_ativo = True
         self.texto_input = ""
         self.mensagens = []
@@ -32,6 +37,7 @@ class TelaDNS:
         self.modo_config_dominio = False
         self.resultados_comandos = []
         self.resultados_filtrados = []
+        self.exibir_camera = False
         self.mensagem_voz = ""
 
         self.menu_opcoes = [
@@ -124,6 +130,14 @@ class TelaDNS:
         self.tela.blit(sombra, sombra_rect)
         self.tela.blit(texto_valor, texto_rect)
 
+    def desenhar_video(self):
+        ret, frame = self.camera.read()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # BGR → RGB
+            frame = cv2.resize(frame, (320, 240))  # Redimensiona o vídeo
+            frame_surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))  # Transforma em Surface
+            self.tela.blit(frame_surface, (650, 400))  # Desenha no canto inferior direito
+
     def desenhar_interface(self):
         if self.modo_hacker:
             self.tela.fill((0, 0, 0))
@@ -160,6 +174,9 @@ class TelaDNS:
             dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
             self.tela.blit(dominio_surface, (50, 200))
 
+        elif self.exibir_camera:
+            self.desenhar_video()
+
         else:
             self.tela.fill((30, 30, 30))
             pygame.draw.rect(self.tela, (200, 200, 200), (50, 50, 700, 40), 2)
@@ -167,7 +184,7 @@ class TelaDNS:
             input_surface = self.fonte.render(self.texto_input, True, (255, 255, 255))
             self.tela.blit(input_surface, (60, 55))
 
-            instr = self.fonte.render("Digite domínio | TAB = Modo Avançado | D = DNS | H = Hacker", True, (180, 180, 180))
+            instr = self.fonte.render("Digite domínio | TAB = Modo Avançado | D = DNS | H = Hacker | V = VIDEO", True, (180, 180, 180))
             self.tela.blit(instr, (50, 10))
 
             y = 120
@@ -243,6 +260,8 @@ class TelaDNS:
                 if evento.type == pygame.QUIT:
                     if self.serial_relay:
                         self.serial_relay.close()
+                    if self.camera:
+                        self.camera.release()
                     pygame.quit()
                     sys.exit()
 
@@ -270,6 +289,9 @@ class TelaDNS:
                         self.texto_input = ""
                     elif evento.key == pygame.K_d:
                         self.modo_config_dominio = not self.modo_config_dominio
+                        self.texto_input = ""
+                    elif evento.key == pygame.K_v:
+                        self.exibir_camera = not self.exibir_camera
                         self.texto_input = ""
                     else:
                         self.texto_input += evento.unicode
