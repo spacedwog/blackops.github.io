@@ -3,7 +3,6 @@
 # -----------------------------
 
 import os
-import sqlite3
 import pandas as pd
 import seaborn as sns
 import streamlit as st
@@ -29,7 +28,7 @@ def main():
     mongo_uri = "mongodb+srv://twitchcombopunch:6z2h1j3k9F.@clusterops.iodjyeg.mongodb.net/"
     token = os.getenv("GITHUB_TOKEN")
     repo_name = "openai/whisper"
-
+    
     try:
         # Tentativa de conexão com GitHub
         streamlit_interface = StreamlitInterface(token=token, mongo_uri=mongo_uri, repo_name=repo_name)
@@ -37,20 +36,27 @@ def main():
     except Exception as e:
         st.warning("⚠️ Não foi possível conectar ao GitHub. Realizando login no Firebase...")
         github_conectado = False
-        firebase = FirebaseConnector(credentials_path="blackops/security/firebase_key.json")
-        firebase.login_usuario_default()  # Supondo que este método valide a conexão
+        try:
+            firebase = FirebaseConnector(credentials_path="blackops/security/firebase_key.json")
+            firebase.login_usuario_default()
+            st.success("✅ Conectado ao Firebase com sucesso.")
+        except Exception as err:
+            st.error(f"❌ Falha na conexão com Firebase: {err}")
 
     with aba1:
+        st.subheader("📂 Informações do Projeto")
         if github_conectado:
             streamlit_interface.show_project_info()
         else:
             st.info("Informações do projeto não disponíveis. GitHub desconectado.")
 
     with aba2:
+        st.subheader("🧬 Visualizador MongoDB")
         if github_conectado:
             streamlit_interface.show_mongo_viewer()
         else:
             st.info("Visualizador Mongo desabilitado. GitHub desconectado.")
+
 
     with aba3:
         st.markdown("### 🧫 BLACKOPS MONITOR")
