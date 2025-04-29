@@ -20,7 +20,7 @@ import socket
 import os
 import re
 from gtts import gTTS
-from ai.consciencia.consultar_dns import DataScienceDNS
+from consultar_dns import DataScienceDNS
 
 class VoiceAssistant:
     def __init__(self, github_token, mongo_uri, repo_name="openai/whisper"):

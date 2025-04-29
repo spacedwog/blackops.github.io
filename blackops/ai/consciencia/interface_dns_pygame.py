@@ -10,7 +10,7 @@ import datetime
 import pandas as pd
 from consultar_dns import DataScienceDNS
 from comando_de_voz import VoiceAssistant
-from security.firebase_connector import FirebaseConnector
+from firebase_connector import FirebaseConn
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
@@ -71,7 +71,7 @@ class TelaDNS:
             self.mensagens.append("[✓] Conectado ao GitHub.")
         except Exception:
             try:
-                self.firebase = FirebaseConnector(credentials_path="blackops/security/firebase_key.json")
+                self.firebase = FirebaseConn(credentials_path="blackops/security/firebase_key.json")
                 self.firebase.login_usuario_default()
                 self.mensagens.append("[✓] Conectado ao Firebase.")
             except Exception as e:
