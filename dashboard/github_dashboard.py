@@ -247,19 +247,6 @@ class GitHubDashboard:
         status = st.empty()
         reiniciar = st.button("💡 Reiniciar Relé")
 
-        if st.button("🔌 Painel DNS"):
-            try:
-                comando = "./executar_paineldns.ps1"
-                resultado = subprocess.run(
-                    ["powershell", "-Command", comando],
-                    capture_output=True,
-                    text=True,
-                    shell=True
-                )
-                st.code(resultado.stdout or resultado.stderr)
-            except Exception as e:
-                st.error(f"Erro ao executar: {e}")
-
         porta_serial = self.detectar_porta_serial() or "COM4"
         baud_rate = 9600
 

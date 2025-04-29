@@ -152,19 +152,6 @@ class OAuthGitHub:
     @classmethod
     def exibir_cyberseguranca(cls):
         st.subheader("🛡️ Cibersegurança: Relatório de Segurança")
-        
-        if st.button("🔌 Gráfico DNS"):
-            try:
-                comando = "./executar_graficodns.ps1"
-                resultado = subprocess.run(
-                    ["powershell", "-Command", comando],
-                    capture_output=True,
-                    text=True,
-                    shell=True
-                )
-                st.code(resultado.stdout or resultado.stderr)
-            except Exception as e:
-                st.error(f"Erro ao executar: {e}")
                 
         cls.verificar_transporte_rede()
         cls.verificar_dns()
