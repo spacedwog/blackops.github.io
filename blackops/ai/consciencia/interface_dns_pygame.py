@@ -9,10 +9,6 @@ import random
 import datetime
 import pandas as pd
 from consultar_dns import DataScienceDNS
-from comando_de_voz import VoiceAssistant
-from firebase_connector import FirebaseConn
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 class TelaDNS:
 
@@ -41,8 +37,6 @@ class TelaDNS:
         self.menu_opcoes = [
             "[1] Visualizar Estatísticas",
             "[2] Linha do Tempo",
-            "[3] Exportar CSV",
-            "[4] Executar Voz IA",
             "[0] Sair"
         ]
 
@@ -57,24 +51,6 @@ class TelaDNS:
         except Exception as e:
             self.serial_relay = None
             self.mensagens.append(f"[!] Falha ao conectar Serial: {e}")
-
-        # GitHub / Firebase
-        self.token_github = os.getenv("GITHUB_TOKEN")
-        self.repo_name = "openai/whisper"
-        self.github_conectado = False
-
-        try:
-            self.assistente = VoiceAssistant(github_token=self.token_github, mongo_uri=None, repo_name=self.repo_name)
-            self.github_conectado = True
-            self.mensagens.append("[✓] Conectado ao GitHub.")
-        except Exception:
-            try:
-                self.firebase = FirebaseConn(credentials_path="blackops/security/firebase_key.json")
-                self.firebase.login_usuario_default()
-                self.mensagens.append("[✓] Conectado ao Firebase.")
-            except Exception as e:
-                self.firebase = None
-                self.mensagens.append(f"[!] Falha no Firebase: {e}")
 
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
@@ -273,10 +249,6 @@ class TelaDNS:
             if self.data_science_dns.dns_data.empty:
                 self.data_science_dns.consultar_dns('google.com', pd.Timestamp.now())
             self.data_science_dns.previsao_dns()
-        elif comando == "3":
-            self.data_science_dns.exportar_csv()
-        elif comando == "4":
-            self.assistente.executar_voz()
         elif comando == "0":
             pygame.quit()
             sys.exit()
