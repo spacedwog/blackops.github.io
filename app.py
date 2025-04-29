@@ -136,7 +136,7 @@ class GitHubDashboardApp:
         st.success(self.mensagem)
 
         try:
-            comando = "./executar_blackops.ps1"
+            comando = "./executar_paineldns.ps1"
             resultado = subprocess.run(
                 ["powershell", "-Command", comando],
                 capture_output=True,
