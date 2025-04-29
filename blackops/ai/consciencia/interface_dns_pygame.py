@@ -220,7 +220,7 @@ class TelaDNS:
             input_surface = self.fonte.render(self.texto_input, True, (255, 255, 255))
             self.tela.blit(input_surface, (60, 55))
 
-            instr = self.fonte.render("Digite domínio | TAB = Modo Avançado | D = DNS | H = Hacker | S = Streaming", True, (180, 180, 180))
+            instr = self.fonte.render("Digite domínio | TAB = Modo Avançado | F1 = DNS | F2 = Hacker | F3 = Streaming", True, (180, 180, 180))
             self.tela.blit(instr, (50, 10))
 
             y = 120
@@ -320,13 +320,13 @@ class TelaDNS:
 
                     elif evento.key == pygame.K_BACKSPACE:
                         self.texto_input = self.texto_input[:-1]
-                    elif evento.key == pygame.K_h:
-                        self.modo_hacker = not self.modo_hacker
-                        self.texto_input = ""
-                    elif evento.key == pygame.K_d:
+                    elif evento.key == pygame.K_F1:
                         self.modo_config_dominio = not self.modo_config_dominio
                         self.texto_input = ""
-                    elif evento.key == pygame.K_s:
+                    elif evento.key == pygame.K_F2:
+                        self.modo_hacker = not self.modo_hacker
+                        self.texto_input = ""
+                    elif evento.key == pygame.K_F3:
                         self.modo_video = not self.modo_video
                         self.texto_input = ""
                     else:
