@@ -282,9 +282,10 @@ class TelaDNS:
         elif comando == "5":
             self.data_science_dns.exportar_csv()
         elif comando == "6":
-            self.data_science_dns.exportar_mongodb()
-        elif comando == "7":
-            self.data_science_dns.agendar_coleta()
+            self.assistente.executar_voz()
+        elif comando == "0":
+            pygame.quit()
+            sys.exit()
         else:
             self.mensagens.append(f"[!] Comando desconhecido: {comando}")
 
