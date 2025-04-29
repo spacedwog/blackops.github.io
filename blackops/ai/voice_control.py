@@ -17,6 +17,7 @@ from firebase_admin import credentials, firestore
 
 import socket
 
+import os
 import re
 from gtts import gTTS
 from ai.consciencia.consultar_dns import DataScienceDNS
@@ -28,7 +29,7 @@ class VoiceGitHubAssistant:
         self.repo_name = repo_name
         self.summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
-        cred = credentials.Certificate("blackops/security/firebase_key.json")
+        cred = credentials.Certificate(os.path.exists("blackops/security/firebase_key.json"))
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
 
