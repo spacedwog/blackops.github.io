@@ -169,29 +169,28 @@ class DataScienceDNS:
             fig.show()
 
     def visualizar_metricas(self):
+        if not {'query_count', 'response_time', 'efficiency_index'}.issubset(self.dns_data.columns):
+            print("[!] Colunas necessárias para visualização não estão presentes.")
+            return
 
-        if 'timestamp' not in self.dns_data.columns and self.dns_data.index.name == 'timestamp':
-            self.dns_data = self.dns_data.reset_index()
+        if self.dns_data.index.name != 'timestamp':
+            if 'timestamp' in self.dns_data.columns:
+                self.dns_data['timestamp'] = pd.to_datetime(self.dns_data['timestamp'])
+                self.dns_data = self.dns_data.set_index('timestamp')
+            else:
+                print("[!] Coluna 'timestamp' ausente.")
+                return
 
-        self.dns_data['timestamp'] = pd.Timestamp.now()
-        self.dns_data = self.dns_data.set_index('timestamp')
-
-        # Gráfico Matplotlib
         fig, ax = plt.subplots(figsize=(10, 6))
-
         self.dns_data['query_count'].plot(ax=ax, label='Consultas', color='b')
         self.dns_data['response_time'].plot(ax=ax, label='Tempo de Resposta', color='r')
-        
         ax.set_title("Métricas de Tráfego DNS")
         ax.set_xlabel("Data")
         ax.set_ylabel("Valores")
         ax.legend()
-        
         plt.show()
 
-        # Gráfico Plotly
         fig2 = go.Figure()
-
         fig2.add_trace(go.Scatter(
             x=self.dns_data.index,
             y=self.dns_data['efficiency_index'],
@@ -199,12 +198,10 @@ class DataScienceDNS:
             name='Índice de Eficiência',
             line=dict(color='green')
         ))
-
         fig2.update_layout(
             title='Índice de Eficiência de Consultas DNS',
             xaxis_title='Timestamp',
             yaxis_title='Consultas por Tempo (QPS)',
             legend_title='Métrica'
         )
-
         fig2.show()
