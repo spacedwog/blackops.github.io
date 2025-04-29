@@ -1,6 +1,6 @@
-# -----------------------------
-# consciencia/interface_dns_relay.py
-# -----------------------------
+# -------------------------------------
+# consciencia/interface_dns_pygame.py
+# -------------------------------------
 import os
 import sys
 import pygame
