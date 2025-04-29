@@ -25,11 +25,11 @@ class TelaDNS:
         self.texto_input = ""
         self.mensagens = []
         self.modo_avancado = False
-        self.modo_blackops = True
         self.valor_potenciometro = 0
         self.modo_hacker = False
         self.codigo_correndo = []
         self.max_linhas_codigo = 25
+        self.modo_config_dominio = False
         self.resultados_comandos = []
         self.resultados_filtrados = []
         self.mensagem_voz = ""
@@ -139,7 +139,7 @@ class TelaDNS:
             input_surface = self.fonte.render(self.texto_input, True, (0, 255, 0))
             self.tela.blit(input_surface, (30, 575))
 
-        else:
+        elif self.modo_avancado:
             self.tela.fill((30, 30, 30))
             pygame.draw.rect(self.tela, (200, 200, 200), (50, 50, 700, 40), 2)
 
@@ -167,6 +167,28 @@ class TelaDNS:
             if status_relay:
                 relay_surface = self.fonte.render(f"Relay: {status_relay}", True, (255, 255, 100))
                 self.tela.blit(relay_surface, (50, 550))
+                
+        elif self.modo_config_dominio:
+            self.tela.fill((20, 20, 50))
+            titulo = self.fonte.render("🔧 Configuração de Domínio", True, (255, 255, 255))
+            self.tela.blit(titulo, (50, 20))
+
+            pygame.draw.rect(self.tela, (255, 255, 255), (50, 80, 700, 40), 2)
+            input_surface = self.fonte.render(self.texto_input, True, (200, 255, 200))
+            self.tela.blit(input_surface, (60, 85))
+
+            instr = self.fonte.render("Insira o domínio desejado e pressione Enter", True, (180, 180, 200))
+            self.tela.blit(instr, (50, 140))
+
+            # Simulando um botão visual "Salvar"
+            pygame.draw.rect(self.tela, (100, 255, 100), (600, 140, 150, 40), 0)
+            btn_text = self.fonte.render("Salvar", True, (0, 0, 0))
+            self.tela.blit(btn_text, (635, 145))
+
+            # Exibe domínio atual
+            dominio_atual = self.obter_dominio()  # Método sugerido
+            dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
+            self.tela.blit(dominio_surface, (50, 200))
 
             self.desenhar_esfera()
 
