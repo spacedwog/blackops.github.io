@@ -1,51 +1,54 @@
-# Byte-compiled / optimized / DLL files
+# Bytecode e caches Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.pyd
+*.pyc
 
-# Virtual environment
+# Virtualenv
+.env/
 .venv/
 env/
 venv/
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
+# Arquivos de credenciais e chaves sensíveis
+blackops/security/firebase_key.json
+*.pem
+*.key
+*.crt
+*.pfx
+*.der
 
-# SQLite database
-*.db
+# Arquivos de ambiente
+.env
+*.env
 
-# Firebase credentials
-firebase_key.json
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
 
 # Streamlit cache
 .streamlit/
+*.streamlit-*
 
-# Logs
-*.log
-
-# VS Code settings
+# Arquivos do VSCode ou outros IDEs
 .vscode/
-
-# PyCharm settings
 .idea/
 
-# MacOS
-.DS_Store
+# Logs e arquivos temporários
+*.log
+*.bak
+*.tmp
 
-# CSV exports
-*.csv
+# SQLite ou bases locais
+*.sqlite3
+*.db
+*.sqlite
 
-# Python test artifacts
-htmlcov/
-.coverage
-.tox/
-.nox/
-.pytest_cache/
+# Jupyter notebooks checkpoints (caso use)
+.ipynb_checkpoints/
 
-# System files
-Thumbs.db
-ehthumbs.db
-
-# Pip dependency resolver
-pip-log.txt
-pip-delete-this-directory.txt
+# Arquivos de build/distribuição
+build/
+dist/
+*.egg-info/
