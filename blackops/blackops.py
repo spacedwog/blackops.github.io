@@ -44,14 +44,12 @@ def main():
             st.error(f"❌ Falha na conexão com Firebase: {err}")
 
     with aba1:
-        st.subheader("📂 Informações do Projeto")
         if github_conectado:
             streamlit_interface.show_project_info()
         else:
             st.info("Informações do projeto não disponíveis. GitHub desconectado.")
 
     with aba2:
-        st.subheader("🧬 Visualizador MongoDB")
         if github_conectado:
             streamlit_interface.show_mongo_viewer()
         else:
