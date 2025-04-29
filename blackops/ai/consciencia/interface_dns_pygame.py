@@ -260,35 +260,20 @@ class TelaDNS:
                         self.texto_input = ""
 
                     elif evento.key == pygame.K_TAB:
-                        self.modo_avancado = not self.modo_avancado and not self.modo_hacker and not self.modo_config_dominio
-                        if self.modo_avancado:
-                            self.modo_hacker = False
-                            self.modo_config_dominio = False
-                            self.codigo_correndo = []
+                        self.modo_avancado = not self.modo_avancado
                         self.texto_input = ""
 
                     elif evento.key == pygame.K_BACKSPACE:
                         self.texto_input = self.texto_input[:-1]
                     elif evento.key == pygame.K_h:
-                        self.modo_hacker = not self.modo_hacker and not self.modo_config_dominio
-                        if self.modo_hacker:
-                            self.codigo_correndo = []
-                            self.modo_avancado = False
-                            self.modo_config_dominio = False
-                            self.texto_input = ""
+                        self.modo_hacker = not self.modo_hacker
                         self.texto_input = ""
                     elif evento.key == pygame.K_d:
-                        self.modo_config_dominio = not self.modo_config_dominio and not self.modo_hacker
-                        if self.modo_config_dominio:
-                            self.modo_avancado = False
-                            self.modo_hacker = False
-                            self.codigo_correndo = []
-                        else:
-                            self.texto_input = ""
+                        self.modo_config_dominio = not self.modo_config_dominio
                         self.texto_input = ""
                     else:
                         self.texto_input += evento.unicode
-
+                        
                 elif evento.type == pygame.MOUSEBUTTONDOWN:  # Caso o usuário clique com o mouse
                     if self.modo_config_dominio:  # Se estiver no modo de configuração de domínio
                         x, y = pygame.mouse.get_pos()  # Pega a posição do clique
