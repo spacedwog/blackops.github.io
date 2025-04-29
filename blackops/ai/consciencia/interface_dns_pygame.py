@@ -1,54 +1,58 @@
 # -----------------------------
 # consciencia/interface_dns_relay.py
 # -----------------------------
-import sys
 import os
+import sys
 import pygame
 import serial
 import random
 import datetime
 import pandas as pd
 from consultar_dns import DataScienceDNS
-from security.monitor import CyberSecurityMonitor
+from voice_control import VoiceGitHubAssistant
+from security.firebase_connector import FirebaseConnector
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 class TelaDNS:
-    
+
     def __init__(self, porta_serial='COM4', baudrate=9600):
-        # Inicializar Pygame
         pygame.init()
-        self.largura, self.altura = 800, 600
+        self.largura, self.altura = 1000, 700
         self.tela = pygame.display.set_mode((self.largura, self.altura))
-        pygame.display.set_caption("Consulta DNS com Relay Serial")
+        pygame.display.set_caption("BlackOps DNS Intelligence")
 
-        # Fonte
-        self.fonte = pygame.font.SysFont("consolas", 24)
-        # Fonte maior
-        self.fonte_valor = pygame.font.SysFont("consolas", 48)
+        self.fonte = pygame.font.SysFont("consolas", 22)
+        self.fonte_valor = pygame.font.SysFont("consolas", 40)
 
-        # Estado
         self.input_ativo = True
         self.texto_input = ""
         self.mensagens = []
         self.modo_avancado = False
+        self.modo_blackops = True
+        self.valor_potenciometro = 0
+        self.modo_hacker = False
+        self.codigo_correndo = []
+        self.max_linhas_codigo = 25
+        self.resultados_comandos = []
+        self.resultados_filtrados = []
+        self.mensagem_voz = ""
 
-        # Opções do menu
         self.menu_opcoes = [
             "[1] Visualizar Estatísticas",
-            "[2] Previsão DNS",
-            "[3] Detecção de Anomalias",
-            "[4] Clusterização",
+            "[2] Linha do Tempo",
+            "[3] Filtrar Repositório",
+            "[4] Buscar Palavra-chave",
             "[5] Exportar CSV",
-            "[6] Exportar MongoDB",
-            "[7] Agendar Coletas",
-            "[8] Monitoramento de Segurança"  # Nova opção de monitoramento
+            "[6] Executar Voz IA",
+            "[0] Sair"
         ]
 
-        # Classe de Data Science
         self.data_science_dns = DataScienceDNS()
 
-        # Inicializar conexão Serial Relay
         self.porta_serial = porta_serial
         self.baudrate = baudrate
+
         try:
             self.serial_relay = serial.Serial(self.porta_serial, self.baudrate, timeout=1)
             self.mensagens.append("[✓] Conexão Serial Relay estabelecida.")
@@ -56,33 +60,23 @@ class TelaDNS:
             self.serial_relay = None
             self.mensagens.append(f"[!] Falha ao conectar Serial: {e}")
 
-        # Variáveis
-        self.valor_potenciometro = 0
-        self.modo_hacker = False
-        self.codigo_correndo = []  # Armazena linhas reais de DNS
-        self.max_linhas_codigo = 25
+        # GitHub / Firebase
+        self.token_github = os.getenv("GITHUB_TOKEN")
+        self.repo_name = "openai/whisper"
+        self.github_conectado = False
 
-        # Integrando CyberSecurityMonitor
-        self.cyber_security_monitor = CyberSecurityMonitor()
-
-    def desenhar_menu(self):
-        # Desenhando o menu na tela
-        self.tela.fill((0, 0, 0))
-        for idx, opcao in enumerate(self.menu_opcoes):
-            texto = self.fonte.render(opcao, True, (255, 255, 255))
-            self.tela.blit(texto, (20, 40 + 40 * idx))
-
-        pygame.display.update()
-
-    def exibir_monitoramento(self):
-        # Exibindo monitoramento de segurança
-        self.tela.fill((0, 0, 0))  # Limpa a tela para desenhar o monitoramento
         try:
-            CyberSecurityMonitor.exibir_monitoramento()
-        except Exception as e:
-            self.mensagens.append(f"[!] Erro ao exibir monitoramento: {e}")
-
-        pygame.display.update()
+            self.assistente = VoiceGitHubAssistant(github_token=self.token_github, mongo_uri=None, repo_name=self.repo_name)
+            self.github_conectado = True
+            self.mensagens.append("[✓] Conectado ao GitHub.")
+        except Exception:
+            try:
+                self.firebase = FirebaseConnector(credentials_path="blackops/security/firebase_key.json")
+                self.firebase.login_usuario_default()
+                self.mensagens.append("[✓] Conectado ao Firebase.")
+            except Exception as e:
+                self.firebase = None
+                self.mensagens.append(f"[!] Falha no Firebase: {e}")
 
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
@@ -291,8 +285,6 @@ class TelaDNS:
             self.data_science_dns.exportar_mongodb()
         elif comando == "7":
             self.data_science_dns.agendar_coleta()
-        elif comando == "8":
-            self.exibir_monitoramento()
         else:
             self.mensagens.append(f"[!] Comando desconhecido: {comando}")
 
