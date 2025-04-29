@@ -37,7 +37,6 @@ class TelaDNS:
         self.menu_opcoes = [
             "[1] Visualizar Estatísticas",
             "[2] Linha do Tempo",
-            "[3] Configurar Domínio Customizado",  # Added option for custom domain
             "[0] Sair"
         ]
 
@@ -264,39 +263,13 @@ class TelaDNS:
                     elif evento.key == pygame.K_h:
                         self.modo_hacker = not self.modo_hacker
                         self.texto_input = ""
+                    elif evento.key == pygame.K_d:
+                        self.modo_config_dominio = not self.modo_config_dominio
+                        self.texto_input = ""
                     else:
                         self.texto_input += evento.unicode
 
             clock.tick(30)
-
-    def configurar_dominio_customizado(self):
-        """
-        Display instructions and validate DNS records for setting up a custom domain for GitHub Pages.
-        """
-        self.mensagens.append("[📄] Configurando domínio customizado...")
-        self.mensagens.append("Configure os seguintes registros DNS no seu provedor:")
-        
-        self.mensagens.append("A Record (IPv4):")
-        self.mensagens.append("  185.199.108.153")
-        self.mensagens.append("  185.199.109.153")
-        self.mensagens.append("  185.199.110.153")
-        self.mensagens.append("  185.199.111.153")
-        
-        self.mensagens.append("AAAA Record (IPv6):")
-        self.mensagens.append("  2606:50c0:8000::153")
-        self.mensagens.append("  2606:50c0:8001::153")
-        self.mensagens.append("  2606:50c0:8002::153")
-        self.mensagens.append("  2606:50c0:8003::153")
-        
-        self.mensagens.append("Importante: Evite registros CNAME em conjunto com os A/AAAA acima.")
-
-        # Mock DNS validation (replace with actual validation if possible)
-        dominio = self.texto_input.strip()
-        if dominio:
-            self.mensagens.append(f"[✓] Dominio '{dominio}' validado com sucesso.")
-        else:
-            self.mensagens.append("[!] Nenhum domínio fornecido para validar.")
-
 
     def processar_entrada_avancada(self, comando):
         if comando == "RELAY_ON":
@@ -315,9 +288,6 @@ class TelaDNS:
             if self.data_science_dns.dns_data.empty:
                 self.data_science_dns.consultar_dns('google.com', pd.Timestamp.now())
             self.data_science_dns.previsao_dns()
-        elif comando == "3":
-            self.modo_config_dominio = True
-            self.mensagens.append("[🔧] Modo de configuração de domínio ativado.")
         elif comando == "0":
             pygame.quit()
             sys.exit()
