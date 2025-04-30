@@ -5,11 +5,11 @@ import time
 import serial
 
 class RFIDTagReader:
-    def __init__(self, port='COM4', baudrate=9600, timeout=1):
+    def __init__(self, port='COM3', baudrate=9600, timeout=1):
         """
         Inicializa a comunicação serial com o leitor RFID 125kHz.
 
-        :param port: Porta serial (ex: 'COM4' no Windows ou '/dev/ttyUSB0' no Linux)
+        :param port: Porta serial (ex: 'COM3' no Windows ou '/dev/ttyUSB0' no Linux)
         :param baudrate: Velocidade de comunicação serial
         :param timeout: Tempo de espera para leitura
         """
