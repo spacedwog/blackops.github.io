@@ -259,15 +259,20 @@ class GitHubDashboard:
                 status.success("Relé Reiniciado com sucesso! ✅")
 
             st.info(f"🔌 Iniciando comunicação serial na porta `{porta_serial}`...")
-            with serial.Serial(porta_serial, baud_rate, timeout=2) as ser:
-                time.sleep(2)
-                ser.write(b"FIREWALL\n")
-                log = ["✅ Comando enviado: FIREWALL"]
-                start = time.time()
-                raw_response = ser.readline()
-                latencia = time.time() - start
+            try:
+                with serial.Serial(porta_serial, baud_rate, timeout=2) as ser:
+                    time.sleep(2)
+                    ser.write(b"FIREWALL\n")
+                    log = ["✅ Comando enviado: FIREWALL"]
+                    start = time.time()
+                    raw_response = ser.readline()
+                    latencia = time.time() - start
+            except serial.SerialException as se:
+                st.error(f"Erro de conexão serial: {se}")
+            except Exception as e:
+                st.error(f"Erro inesperado ao iniciar comunicação serial: {e}")
 
-            if log:
+            if log and raw_response:
                 self.exibir_resultado(raw_response, latencia, log)
 
         except SerialException as se:
