@@ -14,7 +14,7 @@ from consultar_dns import DataScienceDNS
 
 class TelaDNS:
 
-    def __init__(self, porta_serial='COM4', baudrate=9600):
+    def __init__(self, porta_serial='COM3', baudrate=9600):
         pygame.init()
         self.largura, self.altura = 1000, 700
         self.tela = pygame.display.set_mode((self.largura, self.altura))
