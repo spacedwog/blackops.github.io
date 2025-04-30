@@ -176,6 +176,12 @@ class TelaDNS:
                 (x + i * 10, y + 500),
                 2
             )
+            
+        # Exibir mensagem de voz reconhecida
+        if self.mensagem_voz:
+            msg_surface = self.fonte.render(self.mensagem_voz, True, self.neon_ciano)
+            self.tela.blit(msg_surface, (x, y + 490))
+
         pygame.display.flip()
         
     def iniciar_voz(self):
