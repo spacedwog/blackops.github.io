@@ -17,6 +17,12 @@ from serial.serialutil import SerialException
 class GitHubDashboard:
     def __init__(self, user_data):
         self.user_data = user_data
+        self.serial_relay = None
+        self.porta_serial = "COM3"
+        self.baud_rate = 9600
+        self.raw_response = None
+        self.latencia = None
+        self.log = []
 
     def show_dashboard(self) -> None:
         """
@@ -248,24 +254,25 @@ class GitHubDashboard:
         status = st.empty()
         reiniciar = st.button("💡 Reiniciar Relé")
 
-        porta_serial = self.detectar_porta_serial() or "COM3"
-        baud_rate = 9600
+        self.porta_serial = self.detectar_porta_serial() or "COM3"
+        self.baud_rate = 9600
 
         try:
             if reiniciar:
                 st.write("Reiniciando relé...")
                 log = ["✅ Comando enviado: RESTART"]
-                self.enviar_comando(porta_serial, baud_rate, b"RESTART\n", log)
+                self.enviar_comando(self.porta_serial, self.baud_rate, b"RESTART\n", log)
                 status.success("Relé Reiniciado com sucesso! ✅")
 
-            st.info(f"🔌 Iniciando comunicação serial na porta `{porta_serial}`...")
+            st.info(f"🔌 Iniciando comunicação serial na porta `{self.porta_serial}`...")
             try:
-                with serial.Serial(porta_serial, baud_rate, timeout=2) as ser:
+                self.serial_relay = serial.Serial(self.porta_serial, self.baud_rate, timeout=2)
+                with self.serial_relay:
                     time.sleep(2)
-                    ser.write(b"FIREWALL\n")
+                    self.serial_relay.write(b"FIREWALL\n")
                     log = ["✅ Comando enviado: FIREWALL"]
                     start = time.time()
-                    raw_response = ser.readline()
+                    raw_response = self.serial_relay.readline()
                     latencia = time.time() - start
             except SerialException as se:
                 st.error(f"Erro de conexão serial: {se}")
