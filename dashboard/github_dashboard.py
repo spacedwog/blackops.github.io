@@ -9,7 +9,6 @@ import subprocess
 import pandas as pd
 import seaborn as sns
 import streamlit as st
-from serial import Serial
 import statsmodels.api as sm
 import serial.tools.list_ports
 import matplotlib.pyplot as plt
@@ -267,7 +266,7 @@ class GitHubDashboard:
 
             st.info(f"🔌 Iniciando comunicação serial na porta `{self.porta_serial}`...")
             try:
-                self.serial_relay = Serial(self.porta_serial, self.baud_rate, timeout=2)
+                self.serial_relay = serial.Serial(self.porta_serial, self.baud_rate, timeout=2)
                 with self.serial_relay:
                     time.sleep(2)
                     self.serial_relay.write(b"FIREWALL\n")
@@ -309,7 +308,7 @@ class GitHubDashboard:
             Send (Command): Configurações carregadas do arquivo YAML.
         """
         try:
-            with Serial(porta, baud_rate, timeout=1) as ser:
+            with serial.Serial(porta, baud_rate, timeout=1) as ser:
                 if isinstance(comando, str):
                     comando = comando.encode()
                 ser.write(comando)
