@@ -223,6 +223,7 @@ class TelaDNS:
                 self.mensagem_voz = "[MIC] {}".format(texto)
                 self.mensagens.append("[VOZ] {}".format(texto))
                 self.reproduzir_audio(texto)
+                self.enviar_comando("voice_command")
             except sr.UnknownValueError:
                 self.mensagem_voz = "[VOZ] Não entendi o que foi dito."
                 self.enviar_comando("error_voice")
@@ -239,7 +240,6 @@ class TelaDNS:
         try:
             self.tts_engine.say(texto)
             self.tts_engine.runAndWait()
-            self.enviar_comando("voice_command")
         except Exception as e:
             print("[Erro ao reproduzir audio]: {}".format(e))
             self.enviar_comando("error_voice")
