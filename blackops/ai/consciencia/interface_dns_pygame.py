@@ -298,7 +298,7 @@ class TelaDNS:
                 ultimo = self.data_science_dns.dns_data.iloc[-1]
                 dominio = ultimo['dominio']
                 ip = ultimo['ip']
-                metrica = ultimo['efficiency_index']  # Obtendo a métrica calculada
+                metrica = ultimo['efficiency_index']
 
                 linha = f"{dominio} -> {ip} | metrica: {metrica:.2f}"
             else:
