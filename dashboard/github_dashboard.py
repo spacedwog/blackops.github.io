@@ -9,6 +9,7 @@ import subprocess
 import pandas as pd
 import seaborn as sns
 import streamlit as st
+from serial import Serial
 import statsmodels.api as sm
 import serial.tools.list_ports
 import matplotlib.pyplot as plt
