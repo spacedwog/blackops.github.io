@@ -182,7 +182,6 @@ class GitHubDashboardApp:
                     "👤 Perfil",
                     "📦 Repositórios",
                     "📈 Data Science",
-                    "🧱 Firewall e Relay",
                     "🛡️ Cibersegurança",
                     "📷 Leitor RFID OCR"
                 ])
@@ -197,12 +196,9 @@ class GitHubDashboardApp:
                     self.dashboard.exibir_data_science()
 
                 with abas[3]:
-                    self.dashboard.exibir_relay_firewall()
-
-                with abas[4]:
                     self.auth.exibir_cyberseguranca()
 
-                with abas[5]:
+                with abas[4]:
                     self.ler_rfid_via_camera()
 
                 if st.button("🚪 Logout"):
