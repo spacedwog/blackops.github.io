@@ -238,6 +238,7 @@ class TelaDNS:
 
     def reproduzir_audio(self, texto):
         try:
+            self.enviar_comando("voice_command")
             self.tts_engine.say(texto)
             self.tts_engine.runAndWait()
         except Exception as e:
