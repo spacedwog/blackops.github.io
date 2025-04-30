@@ -277,7 +277,7 @@ class TelaDNS:
 
             # Exibe domínio atual
             dominio_atual = self.obter_dominio()  # Método sugerido
-            dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
+            dominio_surface = self.fonte.render("Domínio atual: {}".format(dominio_atual), True, (200, 200, 255))
             self.tela.blit(dominio_surface, (50, 200))
 
         elif getattr(self, 'modo_video', False):
@@ -308,8 +308,9 @@ class TelaDNS:
                     self.tela.blit(msg_surface, (50, y))
                     y += 30
 
-            if status_relay := self.ler_relay_serial():
-                relay_surface = self.fonte.render(f"Relay: {status_relay}", True, (255, 255, 100))
+            status_relay = self.ler_relay_serial()
+            if status_relay:
+                relay_surface = self.fonte.render("Relay: {}".format(status_relay), True, (255, 255, 100))
                 self.tela.blit(relay_surface, (50, 550))
 
             self.desenhar_esfera()
@@ -328,15 +329,15 @@ class TelaDNS:
             ip = ultimo['ip']
             metrica = ultimo['efficiency_index']
 
-            linha = f"{dominio} -> {ip} | metrica: {metrica:.2f}"
+            linha = "{} -> {} | metrica: {:.2f}".format(dominio, ip, metrica)
         else:
             dominios_fake = ["example.com", "test.org", "site.net"]
             ips_fake = ["93.184.216.34", "192.0.2.1", "203.0.113.5"]
             metrica_fake = random.randint(1, 100)
-            linha = f"{random.choice(dominios_fake)} -> {random.choice(ips_fake)} | metrica: {metrica_fake}"
+            linha = "{} -> {} | metrica: {}".format(random.choice(dominios_fake), random.choice(ips_fake), metrica_fake)
 
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-        self.codigo_correndo.append(f"[{timestamp}] {linha}")
+        self.codigo_correndo.append("[{}] {}".format(timestamp, linha))
 
         if len(self.codigo_correndo) > 100:
             self.codigo_correndo.pop(0)
@@ -355,9 +356,9 @@ class TelaDNS:
         try:
             with open(caminho, "w", encoding="utf-8") as f:
                 f.write(dominio.strip())
-            self.mensagens.append(f"[✓] Domínio salvo: {dominio}")
+            self.mensagens.append("[✓] Domínio salvo: {}".format(dominio))
         except Exception as e:
-            self.mensagens.append(f"[!] Erro ao salvar domínio: {e}")
+            self.mensagens.append("[!] Erro ao salvar domínio: {}".format(e))
 
     def executar(self):
         """Runs the main application loop."""
@@ -408,11 +409,13 @@ class TelaDNS:
         """Handles the Enter key press."""
         if self.modo_avancado:
             self.processar_entrada_avancada(self.texto_input.strip())
-        elif dominio := self.texto_input.strip():
-            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            self.data_science_dns.consultar_dns(dominio, timestamp)
-            resultado = f"{dominio} -> {self.data_science_dns.dns_data.iloc[-1]['ip']}"
-            self.mensagens.append(resultado)
+        else:
+            comando = self.texto_input.strip()
+            if comando:
+                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                self.data_science_dns.consultar_dns(comando, timestamp)
+                resultado = "{} -> {}".format(comando, self.data_science_dns.dns_data.iloc[-1]['ip'])
+                self.mensagens.append(resultado)
         self.texto_input = ""
 
     def alternar_modo_video(self):
@@ -428,15 +431,20 @@ class TelaDNS:
         self.texto_input = ""
 
     def processar_entrada_avancada(self, comando):
+        """Handles advanced mode input."""
+        comando = comando.strip()
+        if not comando:
+            return
         if comando == "RELAY_ON":
             self.enviar_comando("RELAY_ON")
         elif comando == "RELAY_OFF":
             self.enviar_comando("RELAY_OFF")
-        elif comando == "STATUS":
-            if status_relay := self.ler_relay_serial():
-                self.mensagens.append(f"[✓] Status Relay: {status_relay}")
+        elif comando == "RELAY_STATUS":
+            status = self.ler_relay_serial()
+            if status:
+                self.mensagens.append("Status do relay: {}".format(status))
             else:
-                self.mensagens.append("[!] Falha ao ler status do relay.")
+                self.mensagens.append("Não foi possível ler o status do relay")
         elif comando == "1":
             self.data_science_dns.visualizar_metricas()
         elif comando == "2":
@@ -447,8 +455,7 @@ class TelaDNS:
             pygame.quit()
             sys.exit()
         else:
-            self.mensagens.append(f"[!] Comando desconhecido: {comando}")
-
+            self.mensagens.append("[!] Comando desconhecido: {}".format(comando))
 
 if __name__ == "__main__":
     app = TelaDNS()
