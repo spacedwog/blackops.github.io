@@ -7,7 +7,6 @@ import requests
 import subprocess
 import dns.resolver
 import streamlit as st
-from serial import SerialException
 from urllib.parse import urlencode
 from dashboard.github_dashboard import GitHubDashboard
 from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI
