@@ -10,6 +10,7 @@ import random
 import datetime
 import numpy as np
 import pandas as pd
+import speech_recognition as sr
 from consultar_dns import DataScienceDNS
 
 class TelaDNS:
@@ -31,6 +32,11 @@ class TelaDNS:
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         self.modo_video = False
+        
+        self.reconhecedor = sr.Recognizer()
+        self.microfone = sr.Microphone()
+        self.mensagem_voz = ""
+        self.ouvindo = False
 
         self.input_ativo = True
         self.texto_input = ""
@@ -136,6 +142,8 @@ class TelaDNS:
         self.tela.blit(texto_valor, texto_rect)
 
     def desenhar_video(self):
+        if not self.ouvindo:
+            self.iniciar_voz()
 
         ret, frame = self.camera.read()
         if not ret:
@@ -169,6 +177,27 @@ class TelaDNS:
                 2
             )
         pygame.display.flip()
+        
+    def iniciar_voz(self):
+        if self.ouvindo:
+            return  # Já está ouvindo
+
+        def callback(recognizer, audio):
+            try:
+                texto = recognizer.recognize_google(audio, language="pt-BR")
+                self.mensagem_voz = f"🎙️ {texto}"
+                self.mensagens.append(f"[🗣️ Voz] {texto}")
+            except sr.UnknownValueError:
+                self.mensagem_voz = "[🗣️ Não entendi o que foi dito.]"
+            except sr.RequestError as e:
+                self.mensagem_voz = f"[Erro no reconhecimento: {e}]"
+
+        try:
+            self.stop_listening = self.reconhecedor.listen_in_background(self.microfone, callback)
+            self.ouvindo = True
+        except Exception as e:
+            self.mensagem_voz = f"[Erro ao ativar microfone: {e}]"
+
 
     def desenhar_interface(self):
         if self.modo_hacker:
