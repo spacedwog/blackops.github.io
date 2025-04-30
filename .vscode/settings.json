@@ -15,5 +15,19 @@
     "java.format.settings.url": ".vscode/java-formatter.xml",
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
         "clang-diagnostic-error"
+    ],
+    "cSpell.words": [
+        "dnspython",
+        "dotenv",
+        "mkdocs",
+        "mkdocstrings",
+        "opencv",
+        "psutil",
+        "pyserial",
+        "pytesseract",
+        "pytest",
+        "seaborn",
+        "statsmodels",
+        "streamlit"
     ]
 }
