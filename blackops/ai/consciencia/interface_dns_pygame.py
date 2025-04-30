@@ -136,9 +136,6 @@ class TelaDNS:
         self.tela.blit(texto_valor, texto_rect)
 
     def desenhar_video(self):
-        # Inicializar captura de vídeo (somente uma vez)
-        if not hasattr(self, "camera"):
-            self.camera = cv2.VideoCapture(0)  # webcam padrão
 
         ret, frame = self.camera.read()
         if not ret:
@@ -327,6 +324,13 @@ class TelaDNS:
                         self.modo_hacker = not self.modo_hacker
                         self.texto_input = ""
                     elif evento.key == pygame.K_F3:
+                        if self.modo_video:
+                            if self.camera:
+                                self.camera.release()
+                        else:
+                            self.camera = cv2.VideoCapture(0)
+                            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+                            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
                         self.modo_video = not self.modo_video
                         self.texto_input = ""
                     else:
