@@ -220,20 +220,20 @@ class TelaDNS:
         def callback(recognizer, audio):
             try:
                 texto = recognizer.recognize_google(audio, language="pt-BR")
-                self.mensagem_voz = f"🎙️ {texto}"
-                self.mensagens.append(f"[🗣️ Voz] {texto}")
+                self.mensagem_voz = "[MIC] {}".format(texto)
+                self.mensagens.append("[VOZ] {}".format(texto))
                 self.reproduzir_audio(texto)
             except sr.UnknownValueError:
-                self.mensagem_voz = "[🗣️ Não entendi o que foi dito.]"
+                self.mensagem_voz = "[VOZ] Não entendi o que foi dito."
                 self.enviar_comando("error_voice")
             except sr.RequestError as e:
-                self.mensagem_voz = f"[Erro no reconhecimento: {e}]"
+                self.mensagem_voz = "[Erro no reconhecimento: {}]".format(e)
 
         try:
             self.stop_listening = self.reconhecedor.listen_in_background(self.microfone, callback)
             self.ouvindo = True
         except Exception as e:
-            self.mensagem_voz = f"[Erro ao ativar microfone: {e}]"
+            self.mensagem_voz = "[Erro ao ativar microfone: {}]".format(e)
 
     def reproduzir_audio(self, texto):
         try:
