@@ -80,7 +80,8 @@ class TelaDNS:
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
-                if linha := self.serial_relay.readline():
+                linha = self.serial_relay.readline()
+                if linha:
                     if linha.startswith(b"[Potenciometro]"):
                         linha = linha.split(b" ")[1]
                         linha = linha.split(b"[Relay]")[0]
@@ -89,10 +90,10 @@ class TelaDNS:
                         valor = int(decoded)
                         valor = max(0, min(1023, valor))
                         self.valor_potenciometro = valor
-                        decoded = f"[Potenciômetro] {valor}"
+                        decoded = "[Potenciômetro] {}".format(valor)
                     return decoded
             except Exception as e:
-                return f"Falha ao ler serial: {e}"
+                return "Falha ao ler serial: {}".format(e)
         return None
     def calcular_fibonacci(self, n):
         if n <= 0:
@@ -105,16 +106,16 @@ class TelaDNS:
                 a, b = b, a + b
             return a
 
-    def enviar_comando_relay(self, comando):
+    def enviar_comando(self, comando):
         if self.serial_relay and self.serial_relay.is_open:
             try:
-                comando_formatado = f"{comando}\n"
-                self.serial_relay.write(comando_formatado.encode('utf-8'))
-                self.mensagens.append(f"[→] Comando enviado: {comando}")
+                self.serial_relay.write("{}\n".format(comando).encode())
+                self.serial_relay.flush()
+                return True
             except Exception as e:
-                self.mensagens.append(f"[!] Falha ao enviar comando: {e}")
-        else:
-            self.mensagens.append("[!] Conexão Serial não está aberta.")
+                print("Erro ao enviar comando: {}".format(e))
+                return False
+        return False
 
     def desenhar_esfera(self):
         indice_fib = int((self.valor_potenciometro / 1023) * 20)
@@ -224,7 +225,7 @@ class TelaDNS:
                 self.reproduzir_audio(texto)
             except sr.UnknownValueError:
                 self.mensagem_voz = "[🗣️ Não entendi o que foi dito.]"
-                self.enviar_comando_relay("error_voice")
+                self.enviar_comando("error_voice")
             except sr.RequestError as e:
                 self.mensagem_voz = f"[Erro no reconhecimento: {e}]"
 
@@ -234,15 +235,14 @@ class TelaDNS:
         except Exception as e:
             self.mensagem_voz = f"[Erro ao ativar microfone: {e}]"
 
-    def reproduzir_audio(self, texto: str):
-        if texto.strip():
-            try:
-                self.tts_engine.say(texto)
-                self.tts_engine.runAndWait()
-                self.enviar_comando_relay("voice_command")
-            except Exception as e:
-                print(f"[Erro ao reproduzir áudio]: {e}")
-                self.enviar_comando_relay("error_voice")
+    def reproduzir_audio(self, texto):
+        try:
+            self.tts_engine.say(texto)
+            self.tts_engine.runAndWait()
+            self.enviar_comando("voice_command")
+        except Exception as e:
+            print("[Erro ao reproduzir audio]: {}".format(e))
+            self.enviar_comando("error_voice")
 
     def desenhar_interface(self):
         if self.modo_hacker:
@@ -429,9 +429,9 @@ class TelaDNS:
 
     def processar_entrada_avancada(self, comando):
         if comando == "RELAY_ON":
-            self.enviar_comando_relay("RELAY_ON")
+            self.enviar_comando("RELAY_ON")
         elif comando == "RELAY_OFF":
-            self.enviar_comando_relay("RELAY_OFF")
+            self.enviar_comando("RELAY_OFF")
         elif comando == "STATUS":
             if status_relay := self.ler_relay_serial():
                 self.mensagens.append(f"[✓] Status Relay: {status_relay}")
