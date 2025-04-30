@@ -248,7 +248,7 @@ class GitHubDashboard:
         Returns:
             Show (Relay): Configurações carregadas do arquivo YAML.
         """
-        log = []
+        self.log = []
 
         st.subheader("🚀 Cibersegurança: Relay e Firewall")
         status = st.empty()
@@ -260,27 +260,27 @@ class GitHubDashboard:
         try:
             if reiniciar:
                 st.write("Reiniciando relé...")
-                log = ["✅ Comando enviado: RESTART"]
-                self.enviar_comando(self.porta_serial, self.baud_rate, b"RESTART\n", log)
+                self.log = ["✅ Comando enviado: RESTART"]
+                self.enviar_comando(self.porta_serial, self.baud_rate, b"RESTART\n", self.log)
                 status.success("Relé Reiniciado com sucesso! ✅")
 
             st.info(f"🔌 Iniciando comunicação serial na porta `{self.porta_serial}`...")
             try:
-                self.serial_relay = serial.Serial(self.porta_serial, self.baud_rate, timeout=2)
+                self.serial_relay = Serial(self.porta_serial, self.baud_rate, timeout=2)
                 with self.serial_relay:
                     time.sleep(2)
                     self.serial_relay.write(b"FIREWALL\n")
-                    log = ["✅ Comando enviado: FIREWALL"]
+                    self.log = ["✅ Comando enviado: FIREWALL"]
                     start = time.time()
-                    raw_response = self.serial_relay.readline()
-                    latencia = time.time() - start
+                    self.raw_response = self.serial_relay.readline()
+                    self.latencia = time.time() - start
             except SerialException as se:
                 st.error(f"Erro de conexão serial: {se}")
             except Exception as e:
                 st.error(f"Erro inesperado ao iniciar comunicação serial: {e}")
 
-            if log and raw_response:
-                self.exibir_resultado(raw_response, latencia, log)
+            if self.log and self.raw_response:
+                self.exibir_resultado(self.raw_response, self.latencia, self.log)
 
         except SerialException as se:
             st.error(f"Erro de conexão serial: {se}")
@@ -308,7 +308,7 @@ class GitHubDashboard:
             Send (Command): Configurações carregadas do arquivo YAML.
         """
         try:
-            with serial.Serial(porta, baud_rate, timeout=1) as ser:
+            with Serial(porta, baud_rate, timeout=1) as ser:
                 if isinstance(comando, str):
                     comando = comando.encode()
                 ser.write(comando)
