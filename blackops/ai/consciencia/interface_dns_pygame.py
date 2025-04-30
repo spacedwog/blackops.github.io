@@ -1,6 +1,7 @@
 # -------------------------------------
 # consciencia/interface_dns_pygame.py
 # -------------------------------------
+import contextlib
 import os
 import cv2
 import sys
@@ -9,7 +10,6 @@ import serial
 import random
 import pyttsx3
 import datetime
-import numpy as np
 import pandas as pd
 import speech_recognition as sr
 from consultar_dns import DataScienceDNS
@@ -29,20 +29,19 @@ class TelaDNS:
         self.neon_ciano = (0, 255, 255)
         self.neon_rosa = (255, 0, 255)
         self.neon_verde = (0, 255, 128)
-        self.camera = cv2.VideoCapture(0)  # Use 0 para webcam, ou URL para stream IP
+        self.camera = cv2.VideoCapture(0)
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         self.modo_video = False
-        
+
         self.reconhecedor = sr.Recognizer()
         self.microfone = sr.Microphone()
         self.mensagem_voz = ""
         self.ouvindo = False
-        
+
         self.tts_engine = pyttsx3.init()
         self.tts_engine.setProperty('rate', 160)  # Velocidade da fala
         self.tts_engine.setProperty('volume', 1.0)  # Volume
-
 
         self.input_ativo = True
         self.texto_input = ""
@@ -69,33 +68,32 @@ class TelaDNS:
         self.baudrate = baudrate
 
         try:
-            self.serial_relay = serial.Serial(self.porta_serial, self.baudrate, timeout=1)
+            self.serial_relay = serial.Serial(
+                self.porta_serial, 
+                self.baudrate, 
+                timeout=1
+            )
             self.mensagens.append("[✓] Conexão Serial Relay estabelecida.")
         except Exception as e:
             self.serial_relay = None
-            self.mensagens.append(f"[!] Falha ao conectar Serial: {e}")
-
+            self.mensagens.append("[!] Falha ao conectar Serial: " + str(e))
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
-                linha = self.serial_relay.readline()
-                if linha:
+                if linha := self.serial_relay.readline():
                     if linha.startswith(b"[Potenciometro]"):
                         linha = linha.split(b" ")[1]
                         linha = linha.split(b"[Relay]")[0]
                     decoded = linha.decode(errors='ignore').strip()
-                    try:
+                    with contextlib.suppress(ValueError):
                         valor = int(decoded)
                         valor = max(0, min(1023, valor))
                         self.valor_potenciometro = valor
                         decoded = f"[Potenciômetro] {valor}"
-                    except ValueError:
-                        pass
                     return decoded
             except Exception as e:
                 return f"Falha ao ler serial: {e}"
         return None
-        
     def calcular_fibonacci(self, n):
         if n <= 0:
             return 0
@@ -134,15 +132,39 @@ class TelaDNS:
                 min(255, int(cor_base[1] * fator + (1 - fator) * 255)),
                 min(255, int(cor_base[2] * fator + (1 - fator) * 255))
             )
-            pygame.draw.circle(self.tela, cor_gradiente, (centro_x, centro_y), r)
+            pygame.draw.circle(
+                self.tela, 
+                cor_gradiente, 
+                (centro_x, centro_y), 
+                r
+            )
 
-        pygame.draw.circle(self.tela, (50, 50, 50), (centro_x, centro_y), raio, 2)
+        pygame.draw.circle(
+            self.tela, 
+            (50, 50, 50), 
+            (centro_x, centro_y), 
+            raio, 
+            2
+        )
 
-        texto_valor = self.fonte_valor.render(str(self.valor_potenciometro), True, (255, 255, 255))
-        sombra = self.fonte_valor.render(str(self.valor_potenciometro), True, (50, 50, 50))
+        texto_valor = self.fonte_valor.render(
+            str(self.valor_potenciometro), 
+            True, 
+            (255, 255, 255)
+        )
+        sombra = self.fonte_valor.render(
+            str(self.valor_potenciometro), 
+            True, 
+            (50, 50, 50)
+        )
 
-        texto_rect = texto_valor.get_rect(center=(centro_x, centro_y))
-        sombra_rect = sombra.get_rect(center=(centro_x + 2, centro_y + 2))  # Pequeno deslocamento para sombra
+        texto_rect = texto_valor.get_rect(
+            center=(centro_x, centro_y)
+        )
+        
+        sombra_rect = sombra.get_rect(
+            center=(centro_x + 2, centro_y + 2)
+        )  # Pequeno deslocamento para sombra
 
         self.tela.blit(sombra, sombra_rect)
         self.tela.blit(texto_valor, texto_rect)
@@ -182,7 +204,6 @@ class TelaDNS:
                 (x + i * 10, y + 500),
                 2
             )
-            
         # Exibir mensagem de voz reconhecida
         if self.mensagem_voz:
             msg_surface = self.fonte.render(self.mensagem_voz, True, self.neon_ciano)
@@ -191,6 +212,7 @@ class TelaDNS:
         pygame.display.flip()
         
     def iniciar_voz(self):
+        
         if self.ouvindo:
             return  # Já está ouvindo
 
@@ -232,7 +254,7 @@ class TelaDNS:
             pygame.draw.rect(self.tela, (0, 255, 0), (20, 570, 760, 30), 2)
             input_surface = self.fonte.render(self.texto_input, True, (0, 255, 0))
             self.tela.blit(input_surface, (30, 575))
-                
+
         elif self.modo_config_dominio:
             self.tela.fill((20, 20, 50))
             titulo = self.fonte.render("🔧 Configuração de Domínio", True, (255, 255, 255))
@@ -283,8 +305,7 @@ class TelaDNS:
                     self.tela.blit(msg_surface, (50, y))
                     y += 30
 
-            status_relay = self.ler_relay_serial()
-            if status_relay:
+            if status_relay := self.ler_relay_serial():
                 relay_surface = self.fonte.render(f"Relay: {status_relay}", True, (255, 255, 100))
                 self.tela.blit(relay_surface, (50, 550))
 
@@ -293,25 +314,29 @@ class TelaDNS:
         pygame.display.flip()
 
     def tela_hacker_matrix(self):
-        if len(self.codigo_correndo) < self.max_linhas_codigo or random.random() < 0.2:
-            if not self.data_science_dns.dns_data.empty:
-                ultimo = self.data_science_dns.dns_data.iloc[-1]
-                dominio = ultimo['dominio']
-                ip = ultimo['ip']
-                metrica = ultimo['efficiency_index']
+        if (
+            len(self.codigo_correndo) >= self.max_linhas_codigo
+            and random.random() >= 0.2
+        ):
+            return
+        if not self.data_science_dns.dns_data.empty:
+            ultimo = self.data_science_dns.dns_data.iloc[-1]
+            dominio = ultimo['dominio']
+            ip = ultimo['ip']
+            metrica = ultimo['efficiency_index']
 
-                linha = f"{dominio} -> {ip} | metrica: {metrica:.2f}"
-            else:
-                dominios_fake = ["example.com", "test.org", "site.net"]
-                ips_fake = ["93.184.216.34", "192.0.2.1", "203.0.113.5"]
-                metrica_fake = random.randint(1, 100)
-                linha = f"{random.choice(dominios_fake)} -> {random.choice(ips_fake)} | metrica: {metrica_fake}"
+            linha = f"{dominio} -> {ip} | metrica: {metrica:.2f}"
+        else:
+            dominios_fake = ["example.com", "test.org", "site.net"]
+            ips_fake = ["93.184.216.34", "192.0.2.1", "203.0.113.5"]
+            metrica_fake = random.randint(1, 100)
+            linha = f"{random.choice(dominios_fake)} -> {random.choice(ips_fake)} | metrica: {metrica_fake}"
 
-            timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-            self.codigo_correndo.append(f"[{timestamp}] {linha}")
+        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+        self.codigo_correndo.append(f"[{timestamp}] {linha}")
 
-            if len(self.codigo_correndo) > 100:
-                self.codigo_correndo.pop(0)
+        if len(self.codigo_correndo) > 100:
+            self.codigo_correndo.pop(0)
 
     def obter_dominio(self):
         """Lê o domínio salvo em 'dominio.txt'."""
@@ -331,8 +356,8 @@ class TelaDNS:
         except Exception as e:
             self.mensagens.append(f"[!] Erro ao salvar domínio: {e}")
 
-
     def executar(self):
+        """Runs the main application loop."""
         clock = pygame.time.Clock()
 
         while True:
@@ -346,53 +371,58 @@ class TelaDNS:
                         self.camera.release()
                     pygame.quit()
                     sys.exit()
-
-                if evento.type == pygame.KEYDOWN:
-                    if evento.key == pygame.K_RETURN:
-                        if not self.modo_avancado:
-                            dominio = self.texto_input.strip()
-                            if dominio:
-                                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                self.data_science_dns.consultar_dns(dominio, timestamp)
-                                resultado = f"{dominio} -> {self.data_science_dns.dns_data.iloc[-1]['ip']}"
-                                self.mensagens.append(resultado)
-                        else:
-                            self.processar_entrada_avancada(self.texto_input.strip())
-                        self.texto_input = ""
-
-                    elif evento.key == pygame.K_TAB:
-                        self.modo_avancado = not self.modo_avancado
-                        self.texto_input = ""
-
-                    elif evento.key == pygame.K_BACKSPACE:
-                        self.texto_input = self.texto_input[:-1]
-                    elif evento.key == pygame.K_F1:
-                        self.modo_config_dominio = not self.modo_config_dominio
-                        self.texto_input = ""
-                    elif evento.key == pygame.K_F2:
-                        self.modo_hacker = not self.modo_hacker
-                        self.texto_input = ""
-                    elif evento.key == pygame.K_F3:
-                        if self.modo_video:
-                            if self.camera:
-                                self.camera.release()
-                        else:
-                            self.camera = cv2.VideoCapture(0)
-                            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-                            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-                        self.modo_video = not self.modo_video
-                        self.texto_input = ""
-                    else:
-                        self.texto_input += evento.unicode
-                        
-                elif evento.type == pygame.MOUSEBUTTONDOWN:  # Caso o usuário clique com o mouse
-                    if self.modo_config_dominio:  # Se estiver no modo de configuração de domínio
-                        x, y = pygame.mouse.get_pos()  # Pega a posição do clique
-                        # Verifica se o clique foi dentro da área do botão "salvar"
+                elif evento.type == pygame.KEYDOWN:
+                    self.processar_evento_teclado(evento)
+                elif evento.type == pygame.MOUSEBUTTONDOWN:
+                    if self.modo_config_dominio:
+                        x, y = pygame.mouse.get_pos()
                         if 600 <= x <= 750 and 140 <= y <= 180:
                             self.salvar_dominio(self.texto_input)
-                            self.texto_input = ""  # Limpa o campo de texto após salvar
+                            self.texto_input = ""
             clock.tick(30)
+
+    def processar_evento_teclado(self, evento):
+        """Handles keyboard events."""
+        if evento.key == pygame.K_RETURN:
+            self.processar_enter()
+        elif evento.key == pygame.K_TAB:
+            self.modo_avancado = not self.modo_avancado
+            self.texto_input = ""
+        elif evento.key == pygame.K_BACKSPACE:
+            self.texto_input = self.texto_input[:-1]
+        elif evento.key == pygame.K_F1:
+            self.modo_config_dominio = not self.modo_config_dominio
+            self.texto_input = ""
+        elif evento.key == pygame.K_F2:
+            self.modo_hacker = not self.modo_hacker
+            self.texto_input = ""
+        elif evento.key == pygame.K_F3:
+            self.alternar_modo_video()
+        else:
+            self.texto_input += evento.unicode
+
+    def processar_enter(self):
+        """Handles the Enter key press."""
+        if self.modo_avancado:
+            self.processar_entrada_avancada(self.texto_input.strip())
+        elif dominio := self.texto_input.strip():
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.data_science_dns.consultar_dns(dominio, timestamp)
+            resultado = f"{dominio} -> {self.data_science_dns.dns_data.iloc[-1]['ip']}"
+            self.mensagens.append(resultado)
+        self.texto_input = ""
+
+    def alternar_modo_video(self):
+        """Toggles video mode."""
+        if self.modo_video:
+            if self.camera:
+                self.camera.release()
+        else:
+            self.camera = cv2.VideoCapture(0)
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+        self.modo_video = not self.modo_video
+        self.texto_input = ""
 
     def processar_entrada_avancada(self, comando):
         if comando == "RELAY_ON":
@@ -400,8 +430,7 @@ class TelaDNS:
         elif comando == "RELAY_OFF":
             self.enviar_comando_relay("RELAY_OFF")
         elif comando == "STATUS":
-            status_relay = self.ler_relay_serial()
-            if status_relay:
+            if status_relay := self.ler_relay_serial():
                 self.mensagens.append(f"[✓] Status Relay: {status_relay}")
             else:
                 self.mensagens.append("[!] Falha ao ler status do relay.")
@@ -416,6 +445,7 @@ class TelaDNS:
             sys.exit()
         else:
             self.mensagens.append(f"[!] Comando desconhecido: {comando}")
+
 
 if __name__ == "__main__":
     app = TelaDNS()
