@@ -224,6 +224,7 @@ class TelaDNS:
                 self.reproduzir_audio(texto)
             except sr.UnknownValueError:
                 self.mensagem_voz = "[🗣️ Não entendi o que foi dito.]"
+                self.enviar_comando_relay("error_voice")
             except sr.RequestError as e:
                 self.mensagem_voz = f"[Erro no reconhecimento: {e}]"
 
@@ -238,8 +239,10 @@ class TelaDNS:
             try:
                 self.tts_engine.say(texto)
                 self.tts_engine.runAndWait()
+                self.enviar_comando_relay("voice_command")
             except Exception as e:
                 print(f"[Erro ao reproduzir áudio]: {e}")
+                self.enviar_comando_relay("error_voice")
 
     def desenhar_interface(self):
         if self.modo_hacker:
