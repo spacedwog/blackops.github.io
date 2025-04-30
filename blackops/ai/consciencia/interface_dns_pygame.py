@@ -7,6 +7,7 @@ import sys
 import pygame
 import serial
 import random
+import pyttsx3
 import datetime
 import numpy as np
 import pandas as pd
@@ -37,6 +38,11 @@ class TelaDNS:
         self.microfone = sr.Microphone()
         self.mensagem_voz = ""
         self.ouvindo = False
+        
+        self.tts_engine = pyttsx3.init()
+        self.tts_engine.setProperty('rate', 160)  # Velocidade da fala
+        self.tts_engine.setProperty('volume', 1.0)  # Volume
+
 
         self.input_ativo = True
         self.texto_input = ""
@@ -193,6 +199,7 @@ class TelaDNS:
                 texto = recognizer.recognize_google(audio, language="pt-BR")
                 self.mensagem_voz = f"🎙️ {texto}"
                 self.mensagens.append(f"[🗣️ Voz] {texto}")
+                self.reproduzir_audio(texto)
             except sr.UnknownValueError:
                 self.mensagem_voz = "[🗣️ Não entendi o que foi dito.]"
             except sr.RequestError as e:
@@ -204,6 +211,13 @@ class TelaDNS:
         except Exception as e:
             self.mensagem_voz = f"[Erro ao ativar microfone: {e}]"
 
+    def reproduzir_audio(self, texto: str):
+        if texto.strip():
+            try:
+                self.tts_engine.say(texto)
+                self.tts_engine.runAndWait()
+            except Exception as e:
+                print(f"[Erro ao reproduzir áudio]: {e}")
 
     def desenhar_interface(self):
         if self.modo_hacker:
