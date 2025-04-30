@@ -12,6 +12,7 @@ import streamlit as st
 import statsmodels.api as sm
 import serial.tools.list_ports
 import matplotlib.pyplot as plt
+from serial import SerialException
 
 class GitHubDashboard:
     def __init__(self, user_data):
