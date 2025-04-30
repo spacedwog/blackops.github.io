@@ -273,7 +273,7 @@ class GitHubDashboard:
         except SerialException as se:
             st.error(f"Erro de conexão serial: {se}")
         except Exception as e:
-            st.error(f"Erro inesperado: {e}")
+            st.error(f"Erro inesperado ao iniciar comunicação serial: {e}")
 
     def detectar_porta_serial(self) -> None:
         """
@@ -304,7 +304,7 @@ class GitHubDashboard:
         except SerialException as e:
             log.append(f"❌ Erro ao enviar comando para a porta serial: {str(e)}")
         except Exception as e:
-            log.append(f"❌ Erro inesperado: {str(e)}")
+            log.append(f"❌ Erro inesperado ao enviar comando: {str(e)}")
 
     def exibir_resultado(self, raw_response, latencia, log) -> None:
         """
