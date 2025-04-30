@@ -267,7 +267,7 @@ class GitHubDashboard:
                     start = time.time()
                     raw_response = ser.readline()
                     latencia = time.time() - start
-            except serial.SerialException as se:
+            except SerialException as se:
                 st.error(f"Erro de conexão serial: {se}")
             except Exception as e:
                 st.error(f"Erro inesperado ao iniciar comunicação serial: {e}")
