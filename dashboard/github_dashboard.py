@@ -12,7 +12,7 @@ import streamlit as st
 import statsmodels.api as sm
 import serial.tools.list_ports
 import matplotlib.pyplot as plt
-from serial import SerialException
+from serial.serialutil import SerialException
 
 class GitHubDashboard:
     def __init__(self, user_data):
@@ -248,7 +248,7 @@ class GitHubDashboard:
         status = st.empty()
         reiniciar = st.button("💡 Reiniciar Relé")
 
-        porta_serial = self.detectar_porta_serial() or "COM4"
+        porta_serial = self.detectar_porta_serial() or "COM3"
         baud_rate = 9600
 
         try:
@@ -270,7 +270,7 @@ class GitHubDashboard:
             if log:
                 self.exibir_resultado(raw_response, latencia, log)
 
-        except serial.SerialException as se:
+        except SerialException as se:
             st.error(f"Erro de conexão serial: {se}")
         except Exception as e:
             st.error(f"Erro inesperado: {e}")
@@ -301,7 +301,7 @@ class GitHubDashboard:
                     comando = comando.encode()
                 ser.write(comando)
                 log.append(f"✅ Comando enviado (interno): {comando.decode().strip()}")
-        except serial.SerialException as e:
+        except SerialException as e:
             log.append(f"❌ Erro ao enviar comando para a porta serial: {str(e)}")
         except Exception as e:
             log.append(f"❌ Erro inesperado: {str(e)}")
