@@ -42,7 +42,7 @@ class GitHubDashboardApp:
         self.blackboard = BlackboardValidator()
         self.user_data = None
 
-    def ler_rfid_via_camera(self):
+    def ler_rfid_via_camera(self):  # sourcery skip: use-named-expression
         st.info("📷 Posicione o cartão RFID com código visível.")
         streaming_area = st.empty()
 
@@ -55,6 +55,7 @@ class GitHubDashboardApp:
                 st.error("❌ Não foi possível reconhecer o texto do cartão.")
 
     def stream_camera_para_rfid(self, st_frame, duracao=7):
+        # sourcery skip: assign-if-exp, reintroduce-else, swap-if-else-branches
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -100,27 +101,30 @@ class GitHubDashboardApp:
 
         config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
         texto = pytesseract.image_to_string(thresh, config=config).strip().upper()
-        return texto if texto else None
+        return texto or None
     
     def processar_uid_detectado(self, uid_detectado):
-        st.success(f"✅ UID detectado: `{uid_detectado}`")
+        st.success("[OK] UID detectado: " + {uid_detectado})
         usuario = self.db.get_usuario_por_uid(uid_detectado)
-
-        if not usuario:
-            st.info("🔒 Cartão não registrado. Registrando novo usuário.")
-            nome = self.user_data.get("name")
-            login_github = self.user_data.get("login")
-            nivel = "Usuario"
-            self.db.registrar_cartao(uid_detectado, nome, login_github, nivel)
-            st.success("✅ Cartão registrado com sucesso!")
-            self.processar_uid_detectado(uid_detectado)
-        else:
+        if usuario:
             self.exibir_dados_usuario(usuario)
 
             if usuario[2] == self.user_data.get("login"):
                 self.executar_acesso_autenticado(usuario, uid_detectado)
             else:
                 st.error("❌ Acesso negado: usuário inválido.")
+
+        else:
+            self._extracted_from_processar_uid_detectado_6(uid_detectado)
+
+    # TODO Rename this here and in `processar_uid_detectado`
+    def _extracted_from_processar_uid_detectado_6(self, uid_detectado):
+        st.info("🔒 Cartão não registrado. Registrando novo usuário.")
+        nome = self.user_data.get("name")
+        login_github = self.user_data.get("login")
+        self.db.registrar_cartao(uid_detectado, nome, login_github, "Usuario")
+        st.success("✅ Cartão registrado com sucesso!")
+        self.processar_uid_detectado(uid_detectado)
 
     def exibir_dados_usuario(self, usuario):
         df = pd.DataFrame([{
@@ -132,7 +136,7 @@ class GitHubDashboardApp:
         st.table(df)
 
     def executar_acesso_autenticado(self, usuario, uid_detectado):
-        self.mensagem = f"✅ Bem-vindo, {usuario[3]} {usuario[2]}! Seu último acesso foi em {usuario[4]}"
+        self.mensagem = "[OK] Bem-vindo, " + usuario[3] + " " + usuario[2] + "! Seu ultimo acesso foi em " + usuario[4]
         st.success(self.mensagem)
 
         try:
@@ -145,7 +149,7 @@ class GitHubDashboardApp:
             )
             st.code(resultado.stdout or resultado.stderr)
         except Exception as e:
-            st.error(f"Erro ao executar: {e}")
+            st.error("Erro ao executar: " + str(e))
 
         self.db.atualizar_ultimo_acesso(uid_detectado)
 
