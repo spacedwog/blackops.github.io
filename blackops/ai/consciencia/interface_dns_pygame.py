@@ -1,7 +1,6 @@
 # -------------------------------------
 # consciencia/interface_dns_pygame.py
 # -------------------------------------
-import contextlib
 import os
 import cv2
 import sys
@@ -10,6 +9,7 @@ import serial
 import random
 import pyttsx3
 import datetime
+import contextlib
 import pandas as pd
 import speech_recognition as sr
 from consultar_dns import DataScienceDNS
@@ -18,6 +18,8 @@ class TelaDNS:
 
     def __init__(self, porta_serial='COM3', baudrate=9600):
         pygame.init()
+        self.fps = 30
+        self.relogio = pygame.time.Clock()
         self.largura, self.altura = 1000, 700
         self.tela = pygame.display.set_mode((self.largura, self.altura))
         pygame.display.set_caption("BlackOps DNS Intelligence")
@@ -61,6 +63,10 @@ class TelaDNS:
             "[2] Linha do Tempo",
             "[0] Sair"
         ]
+        
+        # Carregar frames da animação
+        self.animacao_frames = self.carregar_animacao("imagem")
+        self.frame_atual = 0
 
         self.data_science_dns = DataScienceDNS()
 
@@ -76,7 +82,35 @@ class TelaDNS:
             self.mensagens.append("[✓] Conexão Serial Relay estabelecida.")
         except Exception as e:
             self.serial_relay = None
-            self.mensagens.append("[!] Falha ao conectar Serial: " + str(e))
+            self.mensagens.append(f"[!] Falha ao conectar Serial: {e}")
+
+    def carregar_animacao(self, pasta):
+        """Carrega os frames da animação de uma pasta."""
+        frames = []
+        caminho_completo = os.path.join(os.getcwd(), pasta)
+        for nome_arquivo in sorted(os.listdir(caminho_completo)):
+            if nome_arquivo.endswith(".png"):
+                caminho_frame = os.path.join(caminho_completo, nome_arquivo)
+                imagem = pygame.image.load(caminho_frame).convert_alpha()
+                frames.append(imagem)
+        return frames
+
+    def desenhar(self):
+        """Atualiza a tela com a animação e demais elementos."""
+        self.tela.fill((0, 0, 0))  # Fundo preto
+
+        # Centralizar e desenhar animação
+        if self.animacao_frames:
+            frame = self.animacao_frames[self.frame_atual]
+            rect = frame.get_rect(center=(self.largura // 2, self.altura // 2))
+            self.tela.blit(frame, rect)
+
+        pygame.display.flip()
+
+    def atualizar_animacao(self):
+        """Avança para o próximo frame da animação."""
+        self.frame_atual = (self.frame_atual + 1) % len(self.animacao_frames)
+            
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
@@ -360,12 +394,8 @@ class TelaDNS:
             self.mensagens.append(f"[!] Erro ao salvar domínio: {e}")
 
     def executar(self):
-        
-        """Runs the main application loop."""
-        clock = pygame.time.Clock()
 
         while True:
-            self.desenhar_interface()
 
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
@@ -383,7 +413,10 @@ class TelaDNS:
                         if 600 <= x <= 750 and 140 <= y <= 180:
                             self.salvar_dominio(self.texto_input)
                             self.texto_input = ""
-            clock.tick(30)
+            self.atualizar_animacao()
+            self.desenhar()
+            self.relogio.tick(self.fps)
+            self.desenhar_interface()
 
     def processar_evento_teclado(self, evento):
         """Handles keyboard events."""
