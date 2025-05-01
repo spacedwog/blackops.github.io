@@ -146,10 +146,8 @@ class OAuthGitHub:
     def exibir_cyberseguranca(cls):
         # sourcery skip: use-fstring-for-concatenation
         st.subheader("🛡️ Cibersegurança: Relatório de Segurança")
-        
-        firewall_inspector = FirewallInspector()
                 
         cls.verificar_transporte_rede()
         cls.verificar_dns()
         cls.verificar_porta()
-        firewall_inspector.verificar_firewall()
+        FirewallInspector.verificar_firewall()
