@@ -18,6 +18,8 @@ class OAuthGitHub:
 
     @classmethod
     def login_button(cls):
+        # sourcery skip: use-fstring-for-concatenation
+        # sourcery skip: merge-nested-ifs
         if "access_token" not in st.session_state:
             if st.button("🔐 Login com GitHub"):
                 if "code" not in st.query_params:
@@ -27,10 +29,11 @@ class OAuthGitHub:
                         "scope": "read:user user:email",
                         "state": "secure_random_string"
                     }
-                    auth_url = f"{cls.AUTH_URL}?{urlencode(params)}"
-                    st.markdown(f"[🔗 Redirecionando... clique aqui se não for automático]({auth_url})")
+                    auth_url = cls.AUTH_URL + "?" + urlencode(params)
+                    
+                    st.markdown("[Redirecionando... clique aqui se não for automático](" + auth_url + ")")
                     st.markdown(
-                        f"""<meta http-equiv="refresh" content="0;URL='{auth_url}'" />""",
+                        """<meta http-equiv="refresh" content="0;URL='""" + auth_url + """'" />""",
                         unsafe_allow_html=True
                     )
 
@@ -63,7 +66,7 @@ class OAuthGitHub:
         return cls.get_user_from_token()
 
     @classmethod
-    def get_user_from_token(cls):
+    def get_user_from_token(cls):  # sourcery skip: use-fstring-for-concatenation
         token = st.session_state.get("access_token")
         expiry = st.session_state.get("tokken_expiry")
 
@@ -75,7 +78,7 @@ class OAuthGitHub:
             cls.login_button()  # força re-login
             st.stop()
 
-        headers = {"Authorization": f"Bearer {token}"}
+        headers = {"Authorization": "Bearer " + token}
         response = requests.get(cls.USER_API_URL, headers=headers)
 
         if response.status_code != 200:
@@ -90,6 +93,7 @@ class OAuthGitHub:
 
     @classmethod
     def exibir_dashboard_github(cls):
+        # sourcery skip: use-named-expression
         """Renderiza o dashboard após autenticação GitHub."""
         user_data = cls.get_user_from_token()
         if user_data:
@@ -105,16 +109,18 @@ class OAuthGitHub:
 
     @classmethod
     def verificar_transporte_rede(cls):
+        # sourcery skip: use-fstring-for-concatenation
         try:
             hostname = socket.gethostname()
             ip_address = socket.gethostbyname(hostname)
-            st.write(f"**Host:** {hostname}")
-            st.write(f"**IP Local:** {ip_address}")
+            st.write("**Host:** " + hostname)
+            st.write("**IP Local:** " + ip_address)
         except Exception as e:
-            st.error(f"Erro ao obter informações de rede: {e}")
+            st.error("Erro ao obter informações de rede: " + str(e))
 
     @classmethod
     def verificar_dns(cls, dominio="github.com"):
+        # sourcery skip: use-fstring-for-concatenation
         try:
             resolver = dns.resolver.Resolver()
             resolver.timeout = 2.0
@@ -122,20 +128,22 @@ class OAuthGitHub:
             resolver.nameservers = ['8.8.8.8', '1.1.1.1']
             resposta = resolver.resolve(dominio, 'A')
             ips = [ip.to_text() for ip in resposta]
-            st.write(f"**DNS ({dominio}):** {', '.join(ips)}")
+            st.write("**DNS (" + dominio + "):** " + ", ".join(ips))
         except Exception as e:
-            st.error(f"Erro ao resolver DNS: {e}")
+            st.error("Erro ao resolver DNS: " + str(e))
 
     @classmethod
     def verificar_porta(cls, host="github.com", porta=443):
+        # sourcery skip: use-fstring-for-concatenation
         try:
             with socket.create_connection((host, porta), timeout=3) as sock:
-                st.success(f"✅ Porta {porta} aberta em {host}")
+                st.success("Porta " + str(porta) + " aberta em " + host)
         except Exception:
-            st.error(f"❌ Porta {porta} fechada ou inacessível em {host}")
+            st.error("Porta " + str(porta) + " fechada ou inacessível em " + host)
 
     @classmethod
     def verificar_firewall(cls):
+        # sourcery skip: use-fstring-for-concatenation
         try:
             regras = {
                 "HTTPS": True,
@@ -145,12 +153,13 @@ class OAuthGitHub:
             st.write("**Regras do Firewall (Simulado):**")
             for servico, permitido in regras.items():
                 status = "✅ Permitido" if permitido else "⛔ Bloqueado"
-                st.write(f"• {servico}: {status}")
+                st.write("• " + servico + ": " + status)
         except Exception as e:
-            st.error(f"Erro ao verificar firewall: {e}")
+            st.error("Erro ao verificar firewall: " + str(e))
 
     @classmethod
     def exibir_cyberseguranca(cls):
+        # sourcery skip: use-fstring-for-concatenation
         st.subheader("🛡️ Cibersegurança: Relatório de Segurança")
                 
         cls.verificar_transporte_rede()
