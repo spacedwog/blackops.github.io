@@ -9,6 +9,7 @@ import dns.resolver
 import streamlit as st
 from urllib.parse import urlencode
 from dashboard.github_dashboard import GitHubDashboard
+from config.firewall_inspector import FirewallInspector
 from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI
 
 class OAuthGitHub:
@@ -142,27 +143,13 @@ class OAuthGitHub:
             st.error("Porta " + str(porta) + " fechada ou inacessível em " + host)
 
     @classmethod
-    def verificar_firewall(cls):
-        # sourcery skip: use-fstring-for-concatenation
-        try:
-            regras = {
-                "HTTPS": True,
-                "HTTP": False,
-                "SSH": False
-            }
-            st.write("**Regras do Firewall (Simulado):**")
-            for servico, permitido in regras.items():
-                status = "✅ Permitido" if permitido else "⛔ Bloqueado"
-                st.write("• " + servico + ": " + status)
-        except Exception as e:
-            st.error("Erro ao verificar firewall: " + str(e))
-
-    @classmethod
     def exibir_cyberseguranca(cls):
         # sourcery skip: use-fstring-for-concatenation
         st.subheader("🛡️ Cibersegurança: Relatório de Segurança")
+        
+        firewall_inspector = FirewallInspector()
                 
         cls.verificar_transporte_rede()
         cls.verificar_dns()
         cls.verificar_porta()
-        cls.verificar_firewall()
+        firewall_inspector.verificar_firewall()
