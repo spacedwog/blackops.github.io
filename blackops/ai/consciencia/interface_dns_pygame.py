@@ -36,6 +36,7 @@ class TelaDNS:
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         self.modo_video = False
+        self.modo_video_anterior = False
 
         self.reconhecedor = sr.Recognizer()
         self.microfone = sr.Microphone()
@@ -328,10 +329,15 @@ class TelaDNS:
             dominio_surface = self.fonte.render("Domínio atual: " + dominio_atual, True, (200, 200, 255))
             self.tela.blit(dominio_surface, (50, 200))
 
-        elif getattr(self, 'modo_video', False):
+        elif self.modo_video:
             self.desenhar_video()
-            return
-
+        elif self.modo_video_anterior:  # Saiu do modo vídeo
+            if self.camera.isOpened():
+                self.camera.release()
+            if self.ouvindo and hasattr(self, 'stop_listening'):
+                self.stop_listening(wait_for_stop=False)
+                self.ouvindo = False
+            self.mensagem_voz = ""
         else:
             self.tela.fill((30, 30, 30))
             pygame.draw.rect(self.tela, (200, 200, 200), (50, 50, 700, 40), 2)
