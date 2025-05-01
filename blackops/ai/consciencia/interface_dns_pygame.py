@@ -80,8 +80,7 @@ class TelaDNS:
     def ler_relay_serial(self):
         if self.serial_relay and self.serial_relay.is_open:
             try:
-                linha = self.serial_relay.readline()
-                if linha:
+                if linha := self.serial_relay.readline():
                     if linha.startswith(b"[Potenciometro]"):
                         linha = linha.split(b" ")[1]
                         linha = linha.split(b"[Relay]")[0]
@@ -90,10 +89,10 @@ class TelaDNS:
                         valor = int(decoded)
                         valor = max(0, min(1023, valor))
                         self.valor_potenciometro = valor
-                        decoded = "[Potenciômetro] {}".format(valor)
+                        decoded = f"[Potenciômetro] {valor}"
                     return decoded
             except Exception as e:
-                return "Falha ao ler serial: {}".format(e)
+                return f"Falha ao ler serial: {e}"
         return None
     def calcular_fibonacci(self, n):
         if n <= 0:
@@ -109,11 +108,11 @@ class TelaDNS:
     def enviar_comando(self, comando):
         if self.serial_relay and self.serial_relay.is_open:
             try:
-                self.serial_relay.write("{}\n".format(comando).encode())
+                self.serial_relay.write(f"{comando}\n".encode())
                 self.serial_relay.flush()
                 return True
             except Exception as e:
-                print("Erro ao enviar comando: {}".format(e))
+                print(f"Erro ao enviar comando: {e}")
                 return False
         return False
 
@@ -220,21 +219,21 @@ class TelaDNS:
         def callback(recognizer, audio):
             try:
                 texto = recognizer.recognize_google(audio, language="pt-BR")
-                self.mensagem_voz = "[MIC] {}".format(texto)
-                self.mensagens.append("[VOZ] {}".format(texto))
+                self.mensagem_voz = f"[MIC] {texto}"
+                self.mensagens.append(f"[VOZ] {texto}")
                 self.reproduzir_audio(texto)
                 self.enviar_comando("voice_command")
             except sr.UnknownValueError:
                 self.mensagem_voz = "[VOZ] Não entendi o que foi dito."
                 self.enviar_comando("error_voice")
             except sr.RequestError as e:
-                self.mensagem_voz = "[Erro no reconhecimento: {}]".format(e)
+                self.mensagem_voz = f"[Erro no reconhecimento: {e}]"
 
         try:
             self.stop_listening = self.reconhecedor.listen_in_background(self.microfone, callback)
             self.ouvindo = True
         except Exception as e:
-            self.mensagem_voz = "[Erro ao ativar microfone: {}]".format(e)
+            self.mensagem_voz = f"[Erro ao ativar microfone: {e}]"
 
     def reproduzir_audio(self, texto):
         try:
@@ -242,7 +241,7 @@ class TelaDNS:
             self.tts_engine.say(texto)
             self.tts_engine.runAndWait()
         except Exception as e:
-            print("[Erro ao reproduzir audio]: {}".format(e))
+            print(f"[Erro ao reproduzir audio]: {e}")
             self.enviar_comando("error_voice")
 
     def desenhar_interface(self):
@@ -278,7 +277,7 @@ class TelaDNS:
 
             # Exibe domínio atual
             dominio_atual = self.obter_dominio()  # Método sugerido
-            dominio_surface = self.fonte.render("Domínio atual: {}".format(dominio_atual), True, (200, 200, 255))
+            dominio_surface = self.fonte.render(f"Domínio atual: {dominio_atual}", True, (200, 200, 255))
             self.tela.blit(dominio_surface, (50, 200))
 
         elif getattr(self, 'modo_video', False):
@@ -309,9 +308,8 @@ class TelaDNS:
                     self.tela.blit(msg_surface, (50, y))
                     y += 30
 
-            status_relay = self.ler_relay_serial()
-            if status_relay:
-                relay_surface = self.fonte.render("Relay: {}".format(status_relay), True, (255, 255, 100))
+            if status_relay := self.ler_relay_serial():
+                relay_surface = self.fonte.render(f"Relay: {status_relay}", True, (255, 255, 100))
                 self.tela.blit(relay_surface, (50, 550))
 
             self.desenhar_esfera()
@@ -330,15 +328,15 @@ class TelaDNS:
             ip = ultimo['ip']
             metrica = ultimo['efficiency_index']
 
-            linha = "{} -> {} | metrica: {:.2f}".format(dominio, ip, metrica)
+            linha = f"{dominio} -> {ip} | metrica: {metrica:.2f}"
         else:
             dominios_fake = ["example.com", "test.org", "site.net"]
             ips_fake = ["93.184.216.34", "192.0.2.1", "203.0.113.5"]
             metrica_fake = random.randint(1, 100)
-            linha = "{} -> {} | metrica: {}".format(random.choice(dominios_fake), random.choice(ips_fake), metrica_fake)
+            linha = f"{random.choice(dominios_fake)} -> {random.choice(ips_fake)} | metrica: {metrica_fake}"
 
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-        self.codigo_correndo.append("[{}] {}".format(timestamp, linha))
+        self.codigo_correndo.append(f"[{timestamp}] {linha}")
 
         if len(self.codigo_correndo) > 100:
             self.codigo_correndo.pop(0)
@@ -357,11 +355,12 @@ class TelaDNS:
         try:
             with open(caminho, "w", encoding="utf-8") as f:
                 f.write(dominio.strip())
-            self.mensagens.append("[✓] Domínio salvo: {}".format(dominio))
+            self.mensagens.append(f"[✓] Domínio salvo: {dominio}")
         except Exception as e:
-            self.mensagens.append("[!] Erro ao salvar domínio: {}".format(e))
+            self.mensagens.append(f"[!] Erro ao salvar domínio: {e}")
 
     def executar(self):
+        
         """Runs the main application loop."""
         clock = pygame.time.Clock()
 
@@ -410,20 +409,18 @@ class TelaDNS:
         """Handles the Enter key press."""
         if self.modo_avancado:
             self.processar_entrada_avancada(self.texto_input.strip())
-        else:
-            comando = self.texto_input.strip()
-            if comando:
-                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                self.data_science_dns.consultar_dns(comando, timestamp)
-                resultado = "{} -> {}".format(comando, self.data_science_dns.dns_data.iloc[-1]['ip'])
-                self.mensagens.append(resultado)
+        elif comando := self.texto_input.strip():
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            self.data_science_dns.consultar_dns(comando, timestamp)
+            resultado = f"{comando} -> {self.data_science_dns.dns_data.iloc[-1]['ip']}"
+            self.mensagens.append(resultado)
         self.texto_input = ""
 
     def alternar_modo_video(self):
         """Toggles video mode."""
-        if self.modo_video:
-            if self.camera:
-                self.camera.release()
+        if self.modo_video and self.camera:
+            self.ouvindo = False
+            self.camera.release()
         else:
             self.camera = cv2.VideoCapture(0)
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
@@ -441,9 +438,8 @@ class TelaDNS:
         elif comando == "RELAY_OFF":
             self.enviar_comando("RELAY_OFF")
         elif comando == "RELAY_STATUS":
-            status = self.ler_relay_serial()
-            if status:
-                self.mensagens.append("Status do relay: {}".format(status))
+            if status := self.ler_relay_serial():
+                self.mensagens.append(f"Status do relay: {status}")
             else:
                 self.mensagens.append("Não foi possível ler o status do relay")
         elif comando == "1":
@@ -456,7 +452,7 @@ class TelaDNS:
             pygame.quit()
             sys.exit()
         else:
-            self.mensagens.append("[!] Comando desconhecido: {}".format(comando))
+            self.mensagens.append(f"[!] Comando desconhecido: {comando}")
 
 if __name__ == "__main__":
     app = TelaDNS()
