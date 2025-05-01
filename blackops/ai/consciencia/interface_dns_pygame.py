@@ -71,7 +71,7 @@ class TelaDNS:
         self.contador_quadros = 0
 
         # Carregar frames da animação
-        self.animacao_frames = self.carregar_animacao("animacao_buraco_negro")
+        self.animacao_frames = self.carregar_animacao("imagem")
         self.frame_atual = 0
 
         self.data_science_dns = DataScienceDNS()
