@@ -104,7 +104,7 @@ class GitHubDashboardApp:
         return texto or None
     
     def processar_uid_detectado(self, uid_detectado):
-        st.success("[OK] UID detectado: " + {uid_detectado})
+        st.success("[OK] UID detectado: " + str(uid_detectado))
         usuario = self.db.get_usuario_por_uid(uid_detectado)
         if usuario:
             self.exibir_dados_usuario(usuario)
