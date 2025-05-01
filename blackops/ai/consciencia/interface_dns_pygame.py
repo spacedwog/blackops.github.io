@@ -368,6 +368,8 @@ class TelaDNS:
                 self.tela.blit(relay_surface, (50, 550))
 
             self.desenhar_esfera()
+            
+        self.modo_video_anterior = self.modo_video
 
         pygame.display.flip()
 
