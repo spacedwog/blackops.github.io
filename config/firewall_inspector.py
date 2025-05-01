@@ -2,6 +2,7 @@ import subprocess
 import streamlit as st
 import platform
 import socket
+import psutil
 
 class FirewallInspector:
     WHOIS_SERVIDORES = {
@@ -14,7 +15,6 @@ class FirewallInspector:
         "info": "whois.afilias.net",
         "biz": "whois.biz",
         "dev": "whois.nic.google",
-        # Adicione mais TLDs conforme necessário
     }
 
     @staticmethod
@@ -27,64 +27,75 @@ class FirewallInspector:
 
     @staticmethod
     def verificar_firewall():  # sourcery skip: use-fstring-for-concatenation, use-named-expression
-        portas = {
-            "HTTPS (443)": "443",
-            "HTTP (80)": "80",
-            "SSH (22)": "22"
-        }
-
         sistema = platform.system()
         st.write("**Sistema detectado:**", sistema)
-        st.write("**Regras do Firewall (tempo real):**")
 
-        for servico, porta in portas.items():
-            try:
-                if sistema == "Windows":
-                    comando = 'netsh advfirewall firewall show rule name=all | findstr /R /C:"' + porta + '"'
-                    resultado = subprocess.run(
-                        comando,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        text=True,
-                        shell=True
-                    )
-                    saida = resultado.stdout or ""
-                    if saida.strip():
-                        status = "✅ Permitido (detectado uso da porta)"
-                    else:
-                        status = "⛔ Bloqueado ou não configurado (sem regra visível)"
-                    st.write("• " + servico + ": " + status)
-                else:
-                    st.write("• " + servico + ": ⚠️ Sistema não suportado para verificação direta.")
-            except Exception as e:
-                st.error("Erro ao verificar " + servico + ": " + str(e))
+        st.subheader("🧱 Status da Porta 43 (WHOIS)")
+        if sistema == "Windows":
+            comando = 'netsh advfirewall firewall show rule name=all | findstr /R /C:"43"'
+            resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+            if resultado.stdout.strip():
+                st.success("✅ Porta 43 tem regras definidas (possivelmente permitida).")
+            else:
+                st.warning("⚠️ Nenhuma regra de firewall encontrada para a porta 43.")
+        else:
+            st.info("⚠️ Verificação de firewall só é suportada nativamente no Windows nesta versão.")
 
-        # 🔍 Consulta WHOIS com detecção de servidor
-        st.write("---")
-        st.subheader("🔎 Consulta WHOIS (porta 43)")
-        dominio = st.text_input("Digite o domínio para consulta WHOIS:", value="github.com")
+        st.subheader("🔍 Conexões ativas na porta 43")
+        conexoes = [conn for conn in psutil.net_connections() if conn.raddr and conn.raddr.port == 43]
+        if conexoes:
+            for conn in conexoes:
+                st.write("• " + conn.raddr.ip + ":" + str(conn.raddr.port) + " - PID: " + str(conn.pid))
+        else:
+            st.success("✅ Nenhuma conexão ativa detectada na porta 43.")
 
-        if dominio:
-            servidor_whois = FirewallInspector.detectar_whois_server(dominio)
-            st.write("**Servidor WHOIS detectado:** " + servidor_whois)
+    @staticmethod
+    def bloquear_porta_43():
+        # sourcery skip: remove-unnecessary-else, swap-if-else-branches
+        sistema = platform.system()
+        if sistema == "Windows":
+            comando = 'netsh advfirewall firewall add rule name="Bloquear Porta 43" dir=out action=block protocol=TCP remoteport=43'
+            resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+            return resultado.stdout or resultado.stderr
+        else:
+            return "Bloqueio automático só disponível no Windows nesta versão."
 
-            try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(5)
-                s.connect((servidor_whois, 43))
-                s.send((dominio + "\r\n").encode())
-                resposta = b""
-                while True:
-                    dados = s.recv(4096)
-                    if not dados:
-                        break
-                    resposta += dados
-                s.close()
+# Streamlit App
 
-                whois_texto = resposta.decode(errors="ignore")
-                if whois_texto.strip():
-                    st.text_area("📄 WHOIS de " + dominio, whois_texto.strip(), height=300)
-                else:
-                    st.warning("⚠️ Resposta WHOIS vazia.")
-            except Exception as e:
-                st.error("Erro na consulta WHOIS (" + servidor_whois + "): " + str(e))
+# sourcery skip: use-fstring-for-concatenation, use-named-expression
+st.title("🛡️ Proteção WHOIS e Porta 43")
+
+st.sidebar.header("Ações")
+if st.sidebar.button("🔍 Verificar Porta 43"):
+    FirewallInspector.verificar_firewall()
+
+if st.sidebar.button("⛔ Bloquear Porta 43 (Simulado)"):
+    resultado = FirewallInspector.bloquear_porta_43()
+    st.code(resultado)
+
+st.sidebar.markdown("---")
+
+st.subheader("📡 Consulta WHOIS")
+dominio = st.text_input("Digite o domínio:", value="github.com")
+
+if dominio:
+    servidor_whois = FirewallInspector.detectar_whois_server(dominio)
+    st.write("Servidor WHOIS:", servidor_whois)
+
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(5)
+        s.connect((servidor_whois, 43))
+        s.send((dominio + "\r\n").encode())
+        resposta = b""
+        while True:
+            dados = s.recv(4096)
+            if not dados:
+                break
+            resposta += dados
+        s.close()
+
+        whois_texto = resposta.decode(errors="ignore")
+        st.text_area("📄 Resultado WHOIS", whois_texto.strip(), height=300)
+    except Exception as e:
+        st.error("Erro na consulta WHOIS: " + str(e))
