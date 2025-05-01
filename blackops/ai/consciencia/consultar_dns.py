@@ -25,6 +25,7 @@ class DataScienceDNS:
         self.agendamento_ativo = False
 
     def consultar_dns(self, dominio, timestamp):
+        # sourcery skip: use-fstring-for-concatenation
 
         # Faça isso no script principal, com segurança
         if sys.stdout.encoding != 'utf-8':
@@ -66,10 +67,10 @@ class DataScienceDNS:
         self.detectar_anomalias()
         self.clusterizar_dns()
 
-        print(f"\n🧠 Consulta DNS para o domínio: {dominio}")
-        print(f"📡 IP Resolvido: {ip_resolvido}")
-        print(f"📊 Dados coletados: {consulta}")
-        print("\n📈 Estatísticas básicas:")
+        print("\nConsulta DNS para o dominio: " + dominio)
+        print("IP Resolvido: " + ip_resolvido)
+        print("Dados coletados: " + str(consulta))
+        print("\nEstatisticas basicas:")
         print(descricao)
 
         self.visualizar_metricas()
@@ -101,6 +102,7 @@ class DataScienceDNS:
             time.sleep(1)
 
     def pesquisa_avancada(self, dominio: str) -> dict:
+        # sourcery skip: use-fstring-for-concatenation
 
         resultado = {}
         
@@ -109,7 +111,7 @@ class DataScienceDNS:
                 resposta = dns.resolver.resolve(dominio, tipo)
                 resultado[tipo] = [r.to_text() for r in resposta]
             except Exception as e:
-                resultado[tipo] = f"Erro: {e}"
+                resultado[tipo] = "Erro: " + str(e)
         return resultado
 
     def previsao_dns(self):
@@ -148,6 +150,7 @@ class DataScienceDNS:
         )
 
     def clusterizar_dns(self):
+        # sourcery skip: last-if-guard, use-fstring-for-concatenation
 
         if len(self.dns_data) > 5:
             kmeans = KMeans(n_clusters=3, n_init='auto')
@@ -161,7 +164,7 @@ class DataScienceDNS:
                     x=cluster_data['timestamp'],
                     y=cluster_data['query_count'],
                     mode='markers',
-                    name=f'Cluster {cluster}'
+                    name='Cluster ' + str(cluster)
                 ))
             fig.update_layout(title='Clusterização de Consultas DNS',
                               xaxis_title='Data', yaxis_title='Consultas',
