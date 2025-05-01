@@ -5,7 +5,8 @@ import streamlit as st
 
 class FirewallInspector:
     @classmethod
-    def verificar_firewall(cls):  # sourcery skip: use-fstring-for-concatenation
+    def verificar_firewall(cls):
+        # sourcery skip: use-fstring-for-concatenation
         portas = {
             "HTTPS (443)": 443,
             "HTTP (80)": 80,
