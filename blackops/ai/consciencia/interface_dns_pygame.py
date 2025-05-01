@@ -478,8 +478,8 @@ class TelaDNS:
         """Toggles video mode."""
         if self.modo_video and self.camera:
             self.ouvindo = False
-            self.camera.release()
             self.enviar_comando("voice_off")
+            self.camera.release()
         else:
             self.camera = cv2.VideoCapture(0)
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
