@@ -151,3 +151,17 @@ class OAuthGitHub:
         cls.verificar_dns()
         cls.verificar_porta()
         FirewallInspector.verificar_firewall()
+        
+        if st.button("🔐 CIBERSEGURANÇA - NETWORK TRANSPORT + FIREWALL"):
+            try:
+                comando = "./executar_cyberpainel.ps1"
+                resultado = subprocess.run(
+                    ["powershell", "-Command", comando],
+                    capture_output=True,
+                    text=True,
+                    shell=True
+                )
+                st.code(resultado.stdout or resultado.stderr)
+            except Exception as e:
+                st.error("Erro ao executar: " + str(e))
+                

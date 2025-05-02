@@ -115,10 +115,9 @@ class GitHubDashboardApp:
                 st.error("❌ Acesso negado: usuário inválido.")
 
         else:
-            self._extracted_from_processar_uid_detectado_6(uid_detectado)
-
-    # TODO Rename this here and in `processar_uid_detectado`
-    def _extracted_from_processar_uid_detectado_6(self, uid_detectado):
+            self.extracted_from_processar_uid_detectado(uid_detectado)
+    
+    def extracted_from_processar_uid_detectado(self, uid_detectado):
         st.info("🔒 Cartão não registrado. Registrando novo usuário.")
         nome = self.user_data.get("name")
         login_github = self.user_data.get("login")
