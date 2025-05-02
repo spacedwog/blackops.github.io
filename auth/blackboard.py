@@ -7,6 +7,7 @@ class BlackboardValidator:
 
     @staticmethod
     def validar_usuario(user_data, login_input: str) -> bool:
+        # sourcery skip: assign-if-exp, boolean-if-exp-identity, reintroduce-else, remove-unnecessary-cast
         """
         Valida se o usuário logado no GitHub corresponde ao login digitado
         ou pertence a uma lista confiável de logins/domínios.
