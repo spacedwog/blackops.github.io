@@ -271,6 +271,12 @@ class TelaDNS:
                 self.mensagens.append("[VOZ] " + texto)
                 self.reproduzir_audio(texto)
                 self.enviar_comando("voice_command")
+                if texto == "salvar":
+                    self.enviar_comando("DB_SAVE")
+                if texto == "carregar":
+                    self.enviar_comando("DB_LOAD")
+                if texto == "limpar":
+                    self.enviar_comando("DB_CLEAR")
             except sr.UnknownValueError:
                 self.mensagem_voz = "[VOZ] Não entendi o que foi dito."
                 self.enviar_comando("error_voice")
