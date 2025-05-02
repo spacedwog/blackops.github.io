@@ -10,7 +10,7 @@ import streamlit as st
 from urllib.parse import urlencode
 from dashboard.github_dashboard import GitHubDashboard
 from config.firewall_inspector import FirewallInspector
-from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI
+from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI, APP_CLIENT_ID, APP_CLIENT_SECRET, APP_REDIRECT_URI
 
 class OAuthGitHub:
     AUTH_URL = "https://github.com/login/oauth/authorize"
@@ -37,6 +37,44 @@ class OAuthGitHub:
                         """<meta http-equiv="refresh" content="0;URL='""" + auth_url + """'" />""",
                         unsafe_allow_html=True
                     )
+                    
+                    
+
+    @classmethod
+    def login_github_app(cls, app_id, private_key_pem, installation_id):
+        """Autenticação via GitHub App: gera token de instalação."""
+        try:
+            now = datetime.utcnow()
+            payload = {
+                "iat": int(now.timestamp()),
+                "exp": int((now + timedelta(minutes=10)).timestamp()),
+                "iss": app_id
+            }
+
+            jwt_token = jwt.encode(payload, private_key_pem, algorithm="RS256")
+
+            # Autentica como o App usando JWT
+            headers = {
+                "Authorization": f"Bearer {jwt_token}",
+                "Accept": "application/vnd.github+json"
+            }
+
+            url = f"https://api.github.com/app/installations/{installation_id}/access_tokens"
+            response = requests.post(url, headers=headers)
+
+            if response.status_code == 201:
+                access_token = response.json()["token"]
+                st.session_state["access_token"] = access_token
+                st.session_state["tokken_expiry"] = time.time() + 3600
+                st.success("✅ Autenticado com GitHub App.")
+                return access_token
+            else:
+                st.error(f"Erro ao gerar token de instalação: {response.status_code} - {response.text}")
+                return None
+
+        except Exception as e:
+            st.error(f"Erro na autenticação do GitHub App: {str(e)}")
+            return None
 
     @classmethod
     def callback(cls):
