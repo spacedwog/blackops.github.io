@@ -1,6 +1,7 @@
 # -----------------------------
 # auth/oauth.py
 # -----------------------------
+import jwt
 import time
 import socket
 import requests
@@ -8,6 +9,7 @@ import subprocess
 import dns.resolver
 import streamlit as st
 from urllib.parse import urlencode
+from datetime import datetime, timedelta, timezone
 from dashboard.github_dashboard import GitHubDashboard
 from config.firewall_inspector import FirewallInspector
 from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI
@@ -44,7 +46,7 @@ class OAuthGitHub:
     def login_github_app(cls, app_id, private_key_pem, installation_id):
         """Autenticação via GitHub App: gera token de instalação."""
         try:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             payload = {
                 "iat": int(now.timestamp()),
                 "exp": int((now + timedelta(minutes=10)).timestamp()),

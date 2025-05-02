@@ -13,6 +13,7 @@ import contextlib
 import pandas as pd
 import speech_recognition as sr
 from consultar_dns import DataScienceDNS
+from config.settings import APP_CLIENT_ID, APP_CLIENT_SECRET, APP_REDIRECT_URI
 
 class TelaDNS:
 

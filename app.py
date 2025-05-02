@@ -10,7 +10,6 @@ from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
 from auth.blackboard import BlackboardValidator
 from dashboard.github_dashboard import GitHubDashboard
-from config.settings import APP_CLIENT_ID, APP_CLIENT_SECRET, APP_REDIRECT_URI
 
 # OCR e imagem
 import os
@@ -142,7 +141,6 @@ class GitHubDashboardApp:
         st.success(self.mensagem)
 
         try:
-            OAuthGitHub.login_github_app(APP_CLIENT_ID, APP_CLIENT_SECRET, APP_REDIRECT_URI)
             comando = "./executar_paineldns.ps1"
             resultado = subprocess.run(
                 ["powershell", "-Command", comando],
