@@ -45,10 +45,9 @@ class FirewallInspector:
     def is_admin():
         try:
             return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
+        except Exception:
             return False
 
     @staticmethod
     def listar_conexoes():
-        conexoes = [conn for conn in psutil.net_connections() if conn.raddr and conn.raddr.port == 43]
-        return conexoes
+        return [conn for conn in psutil.net_connections() if conn.raddr and conn.raddr.port == 43]
