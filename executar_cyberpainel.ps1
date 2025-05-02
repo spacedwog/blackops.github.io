@@ -6,7 +6,7 @@ $adminCheck = ([Security.Principal.WindowsPrincipal] [Security.Principal.Windows
 
 if (-not $adminCheck) {
     # Reexecuta o script como administrador
-    Start-Process powershell "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    Start-Process powershell "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
 

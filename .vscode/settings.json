@@ -467,5 +467,6 @@
         "xlabel",
         "yaxis",
         "ylabel"
-    ]
+    ],
+    "powershell.trace.server": "verbose"
 }
