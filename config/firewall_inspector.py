@@ -1,5 +1,6 @@
 import psutil
 import socket
+import requests
 import platform
 import subprocess
 import streamlit as st
@@ -24,7 +25,12 @@ class FirewallInspector:
             tld = dominio.strip().split(".")[-1].lower()
             return FirewallInspector.WHOIS_SERVIDORES.get(tld, "whois.iana.org")
         except Exception:
-            return "whois.iana.org"
+            return FirewallInspector.whois_via_api(dominio)
+        
+    @staticmethod
+    def whois_via_api(dominio):
+        resposta = requests.get(f"https://api.whoisxmlapi.com/v1?apiKey=SEU_API_KEY&domainName={dominio}")
+        return resposta.json()
 
     @staticmethod
     def verificar_firewall():
