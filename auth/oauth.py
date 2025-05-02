@@ -40,8 +40,6 @@ class OAuthGitHub:
                         unsafe_allow_html=True
                     )
                     
-                    
-
     @classmethod
     def login_github_app(cls, app_id, private_key_pem, installation_id):
         """Autenticação via GitHub App: gera token de instalação."""
