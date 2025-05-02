@@ -31,6 +31,7 @@ class FirewallInspector:
     def verificar_firewall():  # sourcery skip: use-fstring-for-concatenation, use-named-expression
         portas = {
             "HTTPS (443)": "443",
+            "WHOIS (43)": "43",
             "HTTP (80)": "80",
             "SSH (22)": "22"
         }
@@ -95,7 +96,18 @@ class FirewallInspector:
         comando = 'netsh advfirewall firewall add rule name="Bloquear Porta 43" dir=out action=block protocol=TCP remoteport=43'
         resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
         return resultado.stdout
-    
+    def porta_bloqueada(servidor):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(5)
+            s.connect((servidor, 43))
+            s.close()
+            return False
+        except PermissionError:
+            return True
+        except Exception:
+            return False
+
     @staticmethod
     def is_admin():
         try:
