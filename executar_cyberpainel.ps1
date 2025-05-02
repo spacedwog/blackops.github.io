@@ -6,9 +6,9 @@ $adminCheck = ([Security.Principal.WindowsPrincipal] [Security.Principal.Windows
 
 if (-not $adminCheck) {
     # Reexecuta o script como administrador
-    Start-Process powershell "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    Start-Process powershell "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
 
 # Executa o Streamlit como administrador
-powershell -ExecutionPolicy Bypass -File "config/firewall_widget.py"
+streamlit run $scriptPath
