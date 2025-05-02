@@ -1,6 +1,5 @@
-import socket
 import psutil
-import ctypes
+import socket
 import platform
 import subprocess
 import streamlit as st
@@ -28,10 +27,10 @@ class FirewallInspector:
             return "whois.iana.org"
 
     @staticmethod
-    def verificar_firewall():  # sourcery skip: use-fstring-for-concatenation, use-named-expression
+    def verificar_firewall():
+        # sourcery skip: use-fstring-for-concatenation, use-named-expression
         portas = {
             "HTTPS (443)": "443",
-            "WHOIS (43)": "43",
             "HTTP (80)": "80",
             "SSH (22)": "22"
         }
@@ -92,10 +91,7 @@ class FirewallInspector:
             except Exception as e:
                 st.error("Erro na consulta WHOIS (" + servidor_whois + "): " + str(e))
                 
-    def bloquear_porta():
-        comando = 'netsh advfirewall firewall add rule name="Bloquear Porta 43" dir=out action=block protocol=TCP remoteport=43'
-        resultado = subprocess.run(comando, shell=True, capture_output=True, text=True)
-        return resultado.stdout
+    @staticmethod
     def porta_bloqueada(servidor):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -107,13 +103,19 @@ class FirewallInspector:
             return True
         except Exception:
             return False
+        
+    @staticmethod
+    def bloquear_porta():
+        # sourcery skip: remove-unnecessary-else, swap-if-else-branches
+        sistema = platform.system()
+        if sistema == "Windows":
+            comando = 'netsh advfirewall firewall add rule name="Bloquear Porta 43" dir=out action=block protocol=TCP remoteport=43'
+            resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+            return resultado.stdout or resultado.stderr
+        else:
+            return "Bloqueio automático só disponível no Windows nesta versão."
 
     @staticmethod
-    def is_admin():
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except Exception:
-            return False
-    
-    def listar_conexoes():
-        return [conn for conn in psutil.net_connections() if conn.raddr and conn.raddr.port == 43]
+    def listar_conexoes():  # sourcery skip: inline-immediately-returned-variable
+        conexoes = [conn for conn in psutil.net_connections() if conn.raddr and conn.raddr.port == 43]
+        return conexoes

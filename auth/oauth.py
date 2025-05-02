@@ -157,4 +157,3 @@ class OAuthGitHub:
             st.error("Porta 43 não bloqueada.")
             FirewallInspector.bloquear_porta()
         FirewallInspector.listar_conexoes()
-        FirewallInspector.is_admin()
