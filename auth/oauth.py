@@ -150,10 +150,5 @@ class OAuthGitHub:
         cls.verificar_transporte_rede()
         cls.verificar_dns()
         cls.verificar_porta()
-        if FirewallInspector.porta_bloqueada("whois.verisign-grs.com"):
-            st.success("Porta 43 bloqueada com sucesso.")
-        else:
-            st.error("Porta 43 não bloqueada.")
-            FirewallInspector.bloquear_porta()
         FirewallInspector.verificar_firewall()
         FirewallInspector.listar_conexoes()
