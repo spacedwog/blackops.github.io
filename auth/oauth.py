@@ -10,7 +10,7 @@ import streamlit as st
 from urllib.parse import urlencode
 from dashboard.github_dashboard import GitHubDashboard
 from config.firewall_inspector import FirewallInspector
-from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI, APP_CLIENT_ID, APP_CLIENT_SECRET, APP_REDIRECT_URI
+from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI
 
 class OAuthGitHub:
     AUTH_URL = "https://github.com/login/oauth/authorize"
