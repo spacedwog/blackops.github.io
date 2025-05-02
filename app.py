@@ -104,6 +104,7 @@ class GitHubDashboardApp:
         return texto or None
     
     def processar_uid_detectado(self, uid_detectado):
+        # sourcery skip: use-fstring-for-concatenation, use-named-expression
         st.success("[OK] UID detectado: " + str(uid_detectado))
         usuario = self.db.get_usuario_por_uid(uid_detectado)
         if usuario:
@@ -135,6 +136,7 @@ class GitHubDashboardApp:
         st.table(df)
 
     def executar_acesso_autenticado(self, usuario, uid_detectado):
+        # sourcery skip: use-fstring-for-concatenation
         self.mensagem = "[OK] Bem-vindo, " + usuario[3] + " " + usuario[2] + "! Seu ultimo acesso foi em " + usuario[4]
         st.success(self.mensagem)
 
@@ -152,7 +154,7 @@ class GitHubDashboardApp:
 
         self.db.atualizar_ultimo_acesso(uid_detectado)
 
-    def run(self):
+    def run(self):  # sourcery skip: extract-duplicate-method, extract-method
         st.set_page_config(page_title="GitHub OAuth Dashboard", page_icon="🐙")
         st.title("🔐 Login com GitHub")
 
