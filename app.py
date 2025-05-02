@@ -142,7 +142,6 @@ class GitHubDashboardApp:
         st.success(self.mensagem)
 
         try:
-            OAuthGitHub.login_github_app(APP_CLIENT_ID, APP_CLIENT_SECRET, APP_REDIRECT_URI)
             comando = "./executar_paineldns.ps1"
             resultado = subprocess.run(
                 ["powershell", "-Command", comando],
