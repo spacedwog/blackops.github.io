@@ -24,7 +24,7 @@ if st.sidebar.button("🔍 Verificar Regras de Firewall para Porta 43"):
 
 if st.sidebar.button("⛔ Bloquear Porta 43 (Firewall)"):
     resultado = FirewallInspector.bloquear_porta()
-    if "requer privilégios" in resultado:
+    if "requer privilegios" in resultado:
         st.error(resultado)
     else:
         st.success("✅ Comando executado:")
