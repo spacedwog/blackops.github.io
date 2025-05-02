@@ -4,10 +4,10 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.seuprojeto</groupId>
-    <artifactId>blackopsapiclient</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    
+    <groupId>org.xerial</groupId>
+    <artifactId>sqlite-jdbc</artifactId>
+    <version>3.43.2.0</version> <!-- Verifique a versão mais recente -->
 
     <dependencies>
         <dependency>

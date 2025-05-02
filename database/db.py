@@ -19,6 +19,7 @@ class UsuarioDB:
         self.criar_tabela_logs()
 
     def criar_tabela_usuarios(self):
+        # sourcery skip: class-extract-method
         with self.conectar() as conn:
             cursor = conn.cursor()
             cursor.execute("""
