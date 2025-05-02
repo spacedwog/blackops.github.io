@@ -34,7 +34,7 @@ st.subheader("🔍 Conexões Ativas na Porta 43")
 conexoes = FirewallInspector.listar_conexoes()
 if conexoes:
     for conn in conexoes:
-        st.write(f"• {conn.raddr.ip}:{conn.raddr.port} | PID: {conn.pid}")
+        st.write("- " + str(conn.raddr.ip) + ":" + str(conn.raddr.port) + " | PID: " + str(conn.pid))
 else:
     st.success("✅ Nenhuma conexão ativa na porta 43.")
 
@@ -59,4 +59,4 @@ if dominio:
         texto = resposta.decode(errors="ignore")
         st.text_area("📄 Resposta WHOIS", texto.strip(), height=300)
     except Exception as e:
-        st.error(f"Erro na consulta: {e}")
+        st.error("Erro na consulta: " + str(e))
