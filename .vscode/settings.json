@@ -321,6 +321,7 @@
         "novamente",
         "Obtendo",
         "obter",
+        "oldstuff",
         "opcao",
         "opcoes",
         "opencv",
@@ -373,7 +374,9 @@
         "psutil",
         "publicos",
         "Públicos",
+        "pycache",
         "pygame",
+        "pyright",
         "pyserial",
         "pytesseract",
         "pytest",
@@ -472,6 +475,7 @@
         "traduzir",
         "Tráfego",
         "transporte",
+        "typestubs",
         "último",
         "usando",
         "usuário",
@@ -502,5 +506,6 @@
         "yaxis",
         "ylabel"
     ],
-    "powershell.trace.server": "verbose"
+    "powershell.trace.server": "verbose",
+    "python.pythonPath": "C:\\Users\\felip\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
 }
