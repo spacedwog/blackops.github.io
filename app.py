@@ -2,12 +2,19 @@
 # ./app.py
 # -----------------------------
 import time
+import boto3
 import serial
+import joblib
 import platform
 import streamlit as st
 from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
+from sklearn.datasets import load_iris
+from sklearn.metrics import accuracy_score
 from auth.blackboard import BlackboardValidator
+from botocore.exceptions import NoCredentialsError
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
 
 # OCR e imagem
@@ -75,7 +82,7 @@ class GitHubDashboardApp:
                     "📦 Repositórios",
                     "📈 Data Science",
                     "🛡️ Cibersegurança",
-                    "🔄 Relay(Arduino)"
+                    "🔄 Cyber-Brain"
                 ])
 
                 with abas[0]:
@@ -91,33 +98,47 @@ class GitHubDashboardApp:
                     self.auth.exibir_cyberseguranca()
 
                 with abas[4]:
-                    # Configurar a porta serial
-                    try:
-                        arduino = serial.Serial('COM3', 9600, timeout=1)  # Altere 'COM3' conforme seu sistema
-                        time.sleep(2)  # Aguarda a conexão
+                    st.header("🔄 Cyber-Brain: Machine Learning + Nuvem")
 
-                        st.title("Monitor de Relé - Arduino")
+                    if st.button("🚀 Treinar Modelo de IA"):
+                        # Carregar dados
+                        iris = load_iris()
+                        X_train, X_test, y_train, y_test = train_test_split(
+                            iris.data, iris.target, test_size=0.3, random_state=42
+                        )
 
-                        if arduino:
-                            if st.button("Ligar Cyber-Brain"):
-                                arduino.write(b'LIGAR\n')
-                                time.sleep(0.5)
-                                leitura = arduino.readline().decode().strip()
-                                if leitura:
-                                    st.success(f"Estado do cyber-brain: {leitura}")
-                                else:
-                                    st.warning("Nenhum dado recebido.")
+                        # Criar e treinar modelo
+                        modelo = RandomForestClassifier(n_estimators=100, random_state=42)
+                        modelo.fit(X_train, y_train)
+                        y_pred = modelo.predict(X_test)
 
-                            if st.button("Reiniciar Cyber-Brain"):
-                                arduino.write(b'RESTART\n')
-                                time.sleep(0.5)
-                                leitura = arduino.readline().decode().strip()
-                                if leitura:
-                                    st.success(f"Estado do cyber-brain: {leitura}")
-                                else:
-                                    st.warning("Nenhum dado recebido.")
-                    except serial.SerialException:
-                        st.error("Erro ao abrir porta serial.")
+                        # Avaliar e exibir acurácia
+                        acc = accuracy_score(y_test, y_pred)
+                        st.success(f"✅ Modelo treinado com acurácia: {acc:.2%}")
+
+                        # Salvar modelo localmente
+                        nome_modelo = 'modelo_iris.joblib'
+                        joblib.dump(modelo, nome_modelo)
+                        st.info("📁 Modelo salvo localmente como 'modelo_iris.joblib'.")
+
+                        # Upload para AWS S3
+                        def upload_para_s3(arquivo_local, nome_bucket, nome_s3):
+                            s3 = boto3.client('s3')
+                            try:
+                                s3.upload_file(arquivo_local, nome_bucket, nome_s3)
+                                st.success(f"☁️ Upload concluído: s3://{nome_bucket}/{nome_s3}")
+                            except FileNotFoundError:
+                                st.error("❌ Arquivo não encontrado.")
+                            except NoCredentialsError:
+                                st.error("❌ Credenciais AWS não configuradas.")
+
+                        # Formulário para upload
+                        st.subheader("☁️ Enviar para AWS S3")
+                        bucket = st.text_input("Nome do Bucket S3", "meu-bucket-modelos")
+                        nome_s3 = st.text_input("Caminho no S3", "modelos/modelo_iris.joblib")
+
+                        if st.button("📤 Enviar para o S3"):
+                            upload_para_s3(nome_modelo, bucket, nome_s3)
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
