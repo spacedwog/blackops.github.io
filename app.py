@@ -1,22 +1,19 @@
 # -----------------------------
 # ./app.py
 # -----------------------------
+import time
+import serial
 import platform
-import subprocess
-import numpy as np
-import pandas as pd
 import streamlit as st
 from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
-from consultar_dns import DataScienceDNS
 from auth.blackboard import BlackboardValidator
 from dashboard.github_dashboard import GitHubDashboard
 
 # OCR e imagem
 import os
-import cv2
-import time
 import pytesseract
+from datetime import date
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
@@ -42,9 +39,10 @@ class GitHubDashboardApp:
         self.auth = OAuthGitHub()
         self.blackboard = BlackboardValidator()
         self.user_data = None
-
-    def run(self):  # sourcery skip: extract-duplicate-method, extract-method
-        st.set_page_config(page_title="GitHub OAuth Dashboard", page_icon="🐙")
+    
+    def run(self):
+        # sourcery skip: extract-duplicate-method, extract-method
+        st.set_page_config(page_title="BlackOps", page_icon="⚫")
         st.title("🔐 Login com GitHub")
 
         if "login_realizado" not in st.session_state:
@@ -77,7 +75,7 @@ class GitHubDashboardApp:
                     "📦 Repositórios",
                     "📈 Data Science",
                     "🛡️ Cibersegurança",
-                    "🔄 Relay"
+                    "🔄 Relay(Arduino)"
                 ])
 
                 with abas[0]:
@@ -93,7 +91,26 @@ class GitHubDashboardApp:
                     self.auth.exibir_cyberseguranca()
 
                 with abas[4]:
-                    DataScienceDNS.consultar_dns()
+                    # Configurar a porta serial
+                    try:
+                        arduino = serial.Serial('COM3', 9600, timeout=1)  # Altere 'COM3' conforme seu sistema
+                        time.sleep(2)  # Aguarda a conexão
+
+                        st.title("Monitor de Relé - Arduino")
+
+                        if arduino:
+                            if st.button("Atualizar estado do relé"):
+                                arduino.flushInput()
+                                leitura = arduino.readline().decode().strip()
+                                if leitura:
+                                    estado = "Ligado" if leitura == "STATUS" else "Desligado"
+                                    st.success(f"Estado do relé: {estado}")
+                                else:
+                                    st.warning("Nenhum dado recebido.")
+                        else:
+                            st.error("Não foi possível conectar ao Arduino.")
+                    except serial.SerialException:
+                        arduino = None
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
