@@ -99,18 +99,27 @@ class GitHubDashboardApp:
                         st.title("Monitor de Relé - Arduino")
 
                         if arduino:
+                            if st.button("Ligar relé"):
+                                arduino.write(b'RELAY_ON\n')
+                                st.success("Comando enviado: RELAY_ON")
+
+                            if st.button("Desligar relé"):
+                                arduino.write(b'RELAY_OFF\n')
+                                st.success("Comando enviado: RELAY_OFF")
+
                             if st.button("Atualizar estado do relé"):
-                                arduino.flushInput()
+                                arduino.write(b'STATUS\n')  # Comando para solicitar status
+                                time.sleep(0.5)  # Aguarda resposta
                                 leitura = arduino.readline().decode().strip()
                                 if leitura:
-                                    estado = "Ligado" if leitura == "STATUS" else "Desligado"
-                                    st.success(f"Estado do relé: {estado}")
+                                    st.success(f"Estado do relé: {leitura}")
                                 else:
                                     st.warning("Nenhum dado recebido.")
                         else:
                             st.error("Não foi possível conectar ao Arduino.")
                     except serial.SerialException:
-                        arduino = None
+                        st.error("Erro ao abrir porta serial.")
+
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
