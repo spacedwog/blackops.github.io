@@ -11,6 +11,7 @@ from auth.oauth import OAuthGitHub
 from sklearn.datasets import load_iris
 from sklearn.metrics import accuracy_score
 from auth.blackboard import BlackboardValidator
+from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
@@ -99,6 +100,14 @@ class GitHubDashboardApp:
                     st.header("🔄 Cyber-Brain: Machine Learning + Nuvem")
                     diretorio = st.text_input("Diretório para salvar", "./modelos_salvos")
                     nome_arquivo = st.text_input("Nome do arquivo", "modelo_iris.joblib")
+                    
+                    # Carrega e separa os dados
+                    iris = load_iris()
+                    X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2)
+
+                    # Treina o modelo
+                    modelo = LogisticRegression(max_iter=200)
+                    modelo.fit(X_train, y_train)
 
                     if st.button("📁 Salvar modelo"):
                         os.makedirs(diretorio, exist_ok=True)
