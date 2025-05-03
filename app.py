@@ -101,15 +101,25 @@ class GitHubDashboardApp:
                         if arduino:
                             if st.button("Ligar relé"):
                                 arduino.write(b'RELAY_ON\n')
-                                st.success("Comando enviado: RELAY_ON")
+                                time.sleep(0.5)
+                                leitura = arduino.readline().decode().strip()
+                                if leitura:
+                                    st.success(f"Estado do relé: {leitura}")
+                                else:
+                                    st.warning("Nenhum dado recebido.")
 
                             if st.button("Desligar relé"):
                                 arduino.write(b'RELAY_OFF\n')
-                                st.success("Comando enviado: RELAY_OFF")
+                                time.sleep(0.5)
+                                leitura = arduino.readline().decode().strip()
+                                if leitura:
+                                    st.success(f"Estado do relé: {leitura}")
+                                else:
+                                    st.warning("Nenhum dado recebido.")
 
                             if st.button("Atualizar estado do relé"):
-                                arduino.write(b'STATUS\n')  # Comando para solicitar status
-                                time.sleep(0.5)  # Aguarda resposta
+                                arduino.write(b'STATUS\n')
+                                time.sleep(0.5)
                                 leitura = arduino.readline().decode().strip()
                                 if leitura:
                                     st.success(f"Estado do relé: {leitura}")
