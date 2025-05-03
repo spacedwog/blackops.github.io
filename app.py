@@ -8,9 +8,9 @@ import pandas as pd
 import streamlit as st
 from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
+from consultar_dns import DataScienceDNS
 from auth.blackboard import BlackboardValidator
 from dashboard.github_dashboard import GitHubDashboard
-from config.settings import APP_CLIENT_ID, APP_CLIENT_SECRET, APP_REDIRECT_URI
 
 # OCR e imagem
 import os
