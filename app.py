@@ -116,6 +116,8 @@ class GitHubDashboardApp:
                                     st.success(f"Estado do cyber-brain: {leitura}")
                                 else:
                                     st.warning("Nenhum dado recebido.")
+                    except serial.SerialException:
+                        st.error("Erro ao abrir porta serial.")
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
