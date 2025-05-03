@@ -43,118 +43,6 @@ class GitHubDashboardApp:
         self.blackboard = BlackboardValidator()
         self.user_data = None
 
-    def ler_rfid_via_camera(self):  # sourcery skip: use-named-expression
-        st.info("📷 Posicione o cartão RFID com código visível.")
-        streaming_area = st.empty()
-
-        if st.button("🔍 Iniciar Escaneamento ao Vivo"):
-            uid = self.stream_camera_para_rfid(streaming_area, duracao=7)
-
-            if uid:
-                self.processar_uid_detectado(uid)
-            else:
-                st.error("❌ Não foi possível reconhecer o texto do cartão.")
-
-    def stream_camera_para_rfid(self, st_frame, duracao=7):
-        # sourcery skip: assign-if-exp, reintroduce-else, swap-if-else-branches
-        cap = cv2.VideoCapture(0)
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-
-        frame_final = None
-        start_time = time.time()
-        altura_linha = 0
-        direcao = 1  # 1 para baixo, -1 para cima
-
-        while time.time() - start_time < duracao:
-            ret, frame = cap.read()
-            if not ret:
-                continue
-
-            frame_final = frame.copy()  # Salva o último frame válido
-
-            # Desenha a linha de scanner
-            altura, largura, _ = frame.shape
-            cv2.line(frame, (0, altura_linha), (largura, altura_linha), (0, 255, 0), 2)
-            altura_linha += direcao * 15
-            if altura_linha >= altura or altura_linha <= 0:
-                direcao *= -1
-
-            # Mostra vídeo no Streamlit
-            st_frame.image(frame, channels="BGR", caption="📡 Escaneando...")
-
-        cap.release()
-
-        if frame_final is not None:
-            return self.extrair_uid_da_imagem(frame_final)
-        return None
-    
-    def extrair_uid_da_imagem(self, frame):
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # Filtro de nitidez
-        kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])
-        sharpened = cv2.filter2D(gray, -1, kernel)
-
-        # Contraste
-        contrast = cv2.convertScaleAbs(sharpened, alpha=1.6, beta=0)
-        _, thresh = cv2.threshold(contrast, 100, 255, cv2.THRESH_BINARY)
-
-        config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789ABCDEF'
-        texto = pytesseract.image_to_string(thresh, config=config).strip().upper()
-        return texto or None
-    
-    def processar_uid_detectado(self, uid_detectado):
-        # sourcery skip: use-fstring-for-concatenation, use-named-expression
-        st.success("[OK] UID detectado: " + str(uid_detectado))
-        usuario = self.db.get_usuario_por_uid(uid_detectado)
-        if usuario:
-            self.exibir_dados_usuario(usuario)
-
-            if usuario[2] == self.user_data.get("login"):
-                self.executar_acesso_autenticado(usuario, uid_detectado)
-            else:
-                st.error("❌ Acesso negado: usuário inválido.")
-
-        else:
-            self.extracted_from_processar_uid_detectado(uid_detectado)
-    
-    def extracted_from_processar_uid_detectado(self, uid_detectado):
-        st.info("🔒 Cartão não registrado. Registrando novo usuário.")
-        nome = self.user_data.get("name")
-        login_github = self.user_data.get("login")
-        self.db.registrar_cartao(uid_detectado, nome, login_github, "Usuario")
-        st.success("✅ Cartão registrado com sucesso!")
-        self.processar_uid_detectado(uid_detectado)
-
-    def exibir_dados_usuario(self, usuario):
-        df = pd.DataFrame([{
-            "Nome": usuario[1],
-            "Login": usuario[2],
-            "Nível": usuario[3],
-            "Último Acesso": usuario[4]
-        }])
-        st.table(df)
-
-    def executar_acesso_autenticado(self, usuario, uid_detectado):
-        # sourcery skip: use-fstring-for-concatenation
-        self.mensagem = "[OK] Bem-vindo, " + usuario[3] + " " + usuario[2] + "! Seu ultimo acesso foi em " + usuario[4]
-        st.success(self.mensagem)
-
-        try:
-            comando = "./executar_paineldns.ps1"
-            resultado = subprocess.run(
-                ["powershell", "-Command", comando],
-                capture_output=True,
-                text=True,
-                shell=True
-            )
-            st.code(resultado.stdout or resultado.stderr)
-        except Exception as e:
-            st.error("Erro ao executar: " + str(e))
-
-        self.db.atualizar_ultimo_acesso(uid_detectado)
-
     def run(self):  # sourcery skip: extract-duplicate-method, extract-method
         st.set_page_config(page_title="GitHub OAuth Dashboard", page_icon="🐙")
         st.title("🔐 Login com GitHub")
@@ -189,7 +77,7 @@ class GitHubDashboardApp:
                     "📦 Repositórios",
                     "📈 Data Science",
                     "🛡️ Cibersegurança",
-                    "📷 Leitor RFID OCR"
+                    "🔄 Relay"
                 ])
 
                 with abas[0]:
@@ -205,7 +93,7 @@ class GitHubDashboardApp:
                     self.auth.exibir_cyberseguranca()
 
                 with abas[4]:
-                    self.ler_rfid_via_camera()
+                    DataScienceDNS.consultar_dns()
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
