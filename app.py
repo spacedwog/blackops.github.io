@@ -2,7 +2,6 @@
 # ./app.py
 # -----------------------------
 import time
-import boto3
 import serial
 import joblib
 import platform
@@ -12,7 +11,6 @@ from auth.oauth import OAuthGitHub
 from sklearn.datasets import load_iris
 from sklearn.metrics import accuracy_score
 from auth.blackboard import BlackboardValidator
-from botocore.exceptions import NoCredentialsError
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
@@ -99,46 +97,14 @@ class GitHubDashboardApp:
 
                 with abas[4]:
                     st.header("🔄 Cyber-Brain: Machine Learning + Nuvem")
+                    diretorio = st.text_input("Diretório para salvar", "./modelos_salvos")
+                    nome_arquivo = st.text_input("Nome do arquivo", "modelo_iris.joblib")
 
-                    if st.button("🚀 Treinar Modelo de IA"):
-                        # Carregar dados
-                        iris = load_iris()
-                        X_train, X_test, y_train, y_test = train_test_split(
-                            iris.data, iris.target, test_size=0.3, random_state=42
-                        )
-
-                        # Criar e treinar modelo
-                        modelo = RandomForestClassifier(n_estimators=100, random_state=42)
-                        modelo.fit(X_train, y_train)
-                        y_pred = modelo.predict(X_test)
-
-                        # Avaliar e exibir acurácia
-                        acc = accuracy_score(y_test, y_pred)
-                        st.success(f"✅ Modelo treinado com acurácia: {acc:.2%}")
-
-                        # Salvar modelo localmente
-                        nome_modelo = 'modelo_iris.joblib'
-                        joblib.dump(modelo, nome_modelo)
-                        st.info("📁 Modelo salvo localmente como 'modelo_iris.joblib'.")
-
-                        # Upload para AWS S3
-                        def upload_para_s3(arquivo_local, nome_bucket, nome_s3):
-                            s3 = boto3.client('s3')
-                            try:
-                                s3.upload_file(arquivo_local, nome_bucket, nome_s3)
-                                st.success(f"☁️ Upload concluído: s3://{nome_bucket}/{nome_s3}")
-                            except FileNotFoundError:
-                                st.error("❌ Arquivo não encontrado.")
-                            except NoCredentialsError:
-                                st.error("❌ Credenciais AWS não configuradas.")
-
-                        # Formulário para upload
-                        st.subheader("☁️ Enviar para AWS S3")
-                        bucket = st.text_input("Nome do Bucket S3", "meu-bucket-modelos")
-                        nome_s3 = st.text_input("Caminho no S3", "modelos/modelo_iris.joblib")
-
-                        if st.button("📤 Enviar para o S3"):
-                            upload_para_s3(nome_modelo, bucket, nome_s3)
+                    if st.button("📁 Salvar modelo"):
+                        os.makedirs(diretorio, exist_ok=True)
+                        caminho_completo = os.path.join(diretorio, nome_arquivo)
+                        joblib.dump(modelo, caminho_completo)
+                        st.success(f"✅ Modelo salvo com sucesso em: {caminho_completo}")
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
