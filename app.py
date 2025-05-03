@@ -99,37 +99,23 @@ class GitHubDashboardApp:
                         st.title("Monitor de Relé - Arduino")
 
                         if arduino:
-                            if st.button("Ligar relé"):
-                                arduino.write(b'RELAY_ON\n')
+                            if st.button("Ligar Cyber-Brain"):
+                                arduino.write(b'LIGAR\n')
                                 time.sleep(0.5)
                                 leitura = arduino.readline().decode().strip()
                                 if leitura:
-                                    st.success(f"Estado do relé: {leitura}")
+                                    st.success(f"Estado do cyber-brain: {leitura}")
                                 else:
                                     st.warning("Nenhum dado recebido.")
 
-                            if st.button("Desligar relé"):
-                                arduino.write(b'RELAY_OFF\n')
+                            if st.button("Reiniciar Cyber-Brain"):
+                                arduino.write(b'RESTART\n')
                                 time.sleep(0.5)
                                 leitura = arduino.readline().decode().strip()
                                 if leitura:
-                                    st.success(f"Estado do relé: {leitura}")
+                                    st.success(f"Estado do cyber-brain: {leitura}")
                                 else:
                                     st.warning("Nenhum dado recebido.")
-
-                            if st.button("Atualizar estado do relé"):
-                                arduino.write(b'STATUS\n')
-                                time.sleep(0.5)
-                                leitura = arduino.readline().decode().strip()
-                                if leitura:
-                                    st.success(f"Estado do relé: {leitura}")
-                                else:
-                                    st.warning("Nenhum dado recebido.")
-                        else:
-                            st.error("Não foi possível conectar ao Arduino.")
-                    except serial.SerialException:
-                        st.error("Erro ao abrir porta serial.")
-
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
