@@ -11,9 +11,7 @@ streamlit
 statsmodels
 pytesseract
 mkdocstrings
-opencv-python
 python-dotenv
 pyserial>=3.5
 mkdocs-material
 requests-oauthlib
-cryptography>=41.0.0
