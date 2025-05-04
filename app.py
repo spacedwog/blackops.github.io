@@ -8,6 +8,7 @@ import platform
 import streamlit as st
 from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
+from config.firewall import Firewall
 from sklearn.datasets import load_iris
 from sklearn.metrics import accuracy_score
 from auth.blackboard import BlackboardValidator
@@ -97,10 +98,13 @@ class GitHubDashboardApp:
                     self.auth.exibir_cyberseguranca()
 
                 with abas[4]:
-                    st.header("🔄 Cyber-Brain: Machine Learning + Nuvem")
+                    st.title("🤖 Cyber-Brain: Inteligência Artificial na Nuvem")
+                    st.header("🧠 Transferência Segura de Conhecimento com Firewall")
+
+                    # Entradas do usuário
                     diretorio = st.text_input("Diretório para salvar", "./modelos_salvos")
                     nome_arquivo = st.text_input("Nome do arquivo", "modelo_iris.joblib")
-                    
+
                     # Carrega e separa os dados
                     iris = load_iris()
                     X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2)
@@ -109,11 +113,44 @@ class GitHubDashboardApp:
                     modelo = LogisticRegression(max_iter=200)
                     modelo.fit(X_train, y_train)
 
-                    if st.button("📁 Salvar modelo"):
-                        os.makedirs(diretorio, exist_ok=True)
-                        caminho_completo = os.path.join(diretorio, nome_arquivo)
-                        joblib.dump(modelo, caminho_completo)
-                        st.success(f"✅ Modelo salvo com sucesso em: {caminho_completo}")
+                    # Firewall para autenticação de variáveis
+                    firewall = Firewall()
+                    chave_usuario = st.text_input("🔐 Chave de acesso (ex: secret123)")
+                    destino_nome = "modelo_autenticado"
+                    firewall.registrar_autorizacao(destino_nome, "secret123")  # chave válida predefinida
+
+                    variaveis_transmissao = {}
+
+                    if st.button("🚀 Transferir modelo via Firewall"):
+                        sucesso = firewall.transferir(modelo, destino_nome, variaveis_transmissao, chave_usuario)
+                        if sucesso:
+                            st.success("✅ Modelo transferido com sucesso para variável protegida!")
+                        else:
+                            st.error("❌ Acesso negado! Chave incorreta ou sem permissão.")
+
+                    if destino_nome in variaveis_transmissao:
+                        st.write("🔎 Modelo disponível na variável protegida. Exemplo de predição:")
+                        pred = variaveis_transmissao[destino_nome].predict([[5.1, 3.5, 1.4, 0.2]])
+                        st.write(f"🔮 Predição: {pred}")
+
+                    # Botão para salvar
+                    if st.button("💾 Salvar modelo localmente"):
+                        try:
+                            os.makedirs(diretorio, exist_ok=True)
+                            caminho_completo = os.path.join(diretorio, nome_arquivo)
+                            joblib.dump(modelo, caminho_completo)
+                            st.success(f"✅ Modelo salvo com sucesso em: {caminho_completo}")
+                        except Exception as e:
+                            st.error(f"❌ Erro ao salvar o modelo: {e}")
+
+                    # Carregar modelo salvo
+                    if os.path.exists(os.path.join(diretorio, nome_arquivo)):
+                        if st.button("📂 Carregar modelo salvo"):
+                            modelo_carregado = joblib.load(os.path.join(diretorio, nome_arquivo))
+                            st.success("✅ Modelo carregado com sucesso!")
+                            st.write("Exemplo de predição com entrada [5.1, 3.5, 1.4, 0.2]:")
+                            pred = modelo_carregado.predict([[5.1, 3.5, 1.4, 0.2]])
+                            st.write(f"🔮 Predição: {pred}")
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
