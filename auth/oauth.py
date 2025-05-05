@@ -28,7 +28,7 @@ class OAuthGitHub:
                 border: 1px solid #00ffe7;
                 border-radius: 10px;
                 padding: 1em 2em;
-                font-size: 18px;
+                font-size: 16px;
                 font-family: 'Courier New', monospace;
                 text-align: center;
                 cursor: pointer;
