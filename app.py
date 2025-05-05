@@ -88,13 +88,6 @@ class GitHubDashboardApp:
             return None
 
         if st.button("📂 Carregar modelo salvo"):
-            caminho = os.path.join(diretorio, nome_arquivo)
-
-        if not os.path.exists(caminho):
-            st.error("❌ Arquivo não encontrado.")
-            return None
-
-        if st.button("📂 Carregar modelo salvo"):
             try:
                 modelo_carregado = joblib.load(caminho)
                 st.success("✅ Modelo carregado com sucesso via joblib!")
