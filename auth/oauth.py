@@ -16,6 +16,7 @@ class OAuthGitHub:
     AUTH_URL = "https://github.com/login/oauth/authorize"
     TOKEN_URL = "https://github.com/login/oauth/access_token"
     USER_API_URL = "https://api.github.com/user"
+    
     @classmethod
     def login_button(cls):
         # Layout tech visual com HTML + CSS embutido
@@ -61,30 +62,6 @@ class OAuthGitHub:
                         )
             return None
         
-    @staticmethod
-    def adicionar_fundo_animado():
-        st.markdown("""
-            <style>
-            .background-video {
-                position: fixed;
-                right: 0;
-                bottom: 0;
-                min-width: 100vw;
-                min-height: 100vh;
-                z-index: -1;
-                object-fit: cover;
-                opacity: 0.15;
-            }
-            .main-container {
-                position: relative;
-                z-index: 1;
-            }
-            </style>
-
-            <video autoplay loop muted class="background-video">
-                <source src="https://cdn.pixabay.com/video/2022/09/19/130250-757246827_large.webm" type="video/webm">
-            </video>
-        """, unsafe_allow_html=True)
     @classmethod
     def callback(cls):
         query_params = st.query_params
