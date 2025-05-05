@@ -27,10 +27,3 @@ jobs:
         with:
           name: hello-artifact
           path: dist/hello.txt
-
-      - name: Generate SLSA provenance
-        uses: actions/attest-build-provenance@v2
-        with:
-          attestation-name: provenance.intoto.jsonl
-          subject-path: dist/hello.txt
-        
