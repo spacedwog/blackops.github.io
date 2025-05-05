@@ -22,3 +22,23 @@ class Firewall:
             return True
         else:
             return False
+        
+    def transferir_via_firewall(self, modelo):
+        # Firewall para autenticação de variáveis
+        chave_usuario = st.text_input("🔐 Chave de acesso (ex: secret123)")
+        destino_nome = "modelo_autenticado"
+        self.registrar_autorizacao(destino_nome, "secret123")  # chave válida predefinida
+
+        variaveis_transmissao = {}
+
+        if st.button("🚀 Transferir modelo via Firewall"):
+            sucesso = self.transferir(modelo, destino_nome, variaveis_transmissao, chave_usuario)
+            if sucesso:
+                st.success("✅ Modelo transferido com sucesso para variável protegida!")
+            else:
+                st.error("❌ Acesso negado! Chave incorreta ou sem permissão.")
+
+            if destino_nome in variaveis_transmissao:
+                st.write("🔎 Modelo disponível na variável protegida. Exemplo de predição:")
+                pred = variaveis_transmissao[destino_nome].predict([[5.1, 3.5, 1.4, 0.2]])
+                st.write(f"🔮 Predição: {pred}")

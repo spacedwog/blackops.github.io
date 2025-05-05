@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
-from config.gerenciador_arquivo import GerenciadorArquivo
+from config.gerenciador_arquivo import GerenciadorModelo
 
 # OCR e imagem
 import os
@@ -49,77 +49,6 @@ class GitHubDashboardApp:
         self.auth = OAuthGitHub()
         self.blackboard = BlackboardValidator()
         self.user_data = None
-        
-    def firewall(self, modelo):
-        # Firewall para autenticação de variáveis
-        firewall = Firewall()
-        chave_usuario = st.text_input("🔐 Chave de acesso (ex: secret123)")
-        destino_nome = "modelo_autenticado"
-        firewall.registrar_autorizacao(destino_nome, "secret123")  # chave válida predefinida
-
-        variaveis_transmissao = {}
-
-        if st.button("🚀 Transferir modelo via Firewall"):
-            sucesso = firewall.transferir(modelo, destino_nome, variaveis_transmissao, chave_usuario)
-            if sucesso:
-                st.success("✅ Modelo transferido com sucesso para variável protegida!")
-            else:
-                st.error("❌ Acesso negado! Chave incorreta ou sem permissão.")
-
-            if destino_nome in variaveis_transmissao:
-                st.write("🔎 Modelo disponível na variável protegida. Exemplo de predição:")
-                pred = variaveis_transmissao[destino_nome].predict([[5.1, 3.5, 1.4, 0.2]])
-                st.write(f"🔮 Predição: {pred}")
-                
-    def salvar_arquivo(self, diretorio, modelo, nome_arquivo):
-        if st.button("💾 Salvar modelo localmente"):
-            try:
-                os.makedirs(diretorio, exist_ok=True)
-                caminho_completo = os.path.join(diretorio, nome_arquivo)
-                joblib.dump(modelo, caminho_completo)
-                st.success(f"✅ Modelo salvo com sucesso em: {caminho_completo}")
-                return caminho_completo
-            except Exception as e:
-                st.error(f"❌ Erro ao salvar o modelo: {e}")
-                return None
-                
-    def carregar_arquivo(self, diretorio, nome_arquivo):
-        caminho = os.path.join(diretorio, nome_arquivo)
-
-        if not os.path.exists(caminho):
-            st.error("❌ Arquivo não encontrado.")
-            return None
-
-        if st.button("📂 Carregar modelo salvo"):
-            try:
-                modelo_carregado = joblib.load(caminho)
-                st.success("✅ Modelo carregado com sucesso via joblib!")
-            except Exception as e_joblib:
-                st.warning("⚠️ Falha ao carregar com joblib. Tentando com pickle...")
-
-                try:
-                    with open(caminho, 'rb') as f:
-                        modelo_carregado = pickle.load(f)
-                    st.success("✅ Modelo carregado com sucesso via pickle!")
-                except Exception as e_pickle:
-                    st.error("❌ Falha com joblib e pickle. O arquivo está corrompido.")
-                    st.error(f"Erro: {e_pickle}")
-                    try:
-                        os.remove(caminho)
-                        st.warning("🚮 Arquivo corrompido foi removido automaticamente.")
-                    except Exception as e_remover:
-                        st.error(f"❌ Erro ao tentar remover o arquivo: {e_remover}")
-                    return None
-
-            # Predição de exemplo
-            try:
-                st.write("Exemplo de predição com entrada [5.1, 3.5, 1.4, 0.2]:")
-                pred = modelo_carregado.predict([[5.1, 3.5, 1.4, 0.2]])
-                st.write(f"🔮 Predição: {pred}")
-            except Exception as e_pred:
-                st.error(f"❌ Erro ao realizar predição: {e_pred}")
-
-            return modelo_carregado
     
     def run(self):
         # sourcery skip: extract-duplicate-method, extract-method
@@ -187,8 +116,10 @@ class GitHubDashboardApp:
                     modelo = LogisticRegression(max_iter=200)
                     modelo.fit(X_train, y_train)
                     
-                    self.firewall(modelo)
-                    gerenciador_arquivo = GerenciadorArquivo(nome_arquivo)
+                    firewall = Firewall()
+                    firewall.transferir_via_firewall(modelo)
+
+                    gerenciador_arquivo = GerenciadorModelo(nome_arquivo)
                     gerenciador_arquivo.salvar_arquivo(modelo, diretorio, nome_arquivo)
                     gerenciador_arquivo.carregar_arquivo(diretorio, nome_arquivo)
 
