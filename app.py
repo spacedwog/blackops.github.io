@@ -5,6 +5,7 @@ import time
 import serial
 import pickle
 import joblib
+import shutil
 import platform
 import streamlit as st
 from database.db import UsuarioDB
@@ -17,6 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
+from config.gerenciador_arquivo import GerenciadorArquivo
 
 # OCR e imagem
 import os
@@ -70,15 +72,16 @@ class GitHubDashboardApp:
                 st.write(f"🔮 Predição: {pred}")
                 
     def salvar_arquivo(self, diretorio, modelo, nome_arquivo):
-        # Botão para salvar
         if st.button("💾 Salvar modelo localmente"):
             try:
                 os.makedirs(diretorio, exist_ok=True)
                 caminho_completo = os.path.join(diretorio, nome_arquivo)
                 joblib.dump(modelo, caminho_completo)
                 st.success(f"✅ Modelo salvo com sucesso em: {caminho_completo}")
+                return caminho_completo
             except Exception as e:
                 st.error(f"❌ Erro ao salvar o modelo: {e}")
+                return None
                 
     def carregar_arquivo(self, diretorio, nome_arquivo):
         caminho = os.path.join(diretorio, nome_arquivo)
@@ -185,8 +188,9 @@ class GitHubDashboardApp:
                     modelo.fit(X_train, y_train)
                     
                     self.firewall(modelo)
-                    self.salvar_arquivo(diretorio, modelo, nome_arquivo)
-                    self.carregar_arquivo(diretorio, nome_arquivo)
+                    gerenciador_arquivo = GerenciadorArquivo(nome_arquivo)
+                    gerenciador_arquivo.salvar_arquivo(modelo, diretorio, nome_arquivo)
+                    gerenciador_arquivo.carregar_arquivo(diretorio, nome_arquivo)
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
