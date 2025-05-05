@@ -1,0 +1,35 @@
+name: Build and Generate Provenance
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [created]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Build artifact
+        run: |
+          mkdir -p dist
+          echo "Hello SLSA" > dist/hello.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello-artifact
+          path: dist/hello.txt
+
+      - name: Generate SLSA provenance
+        uses: slsa-framework/github-actions-build@v1.6.0 # contém o attest-build-provenance
+        with:
+          attestation-name: provenance.intoto.jsonl
+          subject-path: dist/hello.txt
