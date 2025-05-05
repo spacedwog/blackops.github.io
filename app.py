@@ -80,13 +80,25 @@ class GitHubDashboardApp:
                 st.error(f"❌ Erro ao salvar o modelo: {e}")
                 
     def carregar_arquivo(self, diretorio, nome_arquivo):
-        # Carregar modelo salvo
-        if os.path.exists(os.path.join(diretorio, nome_arquivo)) and st.button("📂 Carregar modelo salvo"):
-            modelo_carregado = joblib.load(os.path.join(diretorio, nome_arquivo))
-            st.success("✅ Modelo carregado com sucesso!")
-            st.write("Exemplo de predição com entrada [5.1, 3.5, 1.4, 0.2]:")
-            pred = modelo_carregado.predict([[5.1, 3.5, 1.4, 0.2]])
-            st.write(f"🔮 Predição: {pred}")
+        caminho = os.path.join(diretorio, nome_arquivo)
+
+        if not os.path.exists(caminho):
+            st.error("❌ Arquivo não encontrado.")
+            return None
+
+        if st.button("📂 Carregar modelo salvo"):
+            try:
+                modelo_carregado = joblib.load(caminho)
+                st.success("✅ Modelo carregado com sucesso!")
+
+                # Exemplo de predição
+                st.write("Exemplo de predição com entrada [5.1, 3.5, 1.4, 0.2]:")
+                pred = modelo_carregado.predict([[5.1, 3.5, 1.4, 0.2]])
+                st.write(f"🔮 Predição: {pred}")
+                return modelo_carregado
+            except Exception as e:
+                st.error(f"❌ Erro ao carregar o modelo: {e}")
+                return None
     
     def run(self):
         # sourcery skip: extract-duplicate-method, extract-method
