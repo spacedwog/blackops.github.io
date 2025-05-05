@@ -46,6 +46,47 @@ class GitHubDashboardApp:
         self.auth = OAuthGitHub()
         self.blackboard = BlackboardValidator()
         self.user_data = None
+        
+    def firewall(self, modelo):
+        # Firewall para autenticação de variáveis
+        firewall = Firewall()
+        chave_usuario = st.text_input("🔐 Chave de acesso (ex: secret123)")
+        destino_nome = "modelo_autenticado"
+        firewall.registrar_autorizacao(destino_nome, "secret123")  # chave válida predefinida
+
+        variaveis_transmissao = {}
+
+        if st.button("🚀 Transferir modelo via Firewall"):
+            sucesso = firewall.transferir(modelo, destino_nome, variaveis_transmissao, chave_usuario)
+            if sucesso:
+                st.success("✅ Modelo transferido com sucesso para variável protegida!")
+            else:
+                st.error("❌ Acesso negado! Chave incorreta ou sem permissão.")
+
+            if destino_nome in variaveis_transmissao:
+                st.write("🔎 Modelo disponível na variável protegida. Exemplo de predição:")
+                pred = variaveis_transmissao[destino_nome].predict([[5.1, 3.5, 1.4, 0.2]])
+                st.write(f"🔮 Predição: {pred}")
+                
+    def salvar_arquivo(self, diretorio, modelo, nome_arquivo):
+        # Botão para salvar
+        if st.button("💾 Salvar modelo localmente"):
+            try:
+                os.makedirs(diretorio, exist_ok=True)
+                caminho_completo = os.path.join(diretorio, nome_arquivo)
+                joblib.dump(modelo, caminho_completo)
+                st.success(f"✅ Modelo salvo com sucesso em: {caminho_completo}")
+            except Exception as e:
+                st.error(f"❌ Erro ao salvar o modelo: {e}")
+                
+    def carregar_arquivo(self, diretorio, nome_arquivo):
+        # Carregar modelo salvo
+        if os.path.exists(os.path.join(diretorio, nome_arquivo)) and st.button("📂 Carregar modelo salvo"):
+            modelo_carregado = joblib.load(os.path.join(diretorio, nome_arquivo))
+            st.success("✅ Modelo carregado com sucesso!")
+            st.write("Exemplo de predição com entrada [5.1, 3.5, 1.4, 0.2]:")
+            pred = modelo_carregado.predict([[5.1, 3.5, 1.4, 0.2]])
+            st.write(f"🔮 Predição: {pred}")
     
     def run(self):
         # sourcery skip: extract-duplicate-method, extract-method
@@ -112,45 +153,10 @@ class GitHubDashboardApp:
                     # Treina o modelo
                     modelo = LogisticRegression(max_iter=200)
                     modelo.fit(X_train, y_train)
-
-                    # Firewall para autenticação de variáveis
-                    firewall = Firewall()
-                    chave_usuario = st.text_input("🔐 Chave de acesso (ex: secret123)")
-                    destino_nome = "modelo_autenticado"
-                    firewall.registrar_autorizacao(destino_nome, "secret123")  # chave válida predefinida
-
-                    variaveis_transmissao = {}
-
-                    if st.button("🚀 Transferir modelo via Firewall"):
-                        sucesso = firewall.transferir(modelo, destino_nome, variaveis_transmissao, chave_usuario)
-                        if sucesso:
-                            st.success("✅ Modelo transferido com sucesso para variável protegida!")
-                        else:
-                            st.error("❌ Acesso negado! Chave incorreta ou sem permissão.")
-
-                    if destino_nome in variaveis_transmissao:
-                        st.write("🔎 Modelo disponível na variável protegida. Exemplo de predição:")
-                        pred = variaveis_transmissao[destino_nome].predict([[5.1, 3.5, 1.4, 0.2]])
-                        st.write(f"🔮 Predição: {pred}")
-
-                    # Botão para salvar
-                    if st.button("💾 Salvar modelo localmente"):
-                        try:
-                            os.makedirs(diretorio, exist_ok=True)
-                            caminho_completo = os.path.join(diretorio, nome_arquivo)
-                            joblib.dump(modelo, caminho_completo)
-                            st.success(f"✅ Modelo salvo com sucesso em: {caminho_completo}")
-                        except Exception as e:
-                            st.error(f"❌ Erro ao salvar o modelo: {e}")
-
-                    # Carregar modelo salvo
-                    if os.path.exists(os.path.join(diretorio, nome_arquivo)):
-                        if st.button("📂 Carregar modelo salvo"):
-                            modelo_carregado = joblib.load(os.path.join(diretorio, nome_arquivo))
-                            st.success("✅ Modelo carregado com sucesso!")
-                            st.write("Exemplo de predição com entrada [5.1, 3.5, 1.4, 0.2]:")
-                            pred = modelo_carregado.predict([[5.1, 3.5, 1.4, 0.2]])
-                            st.write(f"🔮 Predição: {pred}")
+                    
+                    self.firewall(modelo)
+                    self.salvar_arquivo(diretorio, modelo, nome_arquivo)
+                    self.carregar_arquivo(diretorio, nome_arquivo)
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
