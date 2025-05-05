@@ -71,6 +71,7 @@ class GitHubDashboardApp:
                 else:
                     st.error("❌ Acesso negado: usuário inválido.")
             else:
+                self.auth.adicionar_fundo_animado()
                 self.auth.login_button()
 
         else:

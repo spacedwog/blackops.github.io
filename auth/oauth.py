@@ -16,51 +16,75 @@ class OAuthGitHub:
     AUTH_URL = "https://github.com/login/oauth/authorize"
     TOKEN_URL = "https://github.com/login/oauth/access_token"
     USER_API_URL = "https://api.github.com/user"
-
     @classmethod
     def login_button(cls):
         # Layout tech visual com HTML + CSS embutido
-    st.markdown("""
-        <style>
-        .tech-button {
-            background: linear-gradient(135deg, #1f1f1f, #0f0f0f);
-            color: #00ffe7;
-            border: 1px solid #00ffe7;
-            border-radius: 10px;
-            padding: 1em 2em;
-            font-size: 18px;
-            font-family: 'Courier New', monospace;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease-in-out;
-        }
-        .tech-button:hover {
-            background: #00ffe7;
-            color: #0f0f0f;
-            box-shadow: 0 0 10px #00ffe7;
-        }
-        </style>
-    """, unsafe_allow_html=True)
+        st.markdown("""
+            <style>
+            .tech-button {
+                background: linear-gradient(135deg, #1f1f1f, #0f0f0f);
+                color: #00ffe7;
+                border: 1px solid #00ffe7;
+                border-radius: 10px;
+                padding: 1em 2em;
+                font-size: 18px;
+                font-family: 'Courier New', monospace;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease-in-out;
+            }
+            .tech-button:hover {
+                background: #00ffe7;
+                color: #0f0f0f;
+                box-shadow: 0 0 10px #00ffe7;
+            }
+            </style>
+        """, unsafe_allow_html=True)
 
-    if "access_token" not in st.session_state:
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("🔐 Login com GitHub", key="github_login", help="Clique para autenticar com GitHub"):
-                if "code" not in st.query_params:
-                    params = {
-                        "client_id": OAUTH_CLIENT_ID,
-                        "redirect_uri": REDIRECT_URI,
-                        "scope": "read:user user:email",
-                        "state": "secure_random_string"
-                    }
-                    auth_url = cls.AUTH_URL + "?" + urlencode(params)
-                    
-                    st.markdown("<p class='tech-button'>Redirecionando para o GitHub...</p>", unsafe_allow_html=True)
-                    st.markdown(
-                        f"""<meta http-equiv="refresh" content="0;URL='{auth_url}'" />""",
-                        unsafe_allow_html=True
-                    )
-        return None
+        if "access_token" not in st.session_state:
+            col1, col2, col3 = st.columns([2, 2, 1])
+            with col1:
+                if st.button("🔐 Login com GitHub", key="github_login", help="Clique para autenticar com GitHub"):
+                    if "code" not in st.query_params:
+                        params = {
+                            "client_id": OAUTH_CLIENT_ID,
+                            "redirect_uri": REDIRECT_URI,
+                            "scope": "read:user user:email",
+                            "state": "secure_random_string"
+                        }
+                        auth_url = cls.AUTH_URL + "?" + urlencode(params)
+                        
+                        st.markdown("<p class='tech-button'>Redirecionando para o GitHub...</p>", unsafe_allow_html=True)
+                        st.markdown(
+                            f"""<meta http-equiv="refresh" content="0;URL='{auth_url}'" />""",
+                            unsafe_allow_html=True
+                        )
+            return None
+        
+    @staticmethod
+    def adicionar_fundo_animado():
+        st.markdown("""
+            <style>
+            .background-video {
+                position: fixed;
+                right: 0;
+                bottom: 0;
+                min-width: 100vw;
+                min-height: 100vh;
+                z-index: -1;
+                object-fit: cover;
+                opacity: 0.15;
+            }
+            .main-container {
+                position: relative;
+                z-index: 1;
+            }
+            </style>
+
+            <video autoplay loop muted class="background-video">
+                <source src="https://cdn.pixabay.com/video/2022/09/19/130250-757246827_large.webm" type="video/webm">
+            </video>
+        """, unsafe_allow_html=True)
     @classmethod
     def callback(cls):
         query_params = st.query_params
