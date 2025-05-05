@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
-from config.gerenciador_arquivo import GerenciadorModelo
+from config.gerenciador_modelo import GerenciadorModelo
 
 # OCR e imagem
 import os
@@ -119,9 +119,9 @@ class GitHubDashboardApp:
                     firewall = Firewall()
                     firewall.transferir_via_firewall(modelo)
 
-                    gerenciador_arquivo = GerenciadorModelo(nome_arquivo)
-                    gerenciador_arquivo.salvar_arquivo(modelo, diretorio, nome_arquivo)
-                    gerenciador_arquivo.carregar_arquivo(diretorio, nome_arquivo)
+                    gerenciador_modelo = GerenciadorModelo(nome_arquivo)
+                    gerenciador_modelo.salvar_arquivo(modelo, diretorio, nome_arquivo)
+                    gerenciador_modelo.carregar_arquivo(diretorio, nome_arquivo)
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
