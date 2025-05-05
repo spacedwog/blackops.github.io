@@ -1,3 +1,4 @@
 [2025-05-05 10:29:28] Backup criado: ./modelos_salvos\modelo_iris.joblib.bak
 [2025-05-05 10:29:28] Modelo salvo: ./modelos_salvos\modelo_iris.joblib
 [2025-05-05 10:29:37] Modelo carregado com joblib: ./modelos_salvos\modelo_iris.joblib
+[2025-05-05 10:35:39] Modelo carregado com joblib: ./modelos_salvos\modelo_iris.joblib

@@ -19,10 +19,33 @@ class OAuthGitHub:
 
     @classmethod
     def login_button(cls):
-        # sourcery skip: use-fstring-for-concatenation
-        # sourcery skip: merge-nested-ifs
-        if "access_token" not in st.session_state:
-            if st.button("🔐 Login com GitHub"):
+        # Layout tech visual com HTML + CSS embutido
+    st.markdown("""
+        <style>
+        .tech-button {
+            background: linear-gradient(135deg, #1f1f1f, #0f0f0f);
+            color: #00ffe7;
+            border: 1px solid #00ffe7;
+            border-radius: 10px;
+            padding: 1em 2em;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        .tech-button:hover {
+            background: #00ffe7;
+            color: #0f0f0f;
+            box-shadow: 0 0 10px #00ffe7;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    if "access_token" not in st.session_state:
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🔐 Login com GitHub", key="github_login", help="Clique para autenticar com GitHub"):
                 if "code" not in st.query_params:
                     params = {
                         "client_id": OAUTH_CLIENT_ID,
@@ -32,13 +55,12 @@ class OAuthGitHub:
                     }
                     auth_url = cls.AUTH_URL + "?" + urlencode(params)
                     
-                    st.markdown("[Redirecionando... clique aqui se não for automático](" + auth_url + ")")
+                    st.markdown("<p class='tech-button'>Redirecionando para o GitHub...</p>", unsafe_allow_html=True)
                     st.markdown(
-                        """<meta http-equiv="refresh" content="0;URL='""" + auth_url + """'" />""",
+                        f"""<meta http-equiv="refresh" content="0;URL='{auth_url}'" />""",
                         unsafe_allow_html=True
                     )
-            return None
-
+        return None
     @classmethod
     def callback(cls):
         query_params = st.query_params
@@ -145,11 +167,26 @@ class OAuthGitHub:
 
     @classmethod
     def exibir_cyberseguranca(cls):
-        # sourcery skip: use-fstring-for-concatenation
-        st.subheader("🛡️ Cibersegurança: Relatório de Segurança")
-                
+        st.markdown("""
+            <style>
+            .cyber-box {
+                background-color: #111827;
+                border: 1px solid #00ffe7;
+                border-radius: 12px;
+                padding: 1em;
+                color: #00ffe7;
+                font-family: 'Courier New', monospace;
+                box-shadow: 0 0 8px #00ffe7;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<div class='cyber-box'><h3>🛡️ Cibersegurança: Relatório de Segurança</h3>", unsafe_allow_html=True)
+ 
         cls.verificar_transporte_rede()
         cls.verificar_dns()
         cls.verificar_porta()
         FirewallInspector.verificar_firewall()
         FirewallInspector.listar_conexoes()
+
+        st.markdown("</div>", unsafe_allow_html=True)
