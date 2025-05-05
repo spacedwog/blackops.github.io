@@ -90,6 +90,11 @@ class FirewallRelayController:
                     return "🟢 O relé está ligado."
                 elif response[6:] == "OFF":
                     return "🔴 O relé está desligado."
+            elif response.startswith("LED:"):
+                if response[4:] == "ON":
+                    return "🟢 O LED está ligado."
+                elif response[4:] == "OFF":
+                    return "🔴 O LED está desligado."
             else:
                 return f"⚠️ Resposta inesperada: {response}"
         except Exception as e:
