@@ -29,7 +29,8 @@ jobs:
           path: dist/hello.txt
 
       - name: Generate SLSA provenance
-        uses: slsa-framework/github-actions-build@v1.6.0 # contém o attest-build-provenance
+        uses: slsa-framework/github-actions-build/attest-build-provenance@v1.6.0
         with:
           attestation-name: provenance.intoto.jsonl
           subject-path: dist/hello.txt
+        
