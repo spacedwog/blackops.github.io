@@ -3,6 +3,7 @@
 # -----------------------------
 import time
 import serial
+import pickle
 import joblib
 import platform
 import streamlit as st
@@ -87,18 +88,42 @@ class GitHubDashboardApp:
             return None
 
         if st.button("📂 Carregar modelo salvo"):
+            caminho = os.path.join(diretorio, nome_arquivo)
+
+        if not os.path.exists(caminho):
+            st.error("❌ Arquivo não encontrado.")
+            return None
+
+        if st.button("📂 Carregar modelo salvo"):
             try:
                 modelo_carregado = joblib.load(caminho)
-                st.success("✅ Modelo carregado com sucesso!")
+                st.success("✅ Modelo carregado com sucesso via joblib!")
+            except Exception as e_joblib:
+                st.warning("⚠️ Falha ao carregar com joblib. Tentando com pickle...")
 
-                # Exemplo de predição
+                try:
+                    with open(caminho, 'rb') as f:
+                        modelo_carregado = pickle.load(f)
+                    st.success("✅ Modelo carregado com sucesso via pickle!")
+                except Exception as e_pickle:
+                    st.error("❌ Falha com joblib e pickle. O arquivo está corrompido.")
+                    st.error(f"Erro: {e_pickle}")
+                    try:
+                        os.remove(caminho)
+                        st.warning("🚮 Arquivo corrompido foi removido automaticamente.")
+                    except Exception as e_remover:
+                        st.error(f"❌ Erro ao tentar remover o arquivo: {e_remover}")
+                    return None
+
+            # Predição de exemplo
+            try:
                 st.write("Exemplo de predição com entrada [5.1, 3.5, 1.4, 0.2]:")
                 pred = modelo_carregado.predict([[5.1, 3.5, 1.4, 0.2]])
                 st.write(f"🔮 Predição: {pred}")
-                return modelo_carregado
-            except Exception as e:
-                st.error(f"❌ Erro ao carregar o modelo: {e}")
-                return None
+            except Exception as e_pred:
+                st.error(f"❌ Erro ao realizar predição: {e_pred}")
+
+            return modelo_carregado
     
     def run(self):
         # sourcery skip: extract-duplicate-method, extract-method
