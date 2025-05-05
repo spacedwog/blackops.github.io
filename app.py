@@ -19,7 +19,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
 from config.gerenciador_modelo import GerenciadorModelo
-
+from config.firewall_relay_controller import FirewallRelayController
 # OCR e imagem
 import os
 import pytesseract
@@ -84,6 +84,7 @@ class GitHubDashboardApp:
                     "👤 Perfil",
                     "📦 Repositórios",
                     "📈 Data Science",
+                    "🧱 Firewall",
                     "🛡️ Cibersegurança",
                     "🔄 Cyber-Brain"
                 ])
@@ -96,11 +97,24 @@ class GitHubDashboardApp:
 
                 with abas[2]:
                     self.dashboard.exibir_data_science()
-
+                    
                 with abas[3]:
-                    self.auth.exibir_cyberseguranca()
+                    st.title("🧱 Firewall: Verificação de Status")
+                    st.header("🔍 Verificar Firewall Relay")
+
+                    # Criação de um botão para verificar o status
+                    if st.button("🔍 Verificar Firewall Relay"):
+                        controller = FirewallRelayController(port="COM3")  # Ajuste conforme necessário
+                        status = controller.get_firewall_status_and_control_relay()
+                        st.write(status)
+                        print("\n📋 Motivos possíveis:")
+                        for reason in controller.list_possible_reasons():
+                            st.write("-", reason)
 
                 with abas[4]:
+                    self.auth.exibir_cyberseguranca()
+
+                with abas[5]:
                     st.title("🤖 Cyber-Brain: Inteligência Artificial na Nuvem")
                     st.header("🧠 Transferência Segura de Conhecimento com Firewall")
 

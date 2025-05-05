@@ -1,4 +1,0 @@
-[2025-05-05 13:20:10] Erro: Arquivo não encontrado - ./modelos_salvos\modelo_iris.jar
-[2025-05-05 13:20:17] Erro: Arquivo não encontrado - ./modelos_salvos\modelo_iris.jar
-[2025-05-05 13:20:24] Modelo salvo: ./modelos_salvos\modelo_iris.jar
-[2025-05-05 13:20:50] Modelo carregado com joblib: ./modelos_salvos\modelo_iris.jar
