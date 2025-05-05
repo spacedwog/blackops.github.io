@@ -101,10 +101,12 @@ class GitHubDashboardApp:
                 with abas[3]:
                     st.title("🧱 Firewall: Verificação de Status")
                     st.header("🔍 Verificar Firewall Relay")
-
+                    
+                    controller = FirewallRelayController(port="COM3")
+                    st.write(controller.get_relay_status())
+                    
                     # Criação de um botão para verificar o status
-                    if st.button("🔍 Verificar Firewall Relay"):
-                        controller = FirewallRelayController(port="COM3")  # Ajuste conforme necessário
+                    if st.button("🔍 Verificar Firewall Relay"):# Ajuste conforme necessário
                         status = controller.get_firewall_status_and_control_relay()
                         st.write(status)
                         print("\n📋 Motivos possíveis:")

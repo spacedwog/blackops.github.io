@@ -73,10 +73,8 @@ class FirewallRelayController:
 
         if access:
             status += f"🟢 Porta {self.firewall_port} está acessível.\n"
-            self.relay_serial.write(b"OFF\n")  # Desliga o relé
         else:
             status += f"🔴 Porta {self.firewall_port} está inacessível. Firewall ou rede pode estar bloqueando.\n"
-            self.relay_serial.write(b"ON1\n")   # Liga o relé
 
         return status
     
@@ -88,12 +86,14 @@ class FirewallRelayController:
             time.sleep(1)  # Dá tempo para o Arduino responder
             response = self.relay_serial.readline().decode().strip()
             if response.startswith("STATE:"):
-                return f"📡 Estado atual do relé: {response[6:]}"
+                if response[6:] == "ON":
+                    return "🟢 O relé está ligado."
+                elif response[6:] == "OFF":
+                    return "🔴 O relé está desligado."
             else:
                 return f"⚠️ Resposta inesperada: {response}"
         except Exception as e:
             return f"❌ Erro ao obter estado do relé: {e}"
-
 
 # Exemplo de uso
 if __name__ == "__main__":
