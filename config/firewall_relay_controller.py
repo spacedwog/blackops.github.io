@@ -126,7 +126,7 @@ class FirewallRelayController:
 
         return reasons
     
-    def detect_active_block_reasons(self):
+    def detect_active_block_reasons(self):  # sourcery skip: extract-method
         """
         Executa um comando 'netsh' para verificar regras de firewall ativas
         e retorna se a porta especificada está bloqueada.
@@ -171,7 +171,8 @@ if __name__ == "__main__":
     print("\n📋 Diagnóstico dos motivos mais prováveis para o bloqueio da porta 43:")
     for reason in controller.diagnose_common_block_reasons():
         print("-", reason)
-    print("\n🧪 Motivos realmente detectados no seu sistema:")
-    for found in controller.detect_active_block_reasons():
-        print("-", found)
+    logging.basicConfig(level=logging.DEBUG)  # Ativa logs de depuração
+    firewall = FirewallRelayController(firewall_port=43)  # Exemplo de porta
+    resultado = firewall.detect_active_block_reasons()
+    print(resultado)
 
