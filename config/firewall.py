@@ -23,7 +23,7 @@ class Firewall:
         else:
             return False
         
-    def transferir_via_firewall(self, modelo):
+    def transferir_via_firewall(self, modelo):  # sourcery skip: move-assign
         # Firewall para autenticação de variáveis
         chave_usuario = st.text_input("🔐 Chave de acesso (ex: secret123)")
         destino_nome = "modelo_autenticado"
