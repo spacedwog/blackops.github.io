@@ -5,8 +5,10 @@ import requests
 import pandas as pd
 import seaborn as sns
 import streamlit as st
+from io import StringIO
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
+import xml.etree.ElementTree as ET
 
 class GitHubDashboard:
     def __init__(self, user_data):
@@ -149,29 +151,61 @@ class GitHubDashboard:
         with aba3:
             self.exibir_series_temporais()
 
-    def exibir_data_science_resumo(self) -> None:
+    def exibir_data_science_resumo(self) -> str:
         """
         Método DataScience.
 
         Returns:
             Show (Resumo): Configurações carregadas do arquivo YAML.
         """
-        st.subheader("📈 Data Science: Regression Table - Info")
-        try:
-            linguagem = self.user_data.get("language", 0)
-            repos = self.user_data.get("public_repos", 0)
-            df = pd.DataFrame({
-                "linguagens": [linguagem + i for i in range(-5, 5)],
-                "repositorios": [repos + i for i in range(-5, 5)]
-            })
-            X = df["linguagens"]
-            y = df["repositorios"]
-            X_const = sm.add_constant(X)
-            modelo = sm.OLS(y, X_const).fit()
-            st.write("**Resumo da Regressão Linear com seus dados do GitHub:**")
-            st.text(modelo.summary())
-        except Exception as e:
-            st.error(f"Erro ao exibir regressão: {e}")
+        # Criando DataFrame com dados simulados
+        df = pd.DataFrame({
+            "linguagens": [self.linguagem + i for i in range(-5, 5)],
+            "repositorios": [self.repositorios + i for i in range(-5, 5)]
+        })
+        X = df["linguagens"]
+        y = df["repositorios"]
+        X_const = sm.add_constant(X)
+        modelo = sm.OLS(y, X_const).fit()
+
+        # Criando estrutura XML
+        root = ET.Element("RegressaoLinear")
+        entrada = ET.SubElement(root, "Entrada")
+        usuario = ET.SubElement(entrada, "Usuario")
+        ET.SubElement(usuario, "Linguagem").text = str(self.linguagem)
+        ET.SubElement(usuario, "Repositorios").text = str(self.repositorios)
+
+        dados = ET.SubElement(entrada, "Dados")
+        for i in range(len(df)):
+            obs = ET.SubElement(dados, "Observacao")
+            ET.SubElement(obs, "Linguagens").text = str(df.iloc[i]["linguagens"])
+            ET.SubElement(obs, "Repositorios").text = str(df.iloc[i]["repositorios"])
+
+        modelo_elem = ET.SubElement(root, "Modelo")
+        coefs = modelo.params
+        pvalores = modelo.pvalues
+        estatisticas = modelo_elem
+
+        coef_elem = ET.SubElement(modelo_elem, "Coeficientes")
+        ET.SubElement(coef_elem, "Constante").text = f"{coefs['const']:.4f}"
+        ET.SubElement(coef_elem, "LinguaCoef").text = f"{coefs['linguagens']:.4f}"
+
+        stats_elem = ET.SubElement(modelo_elem, "Estatisticas")
+        ET.SubElement(stats_elem, "R2").text = f"{modelo.rsquared:.3f}"
+        ET.SubElement(stats_elem, "PValorConstante").text = f"{pvalores['const']:.3f}"
+        ET.SubElement(stats_elem, "PValorLingua").text = f"{pvalores['linguagens']:.3f}"
+        ET.SubElement(stats_elem, "DesvioPadrao").text = f"{modelo.bse['linguagens']:.3f}"
+        ET.SubElement(stats_elem, "FEstatistica").text = f"{modelo.fvalue:.2f}"
+
+        # Adiciona o resumo textual como CDATA
+        resumo_elem = ET.SubElement(root, "ResumoTexto")
+        resumo_text = modelo.summary().as_text()
+        cdata = ET.Comment(f"[CDATA[\n{resumo_text}\n]]")
+        resumo_elem.append(cdata)
+
+        # Converter para string
+        xml_str = ET.tostring(root, encoding="unicode")
+        return xml_str
 
     def exibir_data_science_plot(self) -> None:
         """
