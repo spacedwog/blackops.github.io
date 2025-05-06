@@ -79,7 +79,7 @@ class GitHubDashboardApp:
 
             if self.user_data:
                 self.dashboard = GitHubDashboard(self.user_data)
-
+                st.toast("🔐 Login realizado com sucesso!")
                 abas = st.tabs([
                     "👤 Perfil",
                     "📦 Repositórios",
