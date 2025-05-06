@@ -168,10 +168,34 @@ class GitHubDashboard:
             y = df["repositorios"]
             X_const = sm.add_constant(X)
             modelo = sm.OLS(y, X_const).fit()
+            
             st.write("**Resumo da Regressão Linear com seus dados do GitHub:**")
             st.text(modelo.summary())
+
+            # Layout simulado como XML
+            st.markdown("### 🗂️ Estrutura XML Simulada")
+            st.code(f"""<regressao>
+        <entrada>
+            <linguagem_base>{linguagem}</linguagem_base>
+            <repositorios_base>{repos}</repositorios_base>
+        </entrada>
+        <modelo tipo="OLS">
+            <coeficientes>
+                <const>{modelo.params['const']:.4f}</const>
+                <linguagens>{modelo.params['linguagens']:.4f}</linguagens>
+            </coeficientes>
+            <r_quadrado>{modelo.rsquared:.4f}</r_quadrado>
+            <r_quadrado_ajustado>{modelo.rsquared_adj:.4f}</r_quadrado_ajustado>
+            <estatisticas>
+                <f_statistic>{modelo.fvalue:.4f}</f_statistic>
+                <p_value>{modelo.f_pvalue:.4f}</p_value>
+            </estatisticas>
+        </modelo>
+    </regressao>""", language="xml")
+
         except Exception as e:
             st.error(f"Erro ao exibir regressão: {e}")
+
 
     def exibir_data_science_plot(self) -> None:
         """
@@ -184,53 +208,49 @@ class GitHubDashboard:
         try:
             linguagem = self.user_data.get("language", 0)
             repos = self.user_data.get("public_repos", 0)
-            # Criando DataFrame com dados simulados
             df = pd.DataFrame({
                 "linguagens": [linguagem + i for i in range(-5, 5)],
                 "repositorios": [repos + i for i in range(-5, 5)]
             })
-            X = df["linguagens"]
-            y = df["repositorios"]
-            X_const = sm.add_constant(X)
-            modelo = sm.OLS(y, X_const).fit()
-
-            # Criando estrutura XML
-            root = ET.Element("RegressaoLinear")
-            entrada = ET.SubElement(root, "Entrada")
-            usuario = ET.SubElement(entrada, "Usuario")
-            ET.SubElement(usuario, "Linguagem").text = str(self.linguagem)
-            ET.SubElement(usuario, "Repositorios").text = str(self.repositorios)
-
-            dados = ET.SubElement(entrada, "Dados")
-            for i in range(len(df)):
-                obs = ET.SubElement(dados, "Observacao")
-                ET.SubElement(obs, "Linguagens").text = str(df.iloc[i]["linguagens"])
-                ET.SubElement(obs, "Repositorios").text = str(df.iloc[i]["repositorios"])
-
-            modelo_elem = ET.SubElement(root, "Modelo")
-            coefs = modelo.params
-            pvalores = modelo.pvalues
-            estatisticas = modelo_elem
-
-            coef_elem = ET.SubElement(modelo_elem, "Coeficientes")
-            ET.SubElement(coef_elem, "Constante").text = f"{coefs['const']:.4f}"
-            ET.SubElement(coef_elem, "LinguaCoef").text = f"{coefs['linguagens']:.4f}"
-
-            stats_elem = ET.SubElement(modelo_elem, "Estatisticas")
-            ET.SubElement(stats_elem, "R2").text = f"{modelo.rsquared:.3f}"
-            ET.SubElement(stats_elem, "PValorConstante").text = f"{pvalores['const']:.3f}"
-            ET.SubElement(stats_elem, "PValorLingua").text = f"{pvalores['linguagens']:.3f}"
-            ET.SubElement(stats_elem, "DesvioPadrao").text = f"{modelo.bse['linguagens']:.3f}"
-            ET.SubElement(stats_elem, "FEstatistica").text = f"{modelo.fvalue:.2f}"
-
-            # Adiciona o resumo textual como CDATA
-            resumo_elem = ET.SubElement(root, "ResumoTexto")
-            resumo_text = modelo.summary().as_text()
-            cdata = ET.Comment(f"[CDATA[\n{resumo_text}\n]]")
-            resumo_elem.append(cdata)
-
-            # Converter para string
-            xml_str = ET.tostring(root, encoding="unicode")
-            return xml_str
+            fig, ax = plt.subplots()
+            sns.regplot(x="linguagens", y="repositorios", data=df, ax=ax)
+            ax.set_title("Regressão Linear: Linguagens vs Repositórios (Baseada no seu GitHub)")
+            st.pyplot(fig)
         except Exception as e:
-            st.error(f"Erro ao exibir regressão: {e}")
+            st.error(f"Erro ao exibir gráfico de regressão: {e}")
+
+    def exibir_series_temporais(self) -> None:
+        """
+        Método DataScience.
+
+        Returns:
+            Show (Temporais): Configurações carregadas do arquivo YAML.
+        """
+        st.subheader("📊 Análise de Séries Temporais com seus dados do GitHub")
+        try:
+            linguagem = self.user_data.get("language", 0)
+            repos = self.user_data.get("public_repos", 0)
+            datas = pd.date_range(end=pd.Timestamp.today(), periods=10)
+
+            df = pd.DataFrame({
+                "data": datas,
+                "linguagens": [linguagem + i for i in range(10)],
+                "repositorios": [repos + i + (i % 3 - 1) for i in range(10)]
+            }).set_index("data")
+
+            # Gráfico Altair com datas convertidas para string
+            df_plot = df.reset_index()
+            df_plot["data"] = df_plot["data"].astype(str)
+            st.altair_chart(df_plot[["data", "repositorios"]], use_container_width=True)
+
+            # Média móvel com Matplotlib
+            df["media_movel"] = df["repositorios"].rolling(window=3).mean()
+            fig, ax = plt.subplots()
+            df["repositorios"].plot(ax=ax, label="Repositórios", marker="o")
+            df["media_movel"].plot(ax=ax, label="Média Móvel (3 dias)", linestyle="--")
+            ax.set_title("Repositórios GitHub - Série Temporal com Média Móvel")
+            ax.legend()
+            st.pyplot(fig)
+
+        except Exception as e:
+            st.error(f"Erro ao exibir séries temporais: {e}")
