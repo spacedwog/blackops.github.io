@@ -125,6 +125,40 @@ class FirewallRelayController:
 
         return reasons
     
+    def detect_active_block_reasons(self):
+        """Analisa o sistema e identifica quais possíveis causas de bloqueio estão presentes."""
+        reasons_found = []
+
+        # Verifica acesso direto à porta
+        if not self.check_port_access():
+            reasons_found.append("❌ A porta 43 está inacessível. Pode estar bloqueada localmente ou na rede.")
+
+        # Verifica regras de firewall locais
+        if self.check_firewall_rules():
+            reasons_found.append("🔒 Regras de firewall detectadas para a porta 43.")
+
+        # Verifica presença de iptables ou ufw (Linux)
+        if self.system == "Linux":
+            iptables_check = subprocess.run(["sudo", "iptables", "-L", "-n"], capture_output=True, text=True)
+            ufw_check = subprocess.run(["sudo", "ufw", "status"], capture_output=True, text=True)
+            if "REJECT" in iptables_check.stdout or "DROP" in iptables_check.stdout:
+                reasons_found.append("🛡️ iptables está rejeitando conexões em algumas portas.")
+            if "DENY" in ufw_check.stdout:
+                reasons_found.append("🚫 UFW está configurado para negar conexões em algumas portas.")
+
+        # Verifica no Windows por bloqueios no netsh
+        elif self.system == "Windows":
+            netsh_check = subprocess.run(
+                ["netsh", "advfirewall", "firewall", "show", "rule", "name=all"],
+                capture_output=True, text=True, shell=True
+            )
+            if f"Port: {self.firewall_port}" in netsh_check.stdout:
+                reasons_found.append("🛡️ O Windows Firewall contém regras para a porta 43.")
+
+        if not reasons_found:
+            reasons_found.append("✅ Nenhum motivo de bloqueio detectado localmente — pode ser rede ou ISP.")
+
+        return reasons_found
 
 # Exemplo de uso
 if __name__ == "__main__":
@@ -136,3 +170,7 @@ if __name__ == "__main__":
     print("\n📋 Diagnóstico dos motivos mais prováveis para o bloqueio da porta 43:")
     for reason in controller.diagnose_common_block_reasons():
         print("-", reason)
+    print("\n🧪 Motivos realmente detectados no seu sistema:")
+    for found in controller.detect_active_block_reasons():
+        print("-", found)
+
