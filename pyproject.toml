@@ -1,0 +1,15 @@
+[project]
+name = "blackops"
+version = "0.1.0"
+description = "Aplicação Streamlit para controle de firewall e cibersegurança"
+authors = [
+    { name = "Felipe dos Santos", email = "owner@spacedwog.com.br" }
+]
+dependencies = [
+    "streamlit>=1.32"
+]
+requires-python = ">=3.8"
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
