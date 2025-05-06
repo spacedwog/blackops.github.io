@@ -48,6 +48,7 @@ class FirewallRelayController:
         return False
 
     def list_possible_reasons(self):
+        # sourcery skip: merge-list-appends-into-extend, switch
         reasons = [
             "✔️ Política de segurança da rede exige bloqueio de portas não utilizadas.",
             "✔️ Configuração manual do administrador para bloquear tráfego na porta 43.",
@@ -150,9 +151,9 @@ class FirewallRelayController:
             if netsh_check.stdout and f"Port: {self.firewall_port}" in netsh_check.stdout:
                 logging.info(f"Porta {self.firewall_port} bloqueada pelo firewall.")
                 return st.error(f"A porta {self.firewall_port} está bloqueada.")
-
-            logging.info(f"Porta {self.firewall_port} não encontrada na lista de bloqueios.")
-            return st.success(f"A porta {self.firewall_port} está liberada.")
+            else:
+                logging.info(f"Porta {self.firewall_port} não encontrada na lista de bloqueios.")
+                return st.success(f"A porta {self.firewall_port} está liberada.")
 
         except subprocess.CalledProcessError as e:
             logging.error("Erro ao executar netsh: %s", str(e))
