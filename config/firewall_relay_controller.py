@@ -1,6 +1,7 @@
 import time
 import socket
 import serial
+import logging
 import platform
 import subprocess
 
@@ -126,39 +127,39 @@ class FirewallRelayController:
         return reasons
     
     def detect_active_block_reasons(self):
-        """Analisa o sistema e identifica quais possíveis causas de bloqueio estão presentes."""
-        reasons_found = []
-
-        # Verifica acesso direto à porta
-        if not self.check_port_access():
-            reasons_found.append("❌ A porta 43 está inacessível. Pode estar bloqueada localmente ou na rede.")
-
-        # Verifica regras de firewall locais
-        if self.check_firewall_rules():
-            reasons_found.append("🔒 Regras de firewall detectadas para a porta 43.")
-
-        # Verifica presença de iptables ou ufw (Linux)
-        if self.system == "Linux":
-            iptables_check = subprocess.run(["sudo", "iptables", "-L", "-n"], capture_output=True, text=True)
-            ufw_check = subprocess.run(["sudo", "ufw", "status"], capture_output=True, text=True)
-            if "REJECT" in iptables_check.stdout or "DROP" in iptables_check.stdout:
-                reasons_found.append("🛡️ iptables está rejeitando conexões em algumas portas.")
-            if "DENY" in ufw_check.stdout:
-                reasons_found.append("🚫 UFW está configurado para negar conexões em algumas portas.")
-
-        # Verifica no Windows por bloqueios no netsh
-        elif self.system == "Windows":
+        """
+        Executa um comando 'netsh' para verificar regras de firewall ativas
+        e retorna se a porta especificada está bloqueada.
+        """
+        try:
+            # Executa o comando netsh e captura a saída
             netsh_check = subprocess.run(
                 ["netsh", "advfirewall", "firewall", "show", "rule", "name=all"],
-                capture_output=True, text=True, shell=True
+                capture_output=True,
+                text=True,
+                check=True  # Gera exceção se o comando falhar
             )
-            if f"Port: {self.firewall_port}" in netsh_check.stdout:
-                reasons_found.append("🛡️ O Windows Firewall contém regras para a porta 43.")
 
-        if not reasons_found:
-            reasons_found.append("✅ Nenhum motivo de bloqueio detectado localmente — pode ser rede ou ISP.")
+            # Depuração: registrar a saída
+            logging.debug("Comando netsh retornou código %s", netsh_check.returncode)
+            logging.debug("STDOUT:\n%s", netsh_check.stdout)
+            logging.debug("STDERR:\n%s", netsh_check.stderr)
 
-        return reasons_found
+            # Verifica se há um bloqueio para a porta
+            if netsh_check.stdout and f"Port: {self.firewall_port}" in netsh_check.stdout:
+                logging.info(f"Porta {self.firewall_port} bloqueada pelo firewall.")
+                return f"A porta {self.firewall_port} está bloqueada."
+
+            logging.info(f"Porta {self.firewall_port} não encontrada na lista de bloqueios.")
+            return f"A porta {self.firewall_port} está liberada."
+
+        except subprocess.CalledProcessError as e:
+            logging.error("Erro ao executar netsh: %s", str(e))
+            return "Erro ao verificar regras de firewall."
+
+        except Exception as e:
+            logging.error("Erro inesperado: %s", str(e))
+            return "Erro inesperado ao verificar regras de firewall."
 
 # Exemplo de uso
 if __name__ == "__main__":
