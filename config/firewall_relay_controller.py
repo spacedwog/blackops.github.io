@@ -4,7 +4,6 @@ import serial
 import logging
 import platform
 import subprocess
-import streamlit as st
 
 class FirewallRelayController:
     def __init__(self, port="COM3", baudrate=9600, test_host="whois.iana.org", firewall_port=43, timeout=3):
@@ -150,10 +149,10 @@ class FirewallRelayController:
             # Verifica se há um bloqueio para a porta
             if netsh_check.stdout and f"Port: {self.firewall_port}" in netsh_check.stdout:
                 logging.info(f"Porta {self.firewall_port} bloqueada pelo firewall.")
-                return st.error(f"A porta {self.firewall_port} está bloqueada.")
+                return f"🔴 A porta {self.firewall_port} está bloqueada."
             else:
                 logging.info(f"Porta {self.firewall_port} não encontrada na lista de bloqueios.")
-                return st.success(f"A porta {self.firewall_port} está liberada.")
+                return f"🟢 A porta {self.firewall_port} está liberada."
 
         except subprocess.CalledProcessError as e:
             logging.error("Erro ao executar netsh: %s", str(e))
