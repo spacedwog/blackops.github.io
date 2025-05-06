@@ -99,6 +99,32 @@ class FirewallRelayController:
                 return f"⚠️ Resposta inesperada: {response}"
         except Exception as e:
             return f"❌ Erro ao obter estado do relé: {e}"
+        
+    def diagnose_common_block_reasons(self):
+        """Retorna uma análise formatada dos motivos mais comuns para bloqueio da porta 43."""
+        reasons = [
+            "🔒 Firewall local (Windows Defender, iptables, ufw) pode estar bloqueando conexões WHOIS.",
+            "🧱 Firewall de rede (roteador/modem) configurado para bloquear portas de saída incomuns.",
+            "🏢 Políticas de segurança em redes corporativas bloqueiam portas que não sejam HTTP/HTTPS.",
+            "🌐 ISP (provedor de internet) pode filtrar conexões WHOIS para evitar abusos automatizados.",
+            "❌ O servidor WHOIS pode estar fora do ar ou recusar conexões do seu IP.",
+            "🔧 Permissões do sistema operacional insuficientes para abrir sockets (Linux exige sudo em alguns casos).",
+            "📦 Softwares antivírus/firewall de terceiros (ex: Kaspersky, McAfee) podem bloquear por padrão.",
+        ]
+
+        if self.system == "Linux":
+            reasons += [
+                "⚙️ Regras do iptables ou firewalld ativas bloqueando a porta 43.",
+                "🛡️ UFW (Uncomplicated Firewall) configurado para negar conexões de saída nessa porta."
+            ]
+        elif self.system == "Windows":
+            reasons += [
+                "⚙️ Regras do Windows Firewall via netsh para bloquear tráfego na porta 43.",
+                "🛡️ O perfil de rede (Público/Privado) do Windows pode bloquear conexões WHOIS."
+            ]
+
+        return reasons
+    
 
 # Exemplo de uso
 if __name__ == "__main__":
@@ -106,4 +132,7 @@ if __name__ == "__main__":
     print(controller.get_firewall_status_and_control_relay())
     print("\n📋 Motivos possíveis:")
     for reason in controller.list_possible_reasons():
+        print("-", reason)
+    print("\n📋 Diagnóstico dos motivos mais prováveis para o bloqueio da porta 43:")
+    for reason in controller.diagnose_common_block_reasons():
         print("-", reason)

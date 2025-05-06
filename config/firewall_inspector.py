@@ -22,9 +22,9 @@ class FirewallInspector:
     def detectar_whois_server(dominio):
         try:
             tld = dominio.strip().split(".")[-1].lower()
-            return FirewallInspector.WHOIS_SERVIDORES.get(tld, "whois.iana.org")
+            return FirewallInspector.WHOIS_SERVIDORES.get(tld, "whois.nic.br")
         except Exception:
-            return "whois.iana.org"
+            return "whois.nic.br"
 
     @staticmethod
     def verificar_firewall():

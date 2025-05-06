@@ -104,6 +104,7 @@ class GitHubDashboardApp:
                     
                     controller = FirewallRelayController(port="COM3")
                     st.write(controller.get_relay_status())
+                    st.write(controller.diagnose_common_block_reasons())
                     
                     # Criação de um botão para verificar o status
                     if st.button("🔍 Verificar Firewall Relay"):# Ajuste conforme necessário
