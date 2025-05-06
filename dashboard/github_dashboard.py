@@ -204,7 +204,6 @@ class GitHubDashboard:
         """
         st.subheader("📊 Análise de Séries Temporais com seus dados do GitHub")
         try:
-            # Simula evolução de repositórios com base no tempo
             linguagem = self.user_data.get("language", 0)
             repos = self.user_data.get("public_repos", 0)
             datas = pd.date_range(end=pd.Timestamp.today(), periods=10)
@@ -215,10 +214,12 @@ class GitHubDashboard:
                 "repositorios": [repos + i + (i % 3 - 1) for i in range(10)]
             }).set_index("data")
 
-            # Gráfico de linha simples
-            st.line_chart(df[["repositorios"]])
+            # Gráfico Altair com datas convertidas para string
+            df_plot = df.reset_index()
+            df_plot["data"] = df_plot["data"].astype(str)
+            st.altair_chart(df_plot[["data", "repositorios"]], use_container_width=True)
 
-            # Média móvel
+            # Média móvel com Matplotlib
             df["media_movel"] = df["repositorios"].rolling(window=3).mean()
             fig, ax = plt.subplots()
             df["repositorios"].plot(ax=ax, label="Repositórios", marker="o")
