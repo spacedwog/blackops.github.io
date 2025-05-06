@@ -34,7 +34,7 @@ class Firewall:
         if st.button("🚀 Transferir modelo via Firewall"):
             sucesso = self.transferir(modelo, destino_nome, variaveis_transmissao, chave_usuario)
             if sucesso:
-                st.success("✅ Modelo transferido com sucesso para variável protegida!")
+                st.toast("✅ Modelo transferido com sucesso para variável protegida!")
             else:
                 st.error("❌ Acesso negado! Chave incorreta ou sem permissão.")
 

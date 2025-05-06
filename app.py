@@ -103,7 +103,7 @@ class GitHubDashboardApp:
                     st.header("🔍 Verificar Firewall Relay")
                     
                     controller = FirewallRelayController(port="COM3")
-                    st.toast(controller.get_relay_status())
+                    st.write(controller.get_relay_status())
                     st.write(controller.detect_active_block_reasons())
                     st.write(controller.diagnose_common_block_reasons())
 
