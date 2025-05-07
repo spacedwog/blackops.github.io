@@ -176,4 +176,3 @@ if __name__ == "__main__":
     firewall = FirewallRelayController(firewall_port=43)  # Exemplo de porta
     resultado = firewall.detect_active_block_reasons()
     print(resultado)
-
