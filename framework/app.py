@@ -1,59 +1,71 @@
-# sourcery skip: remove-redundant-fstring
+# app.py
 import streamlit as st
 from firewall import Firewall, FirewallRule
 
-st.set_page_config(page_title="Firewall Interface", layout="wide")
+class App:
+    def __init__(self):
+        st.set_page_config(page_title="Firewall Interface", layout="wide")
+        self.fw = Firewall()
+        st.title("🔐 Firewall Interface com Streamlit")
+        self.tab1, self.tab2, self.tab3 = st.tabs(["📜 Regras", "📦 Simular Pacote", "📁 Exportar/Importar"])
 
-fw = Firewall()
+    def run(self):
+        self.render_rules_tab()
+        self.render_packet_simulation_tab()
+        self.render_import_export_tab()
 
-st.title("🔐 Firewall Interface com Streamlit")
+    def render_rules_tab(self):
+        with self.tab1:
+            st.subheader("Regras Atuais")
+            for i, rule in enumerate(self.fw.rules):
+                st.write(f"{i+1}. {rule.to_dict()}")
+                if st.button(f"Remover Regra {i+1}", key=f"remove_{i}"):
+                    self.fw.remove_rule(i)
+                    st.rerun()
 
-tab1, tab2, tab3 = st.tabs(["📜 Regras", "📦 Simular Pacote", "📁 Exportar/Importar"])
+            st.divider()
+            st.subheader("Adicionar Nova Regra")
+            src = st.text_input("IP de Origem (ex: 192.168.1.1 ou *)", key="src")
+            dst = st.text_input("IP de Destino (ex: 10.0.0.1 ou *)", key="dst")
+            port = st.text_input("Porta (ex: 80 ou *)", key="port")
+            action = st.selectbox("Ação", ["allow", "deny"], key="action")
 
-with tab1:
-    st.subheader("Regras Atuais")
-    for i, rule in enumerate(fw.rules):
-        st.write(f"{i+1}. {rule.to_dict()}")
-        if st.button(f"Remover Regra {i+1}", key=f"remove_{i}"):
-            fw.remove_rule(i)
-            st.rerun()
+            if st.button("Adicionar Regra"):
+                new_rule = FirewallRule(src, dst, port, action)
+                self.fw.add_rule(new_rule)
+                st.success("Regra adicionada com sucesso!")
+                st.rerun()
 
-    st.divider()
-    st.subheader("Adicionar Nova Regra")
-    src = st.text_input("IP de Origem (ex: 192.168.1.1 ou *)", key="src")
-    dst = st.text_input("IP de Destino (ex: 10.0.0.1 ou *)", key="dst")
-    port = st.text_input("Porta (ex: 80 ou *)", key="port")
-    action = st.selectbox("Ação", ["allow", "deny"], key="action")
+    def render_packet_simulation_tab(self):
+        with self.tab2:
+            st.subheader("Simular Verificação de Pacote")
+            test_src = st.text_input("IP Origem do Pacote", key="test_src")
+            test_dst = st.text_input("IP Destino do Pacote", key="test_dst")
+            test_port = st.text_input("Porta", key="test_port")
 
-    if st.button("Adicionar Regra"):
-        new_rule = FirewallRule(src, dst, port, action)
-        fw.add_rule(new_rule)
-        st.success("Regra adicionada com sucesso!")
-        st.rerun()
+            if st.button("Verificar"):
+                result = self.fw.check_packet(test_src, test_dst, test_port)
+                if result == "allow":
+                    st.success("✔️ Pacote PERMITIDO")
+                else:
+                    st.error("⛔ Pacote BLOQUEADO")
 
-with tab2:
-    st.subheader("Simular Verificação de Pacote")
-    test_src = st.text_input("IP Origem do Pacote", key="test_src")
-    test_dst = st.text_input("IP Destino do Pacote", key="test_dst")
-    test_port = st.text_input("Porta", key="test_port")
+    def render_import_export_tab(self):
+        with self.tab3:
+            st.subheader("Exportar / Importar Regras")
+            if st.button("Exportar para JSON"):
+                with open(self.fw.rules_file, "r") as f:
+                    st.download_button("📥 Baixar Regras", f.read(), file_name="firewall_rules.json")
 
-    if st.button("Verificar"):
-        result = fw.check_packet(test_src, test_dst, test_port)
-        if result == "allow":
-            st.success(f"✔️ Pacote PERMITIDO")
-        else:
-            st.error(f"⛔ Pacote BLOQUEADO")
+            uploaded = st.file_uploader("Importar Regras JSON")
+            if uploaded:
+                data = uploaded.read().decode("utf-8")
+                with open("rules.json", "w") as f:
+                    f.write(data)
+                st.success("Regras importadas com sucesso!")
+                st.rerun()
 
-with tab3:
-    st.subheader("Exportar / Importar Regras")
-    if st.button("Exportar para JSON"):
-        with open(fw.rules_file, "r") as f:
-            st.download_button("📥 Baixar Regras", f.read(), file_name="firewall_rules.json")
-
-    uploaded = st.file_uploader("Importar Regras JSON")
-    if uploaded:
-        data = uploaded.read().decode("utf-8")
-        with open("rules.json", "w") as f:
-            f.write(data)
-        st.success("Regras importadas com sucesso!")
-        st.rerun()
+# Executar o app
+if __name__ == "__main__":
+    app = App()
+    app.run()
