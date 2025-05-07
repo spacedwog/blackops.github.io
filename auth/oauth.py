@@ -45,6 +45,7 @@ class OAuthGitHub:
         if "access_token" not in st.session_state:
             col1, col2, col3 = st.columns([2, 2, 1])
             with col1:
+                # sourcery skip: merge-nested-ifs
                 if st.button("🔐 Login com GitHub", key="github_login", help="Clique para autenticar com GitHub"):
                     if "code" not in st.query_params:
                         params = {
