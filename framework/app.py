@@ -1,10 +1,9 @@
 # app.py
 import streamlit as st
-from firewall import Firewall, FirewallRule
+from framework.firewall import Firewall, FirewallRule
 
 class App:
     def __init__(self):
-        st.set_page_config(page_title="Firewall Interface", layout="wide")
         self.fw = Firewall()
         st.title("🔐 Firewall Interface com Streamlit")
         self.tab1, self.tab2, self.tab3 = st.tabs(["📜 Regras", "📦 Simular Pacote", "📁 Exportar/Importar"])
