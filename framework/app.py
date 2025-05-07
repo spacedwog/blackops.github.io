@@ -16,7 +16,7 @@ with tab1:
         st.write(f"{i+1}. {rule.to_dict()}")
         if st.button(f"Remover Regra {i+1}", key=f"remove_{i}"):
             fw.remove_rule(i)
-            st.experimental_user()
+            st.rerun()
 
     st.divider()
     st.subheader("Adicionar Nova Regra")
@@ -29,7 +29,7 @@ with tab1:
         new_rule = FirewallRule(src, dst, port, action)
         fw.add_rule(new_rule)
         st.success("Regra adicionada com sucesso!")
-        st.experimental_user()
+        st.rerun()
 
 with tab2:
     st.subheader("Simular Verificação de Pacote")
@@ -56,4 +56,4 @@ with tab3:
         with open("rules.json", "w") as f:
             f.write(data)
         st.success("Regras importadas com sucesso!")
-        st.experimental_user()
+        st.rerun()
