@@ -87,6 +87,7 @@ class GitHubDashboardApp:
                     "📦 Repositórios",
                     "📈 Data Science",
                     "🧱 Firewall",
+                    "📟 Framework",
                     "🛡️ Cibersegurança",
                     "🔄 Cyber-Brain"
                 ])
@@ -117,6 +118,8 @@ class GitHubDashboardApp:
                         for reason in controller.list_possible_reasons():
                             st.write("-", reason)
                             
+                with abas[4]:
+                            
                     aba = st.tabs(["📜 Regras de Firewall", "📦 Simular Pacotes", "📁 Exportar/Importar(JSON)"])
                     
                     with aba[0]:
@@ -124,12 +127,12 @@ class GitHubDashboardApp:
                     with aba[1]:
                         self.framework.render_packet_simulation_tab()
                     with aba[2]:
-                        self.render_import_export_tab()
-
-                with abas[4]:
-                    self.auth.exibir_cyberseguranca()
+                        self.framework.render_import_export_tab()
 
                 with abas[5]:
+                    self.auth.exibir_cyberseguranca()
+
+                with abas[6]:
                     st.title("🤖 Cyber-Brain: Inteligência Artificial na Nuvem")
                     st.header("🧠 Transferência Segura de Conhecimento com Firewall")
 

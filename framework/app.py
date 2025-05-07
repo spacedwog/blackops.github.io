@@ -5,16 +5,8 @@ from framework.firewall import Firewall, FirewallRule
 class App:
     def __init__(self):
         self.fw = Firewall()
-        st.title("🔐 Firewall Interface com Streamlit")
-        self.tab1, self.tab2, self.tab3 = st.tabs(["📜 Regras", "📦 Simular Pacote", "📁 Exportar/Importar"])
-
-    def run(self):
-        self.render_rules_tab()
-        self.render_packet_simulation_tab()
-        self.render_import_export_tab()
 
     def render_rules_tab(self):
-        with self.tab1:
             st.subheader("Regras Atuais")
             for i, rule in enumerate(self.fw.rules):
                 st.write(f"{i+1}. {rule.to_dict()}")
@@ -36,7 +28,6 @@ class App:
                 st.rerun()
 
     def render_packet_simulation_tab(self):
-        with self.tab2:
             st.subheader("Simular Verificação de Pacote")
             test_src = st.text_input("IP Origem do Pacote", key="test_src")
             test_dst = st.text_input("IP Destino do Pacote", key="test_dst")
@@ -50,7 +41,6 @@ class App:
                     st.error("⛔ Pacote BLOQUEADO")
 
     def render_import_export_tab(self):
-        with self.tab3:
             st.subheader("Exportar / Importar Regras")
             if st.button("Exportar para JSON"):
                 with open(self.fw.rules_file, "r") as f:
@@ -63,8 +53,3 @@ class App:
                     f.write(data)
                 st.success("Regras importadas com sucesso!")
                 st.rerun()
-
-# Executar o app
-if __name__ == "__main__":
-    app = App()
-    app.run()
