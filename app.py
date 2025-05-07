@@ -8,6 +8,7 @@ import joblib
 import shutil
 import platform
 import streamlit as st
+from framework.app import App
 from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
 from config.firewall import Firewall
@@ -46,6 +47,7 @@ class GitHubDashboardApp:
 
     def __init__(self):
         self.db = UsuarioDB()
+        self.framework = App()
         self.auth = OAuthGitHub()
         self.blackboard = BlackboardValidator()
         self.user_data = None
@@ -114,6 +116,15 @@ class GitHubDashboardApp:
                         print("\n📋 Motivos possíveis:")
                         for reason in controller.list_possible_reasons():
                             st.write("-", reason)
+                            
+                    aba = st.tabs(["📜 Regras de Firewall", "📦 Simular Pacotes", "📁 Exportar/Importar(JSON)"])
+                    
+                    with aba[0]:
+                        self.framework.render_rules_tab()
+                    with aba[1]:
+                        self.framework.render_packet_simulation_tab()
+                    with aba[2]:
+                        self.render_import_export_tab()
 
                 with abas[4]:
                     self.auth.exibir_cyberseguranca()
