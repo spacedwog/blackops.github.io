@@ -31,16 +31,15 @@ class Firewall:
         }
         return regras_autorizadas.get(tipo, False)
         
-    def transferir_via_firewall(self, objeto, caminho="./modelos_salvos", nome_arquivo="modelo.joblib"):
+    def transferir_via_firewall(self, dados, caminho="./dados_github", nome_arquivo="dados.json"):
         os.makedirs(caminho, exist_ok=True)
         destino = os.path.join(caminho, nome_arquivo)
-        joblib.dump(objeto, destino)
 
-        # Criptografa ou verifica integridade (hash SHA256)
+        with open(destino, "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=4, ensure_ascii=False)
+
         integridade = self.calcular_hash(destino)
-
-        # Registra a operação
-        self.registrar_log(f"TRANSFERÊNCIA AUTORIZADA: Modelo exportado para {destino} | HASH: {integridade}")
+        self.registrar_log(f"TRANSFERÊNCIA AUTORIZADA: Dados GitHub exportados para {destino} | HASH: {integridade}")
         return destino
 
     def registrar_transferencia(self, tipo, recurso=None):

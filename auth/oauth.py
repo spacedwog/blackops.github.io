@@ -193,20 +193,29 @@ class OAuthGitHub:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    def exportar_repositorio_zip(self, nome_repo, destino="./repositorios"):
-        """
-        Faz o download do repositório como ZIP diretamente do GitHub.
-        Ex: nome_repo = "user/nome_do_repo"
-        """
-        os.makedirs(destino, exist_ok=True)
-        url = f"https://github.com/{nome_repo}/archive/refs/heads/main.zip"
+    def coletar_dados_github(self, username):
         headers = {"Authorization": f"token {self.access_token}"} if self.access_token else {}
+        user_url = f"{self.base_url}/users/{username}"
+        repos_url = f"{self.base_url}/users/{username}/repos"
 
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            zip_path = os.path.join(destino, f"{nome_repo.replace('/', '_')}_main.zip")
-            with open(zip_path, "wb") as f:
-                f.write(response.content)
-            return zip_path
-        else:
-            raise Exception(f"Falha ao baixar repositório: {response.status_code} - {response.text}")
+        user_data = requests.get(user_url, headers=headers).json()
+        repos_data = requests.get(repos_url, headers=headers).json()
+
+        dados = {
+            "login": user_data.get("login"),
+            "nome": user_data.get("name"),
+            "bio": user_data.get("bio"),
+            "localizacao": user_data.get("location"),
+            "public_repos": user_data.get("public_repos"),
+            "seguidores": user_data.get("followers"),
+            "repositorios": [
+                {
+                    "nome": repo["name"],
+                    "descricao": repo.get("description"),
+                    "url": repo["html_url"],
+                    "estrelas": repo["stargazers_count"]
+                } for repo in repos_data
+            ]
+        }
+
+        return dados

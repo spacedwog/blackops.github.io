@@ -137,33 +137,18 @@ class GitHubDashboardApp:
 
                     firewall = Firewall()
 
-                    if st.button("🔄 Treinar e Exportar Modelo via Firewall"):
-                        st.info("🔍 Verificando permissões do firewall...")
-
-                        if firewall.autorizar_transferencia("modelo_ia"):
-                            iris = load_iris()
-                            X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2)
-
-                            modelo = LogisticRegression(max_iter=200)
-                            modelo.fit(X_train, y_train)
-
-                            resultado = firewall.transferir_via_firewall(modelo, diretorio, nome_arquivo)
-                            st.success(f"✅ Modelo exportado com sucesso: {resultado}")
-                        else:
-                            st.error("❌ Transferência bloqueada pelo firewall. Ação não autorizada.")
-
-                    if nome_repo and st.button("⬇️ Exportar Código/Repositório GitHub via Firewall"):
-                        st.info(f"📡 Solicitando exportação segura do repositório `{nome_repo}`...")
-
-                        if firewall.autorizar_transferencia("github_repo", recurso=nome_repo):
-                            try:
-                                caminho_zip = self.auth.exportar_repositorio_zip(nome_repo, destino=diretorio)
-                                firewall.registrar_transferencia("github_repo", recurso=nome_repo)
-                                st.success(f"📁 Repositório exportado com sucesso para: {caminho_zip}")
-                            except Exception as e:
-                                st.error(f"Erro ao exportar repositório: {str(e)}")
-                        else:
-                            st.error("🚫 Exportação bloqueada pelo firewall. Permissão negada.")
+                    if st.button("📤 Exportar Dados GitHub via Firewall"):
+                        if self.user_data:
+                            login_usuario = self.user_data["login"]
+                            st.info(f"🔍 Coletando dados públicos do GitHub para: {login_usuario}")
+                            
+                            if firewall.autorizar_transferencia("github_info", recurso=login_usuario):
+                                dados = self.auth.coletar_dados_github(login_usuario)
+                                caminho_final = firewall.transferir_json_via_firewall(dados, diretorio, nome_arquivo)
+                                firewall.registrar_transferencia("github_info", recurso=login_usuario)
+                                st.success(f"✅ Dados exportados com sucesso: {caminho_final}")
+                            else:
+                                st.error("❌ Firewall bloqueou a exportação de dados do GitHub.")
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
