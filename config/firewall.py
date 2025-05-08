@@ -31,25 +31,17 @@ class Firewall:
         }
         return regras_autorizadas.get(tipo, False)
         
-    def transferir_via_firewall(self, modelo):  # sourcery skip: move-assign
-        # Firewall para autenticação de variáveis
-        chave_usuario = st.text_input("🔐 Chave de acesso (ex: secret123)")
-        destino_nome = "modelo_autenticado"
-        self.registrar_autorizacao(destino_nome, "secret123")  # chave válida predefinida
+    def transferir_via_firewall(self, objeto, caminho="./modelos_salvos", nome_arquivo="modelo.joblib"):
+        os.makedirs(caminho, exist_ok=True)
+        destino = os.path.join(caminho, nome_arquivo)
+        joblib.dump(objeto, destino)
 
-        variaveis_transmissao = {}
+        # Criptografa ou verifica integridade (hash SHA256)
+        integridade = self.calcular_hash(destino)
 
-        if st.button("🚀 Transferir modelo via Firewall"):
-            sucesso = self.transferir(modelo, destino_nome, variaveis_transmissao, chave_usuario)
-            if sucesso:
-                st.toast("✅ Modelo transferido com sucesso para variável protegida!")
-            else:
-                st.error("❌ Acesso negado! Chave incorreta ou sem permissão.")
-
-            if destino_nome in variaveis_transmissao:
-                st.write("🔎 Modelo disponível na variável protegida. Exemplo de predição:")
-                pred = variaveis_transmissao[destino_nome].predict([[5.1, 3.5, 1.4, 0.2]])
-                st.write(f"🔮 Predição: {pred}")
+        # Registra a operação
+        self.registrar_log(f"TRANSFERÊNCIA AUTORIZADA: Modelo exportado para {destino} | HASH: {integridade}")
+        return destino
 
     def registrar_transferencia(self, tipo, recurso=None):
         data = datetime.now().isoformat()
