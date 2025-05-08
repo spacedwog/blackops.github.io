@@ -126,29 +126,32 @@ class GitHubDashboardApp:
 
                 with abas[6]:
                     st.title("🤖 Cyber-Brain: Inteligência Artificial na Nuvem")
-                    st.header("🧠 Transferência Segura de Conhecimento com Firewall e GitHub")
-
-                    st.markdown("Essa seção permite exportar dados do GitHub e modelos IA com verificação de firewall e segurança.")
+                    st.header("🧠 Transferência Segura de Conhecimento com Firewall")
 
                     # Entradas do usuário
-                    diretorio = st.text_input("Diretório para salvar", "./modelos_salvos")
-                    nome_arquivo = st.text_input("Nome do arquivo", "modelo_iris.joblib")
-                    nome_repo = st.text_input("🔗 Nome do repositório GitHub (ex: user/repo)", "")
+                    diretorio = st.text_input("📂 Diretório para salvar o arquivo JSON", "./dados_github")
+                    nome_arquivo = st.text_input("📝 Nome do arquivo JSON", "dados_usuario.json")
 
                     firewall = Firewall()
 
                     if st.button("📤 Exportar Dados GitHub via Firewall"):
                         if self.user_data:
                             login_usuario = self.user_data["login"]
-                            st.info(f"🔍 Coletando dados públicos do GitHub para: {login_usuario}")
-                            
+                            st.info(f"🔍 Coletando dados públicos do GitHub para: **{login_usuario}**")
+
                             if firewall.autorizar_transferencia("github_info", recurso=login_usuario):
                                 dados = self.auth.coletar_dados_github(login_usuario)
                                 caminho_final = firewall.transferir_json_via_firewall(dados, diretorio, nome_arquivo)
                                 firewall.registrar_transferencia("github_info", recurso=login_usuario)
-                                st.success(f"✅ Dados exportados com sucesso: {caminho_final}")
+                                st.success(f"✅ Dados exportados com sucesso para: `{caminho_final}`")
+
+                                # Visualização dos dados exportados
+                                st.subheader("📑 Prévia dos dados exportados:")
+                                st.json(dados)
                             else:
                                 st.error("❌ Firewall bloqueou a exportação de dados do GitHub.")
+                        else:
+                            st.warning("⚠️ Usuário GitHub não autenticado.")
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
