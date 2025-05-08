@@ -37,8 +37,10 @@ class App:
                 result = self.fw.check_packet(test_src, test_dst, test_port)
                 if result == "allow":
                     st.success("✔️ Pacote PERMITIDO")
+                    st.toast("✔️ Pacote PERMITIDO")
                 else:
                     st.error("⛔ Pacote BLOQUEADO")
+                    st.toast("⛔ Pacote BLOQUEADO")
 
     def render_import_export_tab(self):
             st.subheader("Exportar / Importar Regras")
@@ -51,5 +53,6 @@ class App:
                 data = uploaded.read().decode("utf-8")
                 with open("rules.json", "w") as f:
                     f.write(data)
-                st.success("Regras importadas com sucesso!")
+                st.success("📥 Regras importadas com sucesso!")
+                st.toast("📥 Regras importadas com sucesso!")
                 st.rerun()

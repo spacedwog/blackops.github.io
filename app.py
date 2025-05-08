@@ -80,7 +80,7 @@ class GitHubDashboardApp:
                 self.user_data = self.auth.get_user_from_token()
 
             if self.user_data:
-                st.toast(f"⚫ Blackops(Relay/Firewall/Cibersegurança)")
+                st.toast("⚫ Blackops(Relay/Firewall/Cibersegurança)")
                 self.dashboard = GitHubDashboard(self.user_data)
                 abas = st.tabs([
                     "👤 Perfil",
