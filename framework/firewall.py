@@ -20,6 +20,10 @@ class Firewall:
     def __init__(self, rules_file='rules.json'):
         self.rules_file = rules_file
         self.rules = self.load_rules()
+        
+    def add_whois_rules(self, source_ip, dest_ip, port, action):
+        rule = FirewallRule(source_ip=source_ip, dest_ip=dest_ip, port=port, action=action)
+        self.add_rule(rule)
 
     def load_rules(self) -> List[FirewallRule]:
         try:
@@ -41,6 +45,10 @@ class Firewall:
         if 0 <= index < len(self.rules):
             del self.rules[index]
             self.save_rules()
+            
+    def clear_rules(self):
+        self.rules = []
+        self.save_rules()
 
     def check_packet(self, source_ip, dest_ip, port) -> str:
         return next(

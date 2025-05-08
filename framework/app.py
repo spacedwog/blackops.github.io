@@ -15,6 +15,11 @@ class App:
                     st.toast("🗑️ Regra removida com sucesso!")
                     st.rerun()
 
+            if st.button("🧹 Limpar Regras"):
+                self.fw.clear_rules()
+                st.toast("🧹 Regras limpas com sucesso!")
+                st.rerun()
+
             st.divider()
             st.subheader("Adicionar Nova Regra")
             src = st.text_input("IP de Origem (ex: 192.168.1.1 ou *)", key="src")
@@ -23,8 +28,7 @@ class App:
             action = st.selectbox("Ação", ["allow", "deny"], key="action")
 
             if st.button("Adicionar Regra"):
-                new_rule = FirewallRule(src, dst, port, action)
-                self.fw.add_rule(new_rule)
+                self.fw.add_whois_rules(src, dst, port, action)
                 st.success("📥 Regra adicionada com sucesso!")
                 st.toast("📥 Regra adicionada com sucesso!")
                 st.rerun()

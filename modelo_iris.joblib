@@ -7,3 +7,4 @@
 [2025-05-07 18:15:20] Backup criado: ./modelos_salvos\modelo_iris.joblib.bak
 [2025-05-07 18:15:20] Modelo salvo: ./modelos_salvos\modelo_iris.joblib
 [2025-05-07 18:15:35] Modelo carregado com joblib: ./modelos_salvos\modelo_iris.joblib
+[2025-05-08 12:16:55] Erro: Arquivo não encontrado - ./logs\modelo_iris.joblib
