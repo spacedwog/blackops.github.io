@@ -192,3 +192,21 @@ class OAuthGitHub:
         FirewallInspector.listar_conexoes()
 
         st.markdown("</div>", unsafe_allow_html=True)
+
+    def exportar_repositorio_zip(self, nome_repo, destino="./repositorios"):
+        """
+        Faz o download do repositório como ZIP diretamente do GitHub.
+        Ex: nome_repo = "user/nome_do_repo"
+        """
+        os.makedirs(destino, exist_ok=True)
+        url = f"https://github.com/{nome_repo}/archive/refs/heads/main.zip"
+        headers = {"Authorization": f"token {self.access_token}"} if self.access_token else {}
+
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            zip_path = os.path.join(destino, f"{nome_repo.replace('/', '_')}_main.zip")
+            with open(zip_path, "wb") as f:
+                f.write(response.content)
+            return zip_path
+        else:
+            raise Exception(f"Falha ao baixar repositório: {response.status_code} - {response.text}")
