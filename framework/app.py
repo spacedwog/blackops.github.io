@@ -10,8 +10,9 @@ class App:
             st.subheader("Regras Atuais")
             for i, rule in enumerate(self.fw.rules):
                 st.write(f"{i+1}. {rule.to_dict()}")
-                if st.button(f"Remover Regra {i+1}", key=f"remove_{i}"):
+                if st.button(f"🗑️ Remover Regra {i+1}", key=f"remove_{i}"):
                     self.fw.remove_rule(i)
+                    st.toast("🗑️ Regra removida com sucesso!")
                     st.rerun()
 
             st.divider()
@@ -24,7 +25,8 @@ class App:
             if st.button("Adicionar Regra"):
                 new_rule = FirewallRule(src, dst, port, action)
                 self.fw.add_rule(new_rule)
-                st.success("Regra adicionada com sucesso!")
+                st.success("📥 Regra adicionada com sucesso!")
+                st.toast("📥 Regra adicionada com sucesso!")
                 st.rerun()
 
     def render_packet_simulation_tab(self):
@@ -37,10 +39,8 @@ class App:
                 result = self.fw.check_packet(test_src, test_dst, test_port)
                 if result == "allow":
                     st.success("✔️ Pacote PERMITIDO")
-                    st.toast("✔️ Pacote PERMITIDO")
                 else:
                     st.error("⛔ Pacote BLOQUEADO")
-                    st.toast("⛔ Pacote BLOQUEADO")
 
     def render_import_export_tab(self):
             st.subheader("Exportar / Importar Regras")
@@ -54,5 +54,4 @@ class App:
                 with open("rules.json", "w") as f:
                     f.write(data)
                 st.success("📥 Regras importadas com sucesso!")
-                st.toast("📥 Regras importadas com sucesso!")
                 st.rerun()
