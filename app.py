@@ -1,11 +1,6 @@
 # -----------------------------
 # ./app.py
 # -----------------------------
-import time
-import serial
-import pickle
-import joblib
-import shutil
 import platform
 import streamlit as st
 from framework.app import App
@@ -13,18 +8,15 @@ from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
 from config.firewall import Firewall
 from sklearn.datasets import load_iris
-from sklearn.metrics import accuracy_score
 from auth.blackboard import BlackboardValidator
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
-from config.gerenciador_modelo import GerenciadorModelo
 from config.firewall_relay_controller import FirewallRelayController
+
 # OCR e imagem
 import os
 import pytesseract
-from datetime import date
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
@@ -150,10 +142,6 @@ class GitHubDashboardApp:
                     
                     firewall = Firewall()
                     firewall.transferir_via_firewall(modelo)
-
-                    gerenciador_modelo = GerenciadorModelo(nome_arquivo)
-                    gerenciador_modelo.salvar_arquivo(modelo, diretorio, nome_arquivo)
-                    gerenciador_modelo.carregar_arquivo(diretorio, nome_arquivo)
 
                 if st.button("🚪 Logout"):
                     st.session_state.login_realizado = False
