@@ -141,7 +141,7 @@ class GitHubDashboardApp:
 
                             if firewall.autorizar_transferencia("github_info", recurso=login_usuario):
                                 dados = self.auth.coletar_dados_github(login_usuario)
-                                caminho_final = firewall.transferir_json_via_firewall(dados, diretorio, nome_arquivo)
+                                caminho_final = firewall.transferir_via_firewall(dados, diretorio, nome_arquivo)
                                 firewall.registrar_transferencia("github_info", recurso=login_usuario)
                                 st.success(f"✅ Dados exportados com sucesso para: `{caminho_final}`")
 
