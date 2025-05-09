@@ -17,6 +17,10 @@ class OAuthGitHub:
     TOKEN_URL = "https://github.com/login/oauth/access_token"
     USER_API_URL = "https://api.github.com/user"
     
+    def __init__(self):
+        self.base_url = "https://api.github.com"
+        self.access_token = None  # Certifique-se de que será atualizado após login
+        
     @classmethod
     def login_button(cls):
         # Layout tech visual com HTML + CSS embutido
@@ -45,7 +49,6 @@ class OAuthGitHub:
         if "access_token" not in st.session_state:
             col1, col2, col3 = st.columns([2, 2, 1])
             with col1:
-                # sourcery skip: merge-nested-ifs
                 if st.button("🔐 Login com GitHub", key="github_login", help="Clique para autenticar com GitHub"):
                     if "code" not in st.query_params:
                         params = {
@@ -194,6 +197,8 @@ class OAuthGitHub:
         st.markdown("</div>", unsafe_allow_html=True)
 
     def coletar_dados_github(self, username):
+        # sourcery skip: inline-immediately-returned-variable
+        self.access_token = st.session_state.get("access_token")
         headers = {"Authorization": f"token {self.access_token}"} if self.access_token else {}
         user_url = f"{self.base_url}/users/{username}"
         repos_url = f"{self.base_url}/users/{username}/repos"

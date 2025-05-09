@@ -1,0 +1,82 @@
+{
+    "login": "spacedwog",
+    "nome": "Spacedwog",
+    "bio": "🚀 spacedwog\r\nApaixonado por tecnologia, aprendizado e exploração do desconhecido!\r\n📚 Acredita no poder do conhecimento compartilhado e da colaboração.",
+    "localizacao": null,
+    "public_repos": 12,
+    "seguidores": 0,
+    "repositorios": [
+        {
+            "nome": "ai.github.io",
+            "descricao": "Um repositório para criação de IA.",
+            "url": "https://github.com/spacedwog/ai.github.io",
+            "estrelas": 1
+        },
+        {
+            "nome": "blackops.github.io",
+            "descricao": "Repositório para desenvolvimento de interface blackops(datascience + cybersecurity)",
+            "url": "https://github.com/spacedwog/blackops.github.io",
+            "estrelas": 1
+        },
+        {
+            "nome": "codespaces-openvpn",
+            "descricao": "forked from codespaces-contrib/codespaces-openvpn",
+            "url": "https://github.com/spacedwog/codespaces-openvpn",
+            "estrelas": 0
+        },
+        {
+            "nome": "donnaparis.github.io",
+            "descricao": "Repositório da loja virtual Donna Paris",
+            "url": "https://github.com/spacedwog/donnaparis.github.io",
+            "estrelas": 1
+        },
+        {
+            "nome": "felipersantos1988",
+            "descricao": null,
+            "url": "https://github.com/spacedwog/felipersantos1988",
+            "estrelas": 0
+        },
+        {
+            "nome": "iIdol-Shop",
+            "descricao": "aplicativo react-native para loja de influencers",
+            "url": "https://github.com/spacedwog/iIdol-Shop",
+            "estrelas": 0
+        },
+        {
+            "nome": "json-simple",
+            "descricao": "A simple Java toolkit for JSON. You can use json-simple to encode or decode JSON text.",
+            "url": "https://github.com/spacedwog/json-simple",
+            "estrelas": 0
+        },
+        {
+            "nome": "loja_virtual",
+            "descricao": "Este projeto implementa um sistema de video conferência controlado por NodeMCU ESP8266-12 V2.",
+            "url": "https://github.com/spacedwog/loja_virtual",
+            "estrelas": 1
+        },
+        {
+            "nome": "mainframe.github.io",
+            "descricao": "This project is a set of training materials and labs for COBOL on z/OS. The following books are available within this repository. To get started, follow the steps in their respective READMEs.",
+            "url": "https://github.com/spacedwog/mainframe.github.io",
+            "estrelas": 0
+        },
+        {
+            "nome": "secretaria-virtual",
+            "descricao": "A Secretaria Virtual é um sistema desenvolvido em TypeScript para auxiliar no atendimento de pacientes em um escritório médico. O projeto visa fornecer funcionalidades para gestão de consultas, pacientes e relatórios de forma automatizada e eficiente.",
+            "url": "https://github.com/spacedwog/secretaria-virtual",
+            "estrelas": 1
+        },
+        {
+            "nome": "spacedwog.github.io",
+            "descricao": "Repositório da Webpage spacedwog.com.br",
+            "url": "https://github.com/spacedwog/spacedwog.github.io",
+            "estrelas": 1
+        },
+        {
+            "nome": "tesseract",
+            "descricao": "Tesseract Open Source OCR Engine (main repository)",
+            "url": "https://github.com/spacedwog/tesseract",
+            "estrelas": 0
+        }
+    ]
+}

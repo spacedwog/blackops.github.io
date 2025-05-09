@@ -25,10 +25,13 @@ class Firewall:
             return False
 
     def autorizar_transferencia(self, tipo, recurso=None):
-        # Aqui você pode colocar regras reais de firewall
+        """
+            Verifica se a transferência é autorizada com base no tipo e no recurso.
+        """
         regras_autorizadas = {
             "modelo_ia": True,
-            "github_repo": recurso is not None and recurso.startswith("user/")  # ajuste o prefixo conforme seu uso
+            "github_info": recurso is not None,  # Permite exportação de dados GitHub autenticado
+            "github_repo": recurso is not None and recurso.startswith("spacedwog/blackops.github.io")
         }
         return regras_autorizadas.get(tipo, False)
         
