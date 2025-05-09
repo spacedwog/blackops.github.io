@@ -2,7 +2,7 @@
 
 # Defina os valores do seu repositório e token (copiados do GitHub)
 $REPO_URL = "https://github.com/spacedwog/blackops.github.io"
-$TOKEN = "ghp_234567890123456789012345678901234567890"
+$TOKEN = "BEH4NMD4SPZEY64MOKL7KFDIDZHMQ"
 
 # Cria uma pasta e entra nela
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\actions-runner" | Out-Null

@@ -121,14 +121,16 @@ class FirewallInspector:
     @staticmethod
     def bloquear_porta():
         sistema = platform.system()
-        if sistema == "Windows":
-            comando = 'netsh advfirewall firewall add rule name="Bloquear Porta 43" dir=out action=block protocol=TCP remoteport=43'
-            resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
-            return resultado.stdout or resultado.stderr
-        else:
+        if sistema != "Windows":
             return "Bloqueio automático só disponível no Windows nesta versão."
+        comando = 'netsh advfirewall firewall add rule name="Bloquear Porta 43" dir=out action=block protocol=TCP remoteport=43'
+        resultado = subprocess.run(comando, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
+        return resultado.stdout or resultado.stderr
 
     @staticmethod
     def listar_conexoes():
-        conexoes = [conn for conn in psutil.net_connections() if conn.raddr and conn.raddr.port == 43]
-        return conexoes
+        return [
+            conn
+            for conn in psutil.net_connections()
+            if conn.raddr and conn.raddr.port == 43
+        ]
