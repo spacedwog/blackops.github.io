@@ -1,7 +1,7 @@
 # runner-setup.ps1
 
 # Defina os valores do seu repositório e token (copiados do GitHub)
-$REPO_URL = "https://api.github.com/users/spacedwog/repos"
+$REPO_URL = "https://github.com/spacedwog/blackops.github.io"
 $TOKEN = "ghp_234567890123456789012345678901234567890"
 
 # Cria uma pasta e entra nela
