@@ -47,13 +47,13 @@ class GitHubDashboardApp:
     def run(self):
         # sourcery skip: extract-duplicate-method, extract-method, remove-redundant-fstring
         st.set_page_config(page_title="BlackOps", page_icon="⚫")
-        st.title("🔐 Login com GitHub")
+        st.title("🔐 Blackops Intelligence")
 
         if "login_realizado" not in st.session_state:
             st.session_state.login_realizado = False
 
         if not st.session_state.login_realizado:
-            login_input = st.text_input("Digite seu login do GitHub:", key="login_input")
+            login_input = st.text_input("Digite seu login:", key="login_input")
 
             self.user_data = self.auth.callback()
 
