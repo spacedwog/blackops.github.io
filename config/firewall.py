@@ -4,27 +4,35 @@ import joblib
 import hashlib
 import logging
 from datetime import datetime
+from azimov_firewall import AzimovFirewall
 # Simula um firewall simples com autenticação de variáveis por chave
 class Firewall:
     def __init__(self):
         self.autorizacoes = {}  # {'variavel_destino': 'chave_autorizada'}
         self.log_path = "./logs/firewall_transferencias.log"
         os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
+        self.azimov_firewall = AzimovFirewall()
+        self.azimov_firewall.check_integrity()
 
     def registrar_autorizacao(self, var_destino, chave):
+        self.azimov_firewall.process_packet(var_destino)
         self.autorizacoes[var_destino] = chave
 
     def autenticar(self, var_destino, chave):
+        self.azimov_firewall.process_packet(var_destino)
         return self.autorizacoes.get(var_destino) == chave
 
     def transferir(self, origem, destino_nome, destino_dict, chave):
         if self.autenticar(destino_nome, chave):
+            self.azimov_firewall.process_packet(destino_nome)
             destino_dict[destino_nome] = origem
             return True
         else:
             return False
 
     def autorizar_transferencia(self, tipo, recurso=None):
+        self.azimov_firewall.process_packet(recurso)
+        self.azimov_firewall.obey_order(recurso)
         """
             Verifica se a transferência é autorizada com base no tipo e no recurso.
         """
@@ -43,11 +51,15 @@ class Firewall:
             json.dump(dados, f, indent=4, ensure_ascii=False)
 
         integridade = self.calcular_hash(destino)
+        self.azimov_firewall.process_packet(destino)
+        self.azimov_firewall.obey_order(destino)
         self.registrar_log(f"TRANSFERÊNCIA AUTORIZADA: Dados GitHub exportados para {destino} | HASH: {integridade}")
         return destino
 
     def registrar_transferencia(self, tipo, recurso=None):
         data = datetime.now().isoformat()
+        self.azimov_firewall.process_packet(recurso)
+        self.azimov_firewall.obey_order(recurso)
         self.registrar_log(f"TRANSFERÊNCIA: tipo={tipo}, recurso={recurso}, data={data}")
 
     def calcular_hash(self, arquivo):
@@ -55,8 +67,13 @@ class Firewall:
         with open(arquivo, "rb") as f:
             for bloco in iter(lambda: f.read(4096), b""):
                 sha256.update(bloco)
+        self.azimov_firewall.process_packet(arquivo)
+        self.azimov_firewall.obey_order(arquivo)
         return sha256.hexdigest()
 
     def registrar_log(self, mensagem):
+        self.azimov_firewall.process_packet(self.log_path)
+        self.azimov_firewall.obey_order(self.log_path)
         with open(self.log_path, "a") as log:
+            self.azimov_firewall.apply_law_zero(log)
             log.write(f"[{datetime.now().isoformat()}] {mensagem}\n")
