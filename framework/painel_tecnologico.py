@@ -1,6 +1,9 @@
+# painel_tecnologico.py
+
 import streamlit as st
 
-# ===== Estilo CSS para bordas e design tecnológico =====
+st.set_page_config(page_title="Painel Tecnológico", layout="centered")
+
 st.markdown("""
     <style>
         .main {
@@ -24,13 +27,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ===== Título principal do painel =====
 st.title("🔧 Painel Tecnológico Interativo")
-
-# ===== Menu lateral com navegação =====
 menu = st.sidebar.radio("Menu", ["Dashboard", "Configurações", "Sobre"])
 
-# ===== Conteúdo baseado na seleção do menu =====
 if menu == "Dashboard":
     st.subheader("📊 Visualização de Dados")
     st.line_chart({"CPU": [10, 20, 30, 25, 40], "Memória": [15, 25, 20, 30, 35]})
@@ -48,9 +47,8 @@ elif menu == "Sobre":
         **Projeto:** Painel Tecnológico  
         **Versão:** 1.0  
         **Desenvolvido com:** Streamlit  
-        **Execução:** Compatível com PowerShell
+        **Execução:** PowerShell e Navegador
     """)
 
-# Rodapé
 st.markdown("<hr style='border:1px solid #00f5d4;'>", unsafe_allow_html=True)
-st.caption("Desenvolvido por você — Streamlit Power Panel 💡")
+st.caption("Desenvolvido por Spacedwog — Streamlit Power Panel 💡")
