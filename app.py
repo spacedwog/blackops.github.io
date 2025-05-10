@@ -7,10 +7,7 @@ from framework.app import App
 from database.db import UsuarioDB
 from auth.oauth import OAuthGitHub
 from config.firewall import Firewall
-from sklearn.datasets import load_iris
 from auth.blackboard import BlackboardValidator
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 from dashboard.github_dashboard import GitHubDashboard
 from config.firewall_relay_controller import FirewallRelayController
 

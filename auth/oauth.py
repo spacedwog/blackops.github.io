@@ -15,7 +15,7 @@ from config.settings import OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, REDIRECT_URI
 class OAuthGitHub:
     AUTH_URL = "https://github.com/login/oauth/authorize"
     TOKEN_URL = "https://github.com/login/oauth/access_token"
-    USER_API_URL = "https://api.github.com/spacedwog"
+    USER_API_URL = "https://api.github.com/user"
     
     def __init__(self):
         self.base_url = "https://api.github.com"

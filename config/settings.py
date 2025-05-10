@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OAUTH_CLIENT_ID = "Ov23liv7IlX22dKujJ4z"
-OAUTH_CLIENT_SECRET = "8928341d3b422e184b621364a45885f6a2baa804"
+OAUTH_CLIENT_SECRET = "e11bd883fa9f7b350309d01643738670897db31a"
 REDIRECT_URI = "http://localhost:8501"
 
 APP_CLIENT_ID = "Iv23lir3gWXCKZ170nzC"
