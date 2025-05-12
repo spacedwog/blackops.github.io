@@ -1,7 +1,6 @@
 # -----------------------------
 # ai/ocr_rfid.py
 # -----------------------------
-import os
 import cv2
 import base64
 import pytesseract

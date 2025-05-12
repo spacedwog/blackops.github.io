@@ -1,11 +1,9 @@
 import time
-import socket
 import serial
+import socket
 import logging
 import platform
 import subprocess
-print("Serial File.:"+serial.__file__)
-print(dir(serial))
 
 class FirewallRelayController:
     def __init__(self, port="COM3", baudrate=9600, test_host="whois.iana.org", firewall_port=43, timeout=3):
