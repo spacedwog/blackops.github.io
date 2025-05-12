@@ -76,6 +76,7 @@
         "ativado",
         "ativar",
         "ativas",
+        "atividade",
         "ativo",
         "Atuais",
         "atual",
@@ -516,6 +517,7 @@
         "mmap",
         "modelo",
         "modelos",
+        "módulo",
         "MOKL",
         "Moldura",
         "Mostra",
@@ -854,5 +856,5 @@
         "Yottgvv"
     ],
     "powershell.trace.server": "verbose",
-    "python.pythonPath": "C:\\Users\\felip\\AppData\\Local\\Programs\\Python\\Python313\\python.exe"
+    "python.pythonPath": "C:\\Users\\felip\\AppData\\Local\\Programs\\Python\\Python314\\python.exe"
 }
