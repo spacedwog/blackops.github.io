@@ -2,8 +2,8 @@
 # client_powershell.ps1
 # ----------------------------
 
-$hostAddress = "192.168.15.8"
-$port = 8502
+$hostAddress = "127.0.0.1"
+$port = 43
 
 function Connect-AndSendCommand {
     $client = New-Object System.Net.Sockets.TcpClient
