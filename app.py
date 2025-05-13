@@ -94,7 +94,7 @@ class GitHubDashboardApp:
                     st.title("🧱 Firewall: Verificação de Status")
                     st.header("🔍 Verificar Firewall Relay")
                     
-                    controller = FirewallRelayController(port="COM3")
+                    controller = FirewallRelayController(arduino_port=5000)
                     st.write(controller.get_relay_status())
                     st.write(controller.detect_active_block_reasons())
                     st.write(controller.diagnose_common_block_reasons())
