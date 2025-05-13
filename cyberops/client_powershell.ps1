@@ -3,7 +3,7 @@
 # ----------------------------
 
 $hostAddress = "127.0.0.1"
-$port = 43
+$port = 443
 
 function Connect-AndSendCommand {
     $client = New-Object System.Net.Sockets.TcpClient
