@@ -2,8 +2,8 @@
 # client_powershell.ps1
 # ----------------------------
 
-$hostAddress = "127.0.0.1"
-$port = 65432
+$hostAddress = "192.168.15.8"
+$port = 8502
 
 function Connect-AndSendCommand {
     $client = New-Object System.Net.Sockets.TcpClient
@@ -12,7 +12,7 @@ function Connect-AndSendCommand {
     $writer = New-Object System.IO.StreamWriter($stream)
     $reader = New-Object System.IO.StreamReader($stream)
 
-    Write-Host "Conectado ao servidor TCP ($hostAddress:$port)."
+    Write-Host "Conectado ao servidor TCP (${hostAddress}:${port})."
     Write-Host "Digite comandos PowerShell para executar remotamente (digite 'exit' para sair):`n"
 
     while ($true) {

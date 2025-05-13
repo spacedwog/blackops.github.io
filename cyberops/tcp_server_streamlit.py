@@ -6,8 +6,8 @@ import streamlit as st
 import subprocess
 import threading
 
-HOST = '127.0.0.1'
-PORT = 65432
+HOST = '192.168.15.8'
+PORT = 8502
 
 def handle_client(conn, addr):
     with conn:
