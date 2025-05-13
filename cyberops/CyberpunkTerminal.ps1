@@ -19,7 +19,9 @@ Add-Type -AssemblyName PresentationFramework
         </ScrollViewer>
 
         <DockPanel Grid.Row="2" Margin="0,10,0,0">
-            <TextBox Name="InputBox" Height="30" Width="600" Margin="0,0,10,0"/>
+            <ComboBox Name="InputBox" Height="30" Width="600" Margin="0,0,10,0"
+                sEditable="True" IsTextSearchEnabled="True"
+                StaysOpenOnEdit="True" Background="Black" Foreground="Lime"/>
             <Button Name="ExecuteButton" Content="Execute" Width="100" Background="Magenta" Foreground="Black"/>
         </DockPanel>
     </Grid>
@@ -34,6 +36,24 @@ $window = [Windows.Markup.XamlReader]::Load($reader)
 $InputBox = $window.FindName("InputBox")
 $OutputBox = $window.FindName("OutputBox")
 $ExecuteButton = $window.FindName("ExecuteButton")
+
+# Lista de comandos sugeridos
+$commandSuggestions = @(
+    "exit",
+    "dns google.com A",
+    "dns openai.com MX",
+    "dns github.com TXT",
+    "tcp 127.0.0.1 8080 hello",
+    "ipconfig",
+    "whoami",
+    "dir",
+    "ping google.com"
+)
+
+# Popular ComboBox com sugestões
+$commandSuggestions | ForEach-Object {
+    $InputBox.Items.Add($_)
+}
 
 function Append-Output($text, $color = "Lime") {
     $OutputBox.AppendText(">> $text`r`n")
@@ -97,7 +117,7 @@ function Resolve-DNSQuery {
 
 # Evento do botão
 $ExecuteButton.Add_Click({
-    $cmd = $InputBox.Text.Trim()
+    $cmd = $InputBox.Text.ToString().Trim()
     Append-Output $cmd
     $InputBox.Text = ""
 
