@@ -1,161 +1,112 @@
-Add-Type -AssemblyName PresentationFramework
+# Cyberpunk Terminal by ChatGPT
+# Requisitos: PowerShell 5+, ANSI suporte (Windows Terminal recomendado)
 
-# XAML (interface estilo cyberpunk)
-[xml]$xaml = @"
-<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        Title="Cyberpunk Terminal" Height="500" Width="800" Background="Black"
-        FontFamily="Consolas" Foreground="Lime">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+# Tema Neon
+$borderColor = "`e[38;5;199m"  # Rosa neon
+$inputColor = "`e[38;5;45m"    # Azul neon
+$outputColor = "`e[38;5;118m"  # Verde neon
+$resetColor = "`e[0m"
 
-        <TextBlock Grid.Row="0" Text="🧠 CYBERPUNK TERMINAL" FontSize="20" Foreground="Cyan" Margin="0,0,0,10"/>
+# Comandos conhecidos para auto-completar
+$comandos = @("ipconfig", "ping", "nslookup", "netstat", "Get-Process", "Get-Service", "exit")
 
-        <ScrollViewer Grid.Row="1" Name="OutputScroll" VerticalScrollBarVisibility="Auto" Background="#111111">
-            <TextBox Name="OutputBox" IsReadOnly="True" TextWrapping="Wrap" Background="#111111" Foreground="Lime" BorderThickness="0" />
-        </ScrollViewer>
-
-        <DockPanel Grid.Row="2" Margin="0,10,0,0">
-            <ComboBox Name="InputBox" Height="30" Width="600" Margin="0,0,10,0"
-                sEditable="True" IsTextSearchEnabled="True"
-                StaysOpenOnEdit="True" Background="Black" Foreground="Lime"/>
-            <Button Name="ExecuteButton" Content="Execute" Width="100" Background="Magenta" Foreground="Black"/>
-        </DockPanel>
-    </Grid>
-</Window>
-"@
-
-# Carregar XAML
-$reader = (New-Object System.Xml.XmlNodeReader $xaml)
-$window = [Windows.Markup.XamlReader]::Load($reader)
-
-# Acessar controles
-$InputBox = $window.FindName("InputBox")
-$OutputBox = $window.FindName("OutputBox")
-$ExecuteButton = $window.FindName("ExecuteButton")
-
-# Lista de comandos sugeridos
-$commandSuggestions = @(
-    "exit",
-    "dns google.com A",
-    "dns openai.com MX",
-    "dns github.com TXT",
-    "tcp 127.0.0.1 8080 hello",
-    "ipconfig",
-    "whoami",
-    "dir",
-    "ping google.com"
-)
-
-# Popular ComboBox com sugestões
-$commandSuggestions | ForEach-Object {
-    $InputBox.Items.Add($_)
-}
-
-function Append-Output($text, $color = "Lime") {
-    $OutputBox.AppendText(">> $text`r`n")
-    $OutputBox.ScrollToEnd()
-}
-
-function Send-TCPMessage {
-    param([string]$ip, [int]$port, [string]$message)
-    try {
-        $client = New-Object System.Net.Sockets.TcpClient($ip, $port)
-        $stream = $client.GetStream()
-        $writer = New-Object System.IO.StreamWriter($stream)
-        $reader = New-Object System.IO.StreamReader($stream)
-
-        $writer.AutoFlush = $true
-        $writer.WriteLine($message)
-
-        Start-Sleep -Milliseconds 500
-        if ($stream.DataAvailable) {
-            $response = $reader.ReadLine()
-            Append-Output "Received: $response" "Cyan"
-        } else {
-            Append-Output "Message sent. No response." "DarkGray"
-        }
-
-        $writer.Close()
-        $reader.Close()
-        $client.Close()
-    } catch {
-        Append-Output "TCP Error: $_" "Red"
-    }
-}
-
-function Resolve-DNSQuery {
+function Draw-Border {
     param (
-        [string]$domain,
-        [string]$type = "A"
+        [string]$text,
+        [string]$color
     )
+    $length = ($text.Length + 4)
+    $top = "$color┌" + ("─" * $length) + "┐$resetColor"
+    $mid = "$color│$resetColor  $text  $color│$resetColor"
+    $bot = "$color└" + ("─" * $length) + "┘$resetColor"
+    Write-Host $top
+    Write-Host $mid
+    Write-Host $bot
+}
 
+function Auto-Complete {
+    param ([string]$input)
+    return $comandos | Where-Object { $_ -like "$input*" }
+}
+
+function Show-Prompt {
+    Write-Host ""
+    Draw-Border -text "Digite um comando ou 'exit' para sair" -color $borderColor
+    Write-Host -NoNewline "$inputColor> $resetColor"
+    return Read-Host
+}
+
+function Exec-Comando {
+    param ([string]$cmd)
     try {
-        Append-Output "Resolving DNS for '$domain' (type: $type)..."
-
-        if ($type -eq "A") {
-            $addresses = [System.Net.Dns]::GetHostAddresses($domain)
-            foreach ($addr in $addresses) {
-                Append-Output "IPv4: $($addr.IPAddressToString)"
-            }
-        } else {
-            # Usar nslookup para tipos diferentes
-            $output = nslookup -type=$type $domain 2>&1
-            $output | ForEach-Object {
-                if ($_ -match ".*") {
-                    Append-Output $_ "DarkCyan"
-                }
-            }
-        }
+        $output = Invoke-Expression $cmd 2>&1 | Out-String
+        Draw-Border -text "Resultado" -color $borderColor
+        Write-Host "$outputColor$output$resetColor"
     } catch {
-        Append-Output "DNS Error: $_" "Red"
+        Write-Host "$borderColor[ERRO]$resetColor $_"
     }
 }
 
-# Evento do botão
-$ExecuteButton.Add_Click({
-    $cmd = $InputBox.Text.ToString().Trim()
-    Append-Output $cmd
-    $InputBox.Text = ""
+function Test-DNS {
+    param ([string]$dnsHost)
+    try {
+        $dns = Resolve-DnsName $dnsHost -ErrorAction Stop
+        Draw-Border -text "DNS de $dnsHost" -color $borderColor
+        $dns | Format-Table -AutoSize | Out-String | Write-Host -ForegroundColor Cyan
+    } catch {
+        Write-Host "$borderColor[ERRO]$resetColor DNS falhou para $dnsHost"
+    }
+}
+
+function Start-TCPConnection {
+    param (
+        [string]$server = "127.0.0.1",
+        [int]$port = 43
+    )
+    try {
+        $tcp = New-Object System.Net.Sockets.TcpClient
+        $tcp.Connect($server, $port)
+        Draw-Border -text "TCP -> ${server}:${port} OK" -color $borderColor
+        $tcp.Close()
+    } catch {
+        Write-Host "${borderColor}[ERRO]${resetColor} Não foi possível conectar a ${server}:${port}"
+    }
+}
+
+# ===== LOOP PRINCIPAL =====
+Clear-Host
+Draw-Border -text "CYBERPUNK TERMINAL v1.0" -color $borderColor
+
+while ($true) {
+    $cmd = Show-Prompt
 
     if ($cmd -eq "exit") {
-        $window.Close()
-        return
+        Draw-Border -text "Saindo..." -color $borderColor
+        break
     }
 
-    if ($cmd -like "tcp *") {
-        $parts = $cmd -split " "
-        if ($parts.Length -ge 4) {
-            $ip = $parts[1]
-            $port = [int]$parts[2]
-            $message = ($parts[3..($parts.Length - 1)] -join " ")
-            Send-TCPMessage -ip $ip -port $port -message $message
-        } else {
-            Append-Output "Invalid TCP syntax. Use: tcp <ip> <port> <message>" "Yellow"
+    # Autocomplete sugestão
+    $sugestoes = Auto-Complete -input $cmd
+    if ($sugestoes.Count -gt 0 -and $cmd -ne $sugestoes[0]) {
+        Write-Host "$inputColor[Auto-complete sugestão]:$resetColor $($sugestoes -join ', ')"
+    }
+
+    switch -Wildcard ($cmd) {
+        "dns *" {
+            $dnsHost = $cmd -replace "dns ", ""
+            Test-DNS -dnsHost $dnsHost
         }
-    } elseif ($cmd -like "dns *") {
-        $parts = $cmd -split " "
-        if ($parts.Length -ge 2) {
-            $domain = $parts[1]
-            $type = if ($parts.Length -ge 3) { $parts[2] } else { "A" }
-            Resolve-DNSQuery -domain $domain -type $type
-        } else {
-            Append-Output "Invalid DNS syntax. Use: dns <domain> [type]" "Yellow"
-        }
-    } else {
-        try {
-            $output = Invoke-Expression $cmd
-            if ($output) {
-                $output | ForEach-Object { Append-Output $_ }
+        "tcp *" {
+            $dest = $cmd -replace "tcp ", ""
+            $parts = $dest -split ":", 2
+            if ($parts.Count -eq 2) {
+                Start-TCPConnection -server $parts[0] -port [int]$parts[1]
+            } else {
+                Write-Host "$borderColor[ERRO]$resetColor Use formato: tcp 8.8.8.8:53"
             }
-        } catch {
-            Append-Output "Command error: $_" "Red"
+        }
+        default {
+            Exec-Comando -cmd $cmd
         }
     }
-})
-
-# Exibir GUI
-$window.ShowDialog()
+}
