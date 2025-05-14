@@ -6,11 +6,10 @@
         "istream": "cpp"
     },
     "java.project.sourcePaths": [
-        "blackops"
+        "blackops",
+        "cyberops"
     ],
-    "java.project.referencedLibraries": [
-        "c:\\Users\\felip\\Downloads\\json-20240205.jar"
-    ],
+    "java.project.referencedLibraries": [],
     "java.configuration.updateBuildConfiguration": "interactive",
     "java.format.settings.url": ".vscode/java-formatter.xml",
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
@@ -210,6 +209,7 @@
         "Contraste",
         "controlar",
         "Controle",
+        "controles",
         "convertidas",
         "copiados",
         "corporativas",
@@ -271,6 +271,7 @@
         "detectar",
         "Diagnóstico",
         "Diário",
+        "diferentes",
         "Diga",
         "digitado",
         "Digite",
@@ -320,6 +321,7 @@
         "escolheu",
         "escuro",
         "escutando",
+        "escutar",
         "esfera",
         "especificada",
         "Específicos",
@@ -447,6 +449,7 @@
         "Instale",
         "insuficientes",
         "integração",
+        "integrar",
         "integridade",
         "íntegro",
         "Inteligência",
@@ -496,6 +499,7 @@
         "localmente",
         "logado",
         "logar",
+        "Lógica",
         "Lrbe",
         "maior",
         "mais",
@@ -549,6 +553,7 @@
         "noarchive",
         "notificacao",
         "novamente",
+        "nslookup",
         "numpy",
         "Nuvem",
         "obedecida",
@@ -797,6 +802,7 @@
         "Texto",
         "textuais",
         "tipo",
+        "tipos",
         "titulo",
         "título",
         "tokken",
@@ -815,6 +821,7 @@
         "typestubs",
         "último",
         "usando",
+        "Usar",
         "usuário",
         "usuarios",
         "Usuários",

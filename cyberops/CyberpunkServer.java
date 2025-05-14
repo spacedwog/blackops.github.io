@@ -1,10 +1,15 @@
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class CyberpunkServer {
     public static void main(String[] args) {
         int port = 9999; // Porta a escutar
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try (ServerSocket serverSocket = new ServerSocket(port, 9999, InetAddress.getByName("192.168.15.8"));) {
             System.out.println("Cyberpunk Java Server is running on port " + port + "...");
 
             while (true) {
@@ -17,7 +22,7 @@ public class CyberpunkServer {
                 System.out.println("Received: " + inputLine);
 
                 // Lógica de resposta (você pode integrar com métodos Java reais aqui)
-                String response = "[JAVA] Ack: " + inputLine;
+                String response = "[JAVA] Resposta: " + inputLine;
                 out.println(response);
 
                 clientSocket.close();
