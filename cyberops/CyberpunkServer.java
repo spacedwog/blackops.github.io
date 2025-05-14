@@ -8,8 +8,8 @@ import java.net.Socket;
 
 public class CyberpunkServer {
     public static void main(String[] args) {
-        int port = 9999; // Porta a escutar
-        try (ServerSocket serverSocket = new ServerSocket(port, 9999, InetAddress.getByName("192.168.15.8"));) {
+        int port = 8080; // Porta a escutar
+        try (ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("192.168.15.8"));) {
             System.out.println("Cyberpunk Java Server is running on port " + port + "...");
 
             while (true) {
