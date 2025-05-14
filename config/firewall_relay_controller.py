@@ -5,7 +5,7 @@ import platform
 import subprocess
 
 class FirewallRelayController:
-    def __init__(self, arduino_host="192.168.15.8", arduino_port=5000, test_host="whois.iana.org", firewall_port=43, timeout=3):
+    def __init__(self, arduino_host="192.168.15.8", arduino_port=8080, test_host="whois.iana.org", firewall_port=43, timeout=3):
         self.test_host = test_host
         self.firewall_port = firewall_port
         self.timeout = timeout
@@ -138,7 +138,7 @@ class FirewallRelayController:
 
 # Exemplo de uso
 if __name__ == "__main__":
-    controller = FirewallRelayController(arduino_host="192.168.0.50", arduino_port=5000)
+    controller = FirewallRelayController(arduino_host="192.168.15.8", arduino_port=8080)
     print(controller.get_firewall_status_and_control_relay())
     print("\n📋 Motivos possíveis:")
     for reason in controller.list_possible_reasons():
