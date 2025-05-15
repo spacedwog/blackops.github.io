@@ -6,7 +6,7 @@ export default function App() {
   const [message, setMessage] = useState('Conectando...');
 
   useEffect(() => {
-    fetch('http://192.168.15.8:8080/')
+    fetch('http://192.168.15.8:8080/STATUS')
       .then(res => res.json())
       .then(data => {
         setMessage(data.message);

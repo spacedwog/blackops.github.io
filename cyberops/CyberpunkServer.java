@@ -8,26 +8,50 @@ import java.net.Socket;
 
 public class CyberpunkServer {
     public static void main(String[] args) {
-        int port = 8080; // Porta a escutar
-        try (ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("192.168.15.8"));) {
+        int port = 8080;
+
+        try (ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("192.168.15.8"))) {
             System.out.println("Cyberpunk Java Server is running on port " + port + "...");
 
             while (true) {
-                try (Socket clientSocket = serverSocket.accept()) {
+                try {
+                    Socket clientSocket = serverSocket.accept();
+
                     BufferedReader in = new BufferedReader(
                             new InputStreamReader(clientSocket.getInputStream()));
                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-                    
-                    String inputLine = in.readLine();
-                    System.out.println("Received: " + inputLine);
-                    
-                    // Lógica de resposta (você pode integrar com métodos Java reais aqui)
-                    String response = "[JAVA] Resposta: " + inputLine;
-                    out.println(response);
+
+                    String requestLine = in.readLine(); // Lê a primeira linha da requisição
+                    System.out.println("Received: " + requestLine);
+
+                    if (requestLine != null && requestLine.startsWith("GET /STATUS")) {
+                        String body = "STATE:ON"; // sua lógica aqui
+
+                        out.print("HTTP/1.1 200 OK\r\n");
+                        out.print("Content-Type: text/plain\r\n");
+                        out.print("Content-Length: " + body.length() + "\r\n");
+                        out.print("Connection: close\r\n");
+                        out.print("\r\n");
+                        out.print(body);
+                    } else {
+                        String body = "404 Not Found";
+
+                        out.print("HTTP/1.1 404 Not Found\r\n");
+                        out.print("Content-Type: text/plain\r\n");
+                        out.print("Content-Length: " + body.length() + "\r\n");
+                        out.print("Connection: close\r\n");
+                        out.print("\r\n");
+                        out.print(body);
+                    }
+
+                    out.flush();
+                    clientSocket.close();
+                } catch (IOException e) {
+                    System.out.println("Erro ao processar cliente: " + e.getMessage());
                 }
             }
         } catch (IOException e) {
-            System.out.println("Ocorreu um erro" + e.toString());
+            System.out.println("Erro ao iniciar o servidor: " + e);
         }
     }
 }
