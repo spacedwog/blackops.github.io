@@ -13,7 +13,7 @@ class FirewallRelayController:
         self.arduino_host = arduino_host
         self.arduino_port = arduino_port
 
-    def _send_arduino_command(self, command):
+    def send_arduino_command(self, command):
         try:
             with socket.create_connection((self.arduino_host, self.arduino_port), timeout=self.timeout) as sock:
                 sock.sendall((command + "\n").encode())
@@ -88,13 +88,13 @@ class FirewallRelayController:
 
     def get_relay_status(self):
         """Envia STATUS e obtém o estado atual do relé."""
-        response = self._send_arduino_command("")
+        response = self.send_arduino_command("STATUS")
         if response.startswith("STATE:"):
             return "🟢 O relé está ligado." if response[6:] == "ON" else "🔴 O relé está desligado."
         elif response.startswith("LED:"):
             return "🟢 O LED está ligado." if response[4:] == "ON" else "🔴 O LED está desligado."
         elif response.startswith("[JAVA]"):
-            mensagem = "🟢 Conexão com JAVA estabelecida."
+            mensagem = f"🟢 Conexão com JAVA estabelecida.<br>♨️ {response}"
             return mensagem
         else:
             return f"⚠️ Resposta inesperada: {response}"
