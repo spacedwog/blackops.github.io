@@ -1,10 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
+  const [message, setMessage] = useState('Conectando...');
+
+  useEffect(() => {
+    fetch('http://192.168.15.8:8080/')
+      .then(res => res.json())
+      .then(data => {
+        setMessage(data.message);
+      })
+      .catch(error => {
+        setMessage('Erro ao conectar: ' + error.message);
+      });
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+      <Text>{message}</Text>
       <StatusBar style="auto" />
     </View>
   );
