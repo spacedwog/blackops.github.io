@@ -88,7 +88,7 @@ class FirewallRelayController:
 
     def get_relay_status(self):
         """Envia STATUS e obtém o estado atual do relé."""
-        response = self.send_arduino_command("/STATUS")
+        response = self.send_arduino_command("GET /STATUS HTTP/1.1")
         if response.startswith("STATE:"):
             return "🟢 O relé está ligado." if response[6:] == "ON" else "🔴 O relé está desligado."
         elif response.startswith("LED:"):

@@ -31,7 +31,7 @@ public class CyberpunkServer {
                             if ("GET".equals(method) && "/STATUS".equals(path)) {
                                 String body = "STATE:ON";
 
-                                out.print("HTTP/1.1 200 OK\r\n");
+                                out.print("[JAVA]HTTP/1.1 200 OK\r\n");
                                 out.print("Content-Type: text/plain\r\n");
                                 out.print("Content-Length: " + body.length() + "\r\n");
                                 out.print("Connection: close\r\n");
