@@ -95,7 +95,7 @@ class GitHubDashboardApp:
                     st.header("🔍 Verificar Firewall Relay")
                     
                     controller = FirewallRelayController(arduino_port=8080)
-                    st.markdown(controller.get_relay_status(), unsafe_allow_html=True)
+                    st.write(controller.get_relay_status())
                     st.write(controller.detect_active_block_reasons())
                     st.write(controller.diagnose_common_block_reasons())
 

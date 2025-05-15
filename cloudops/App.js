@@ -7,9 +7,9 @@ export default function App() {
 
   useEffect(() => {
     fetch('http://192.168.15.8:8080/STATUS')
-      .then(res => res.json())
+      .then(res => res.text()) // <== texto, não JSON
       .then(data => {
-        setMessage(data.message);
+        setMessage(data);
       })
       .catch(error => {
         setMessage('Erro ao conectar: ' + error.message);
