@@ -24,7 +24,11 @@ public class CyberpunkServer {
                     String requestLine = in.readLine(); // Lê a primeira linha da requisição
                     System.out.println("Received: " + requestLine);
 
-                    if (requestLine != null && requestLine.startsWith("GET /STATUS")) {
+                    String[] parts = requestLine.split(" ");
+                    String method = parts[0];
+                    String path = parts[1];
+
+                    if ("GET".equals(method) && "/STATUS".equals(path)) {
                         String body = "STATE:ON"; // sua lógica aqui
 
                         out.print("HTTP/1.1 200 OK\r\n");
