@@ -93,6 +93,9 @@ class FirewallRelayController:
             return "🟢 O relé está ligado." if response[6:] == "ON" else "🔴 O relé está desligado."
         elif response.startswith("LED:"):
             return "🟢 O LED está ligado." if response[4:] == "ON" else "🔴 O LED está desligado."
+        elif response.startswith("[JAVA]"):
+            mensagem = "🟢 Conexão com JAVA estabelecida."
+            return mensagem
         else:
             return f"⚠️ Resposta inesperada: {response}"
 
@@ -124,17 +127,18 @@ class FirewallRelayController:
                 ["netsh", "advfirewall", "firewall", "show", "rule", "name=all"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
+                shell=True  # Certifique-se de usar shell=True no Windows
             )
-            if f"Port: {self.firewall_port}" in netsh_check.stdout:
+            output = netsh_check.stdout or ""  # Garante que é string, mesmo que seja None
+            if f"Port: {self.firewall_port}" in output:
                 return f"🔴 A porta {self.firewall_port} está bloqueada."
             else:
                 return f"🟢 A porta {self.firewall_port} está liberada."
         except subprocess.CalledProcessError as e:
-            return "Erro ao verificar regras de firewall."
+            return f"Erro ao verificar regras de firewall: {e}"
         except Exception as e:
-            return "Erro inesperado ao verificar regras de firewall."
-
+            return f"Erro inesperado ao verificar regras de firewall: {e}"
 
 # Exemplo de uso
 if __name__ == "__main__":
