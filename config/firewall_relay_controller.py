@@ -11,7 +11,7 @@ class FirewallRelayController:
         self.system = platform.system()
         self.arduino_host = arduino_host
         self.arduino_port = arduino_port
-        self.response = self.send_arduino_command("GET /STATUS HTTP/1.1")
+        self.response = self.send_arduino_command("GET /DIAGNOSE HTTP/1.1")
 
     def send_arduino_command(self, command):
         try:
