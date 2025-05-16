@@ -32,34 +32,32 @@ public class CyberpunkServer {
 
                             if ("GET".equals(method)) {
                                 switch (path) {
-                                    case "/STATUS":
+                                    case "/STATUS" -> {
                                         body = "[JAVA]STATE:ON";
                                         sendResponse(out, 200, "text/plain", body);
-                                        break;
+                                    }
 
-                                    case "/BLOCKED":
+                                    case "/BLOCKED" -> {
                                         body = "[JAVA]BLOCKED_REASONS:\n- IP Suspeito\n- DNS inválido\n- Firewall ativo";
                                         sendResponse(out, 200, "text/plain", body);
-                                        break;
+                                    }
 
-                                    case "/DIAGNOSE":
+                                    case "/DIAGNOSE" -> {
                                         body = "[JAVA]DIAGNOSIS:\n- Verifique a conexão com o GitHub\n- Certifique-se de que os pacotes estão autorizados";
                                         sendResponse(out, 200, "text/plain", body);
-                                        break;
+                                    }
 
-                                    case "/CYBERBRAIN":
+                                    case "/CYBERBRAIN" -> {
                                         body = "[JAVA]{\"ai\":\"active\",\"level\":\"autonomous\",\"protection\":\"enabled\"}";
                                         sendResponse(out, 200, "application/json", body);
-                                        break;
+                                    }
 
-                                    case "/EXPORT":
+                                    case "/EXPORT" -> {
                                         body = "[JAVA]{\"status\":\"success\",\"path\":\"/dados_github/dados_usuario.json\"}";
                                         sendResponse(out, 200, "application/json", body);
-                                        break;
+                                    }
 
-                                    default:
-                                        sendResponse(out, 404, "text/plain", "404 Not Found");
-                                        break;
+                                    default -> sendResponse(out, 404, "text/plain", "404 Not Found");
                                 }
                             } else {
                                 sendResponse(out, 405, "text/plain", "405 Method Not Allowed");

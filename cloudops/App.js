@@ -1,10 +1,11 @@
-import { WebView } from 'react-native-webview'; // coloque no topo
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
 import { Text, Button, Provider as PaperProvider } from 'react-native-paper';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import { RNCamera } from 'react-native-camera';
 
 const NODEMCU_IP = 'http://192.168.15.8:8080';
+const [isCameraOn, setIsCameraOn] = useState(false);
 
 export default function App() {
   const [statusMessage, setStatusMessage] = useState('Conectando ao NodeMCU...');
@@ -19,6 +20,7 @@ export default function App() {
     { key: 'controle', title: 'Controle' },
     { key: 'diagnoses', title: 'Diagnoses' },
     { key: 'blocked', title: 'Blocked' },
+    { key: 'camera', title: 'Câmera' },
   ]);
 
   // Função para formatar mensagens que contenham [JAVA]
@@ -120,10 +122,6 @@ export default function App() {
 
   const ControleRoute = () => (
     <View style={styles.tabContent}>
-      <WebView
-        source={{ uri: `${NODEMCU_IP}/stream` }}
-        style={styles.webcam}
-      />
       <Button
         mode="contained"
         onPress={() => sendCommand('LIGAR')}
@@ -159,11 +157,31 @@ export default function App() {
     </ScrollView>
   );
 
+  const CameraRoute = () => (
+    <View style={styles.tabContent}>
+      <Button
+        mode="contained"
+        onPress={() => setIsCameraOn(!isCameraOn)}
+        style={styles.button}
+      >
+        {isCameraOn ? 'Desligar Câmera' : 'Ligar Câmera'}
+      </Button>
+      {isCameraOn && (
+        <RNCamera
+          style={{ flex: 1, width: '100%', marginTop: 10 }}
+          type={RNCamera.Constants.Type.back}
+          captureAudio={false}
+        />
+      )}
+    </View>
+  );
+
   const renderScene = SceneMap({
     status: StatusRoute,
     controle: ControleRoute,
     diagnoses: DiagnosesRoute,
     blocked: BlockedRoute,
+    camera: CameraRoute,
   });
 
   return (
@@ -215,13 +233,5 @@ const styles = StyleSheet.create({
   logsText: {
     fontSize: 16,
     fontFamily: 'monospace',
-  },
-  webcam: {
-    width: '100%',
-    height: 200,
-    marginBottom: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
   },
 });
