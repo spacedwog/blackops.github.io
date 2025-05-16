@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Text, Button, Tab, Tabs, Provider as PaperProvider } from 'react-native-paper';
+import { StyleSheet, View, Dimensions } from 'react-native';
+import { Text, Button, Provider as PaperProvider } from 'react-native-paper';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 
-// IP do NodeMCU (ajuste conforme necessário)
 const NODEMCU_IP = 'http://192.168.15.8:8080';
 
 export default function App() {
   const [message, setMessage] = useState('Conectando ao NodeMCU...');
   const [statusColor, setStatusColor] = useState('orange');
   const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'status', title: 'Status' },
+    { key: 'controle', title: 'Controle' },
+    { key: 'logs', title: 'Logs' },
+  ]);
 
-  // Função para buscar status
   const fetchStatus = () => {
     fetch(`${NODEMCU_IP}/STATUS`)
       .then(res => res.text())
@@ -37,83 +41,82 @@ export default function App() {
       });
   };
 
-  // Função para enviar comando ao relé
   const sendCommand = (cmd) => {
     fetch(`${NODEMCU_IP}/${cmd}`)
       .then(res => res.text())
       .then(data => {
         setMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
-        fetchStatus(); // Atualiza após envio
+        fetchStatus();
       })
       .catch(error => {
         setMessage(`Erro ao enviar comando ${cmd}: ` + error.message);
       });
   };
 
-  // Atualiza status a cada 5s
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  const StatusRoute = () => (
+    <View style={styles.tabContent}>
+      <Text style={[styles.statusText, { color: statusColor }]}>{message}</Text>
+    </View>
+  );
+
+  const ControleRoute = () => (
+    <View style={styles.tabContent}>
+      <Button
+        mode="contained"
+        onPress={() => sendCommand('LIGAR')}
+        style={[styles.button, { backgroundColor: 'green' }]}
+      >
+        LIGAR
+      </Button>
+      <Button
+        mode="contained"
+        onPress={() => sendCommand('DESLIGAR')}
+        style={[styles.button, { backgroundColor: 'red' }]}
+      >
+        DESLIGAR
+      </Button>
+    </View>
+  );
+
+  const LogsRoute = () => (
+    <View style={styles.tabContent}>
+      <Text style={styles.logsText}>{message}</Text>
+    </View>
+  );
+
+  const renderScene = SceneMap({
+    status: StatusRoute,
+    controle: ControleRoute,
+    logs: LogsRoute,
+  });
+
   return (
     <PaperProvider>
-      <View style={styles.container}>
-        <Tabs
-          navigationState={{ index, routes: [
-            { key: 'status', title: 'Status' },
-            { key: 'controle', title: 'Controle' },
-            { key: 'logs', title: 'Logs' },
-          ] }}
-          onIndexChange={setIndex}
-          renderScene={({ route }) => {
-            switch (route.key) {
-              case 'status':
-                return (
-                  <View style={styles.tabContent}>
-                    <Text style={[styles.statusText, { color: statusColor }]}>{message}</Text>
-                  </View>
-                );
-              case 'controle':
-                return (
-                  <View style={styles.tabContent}>
-                    <Button
-                      mode="contained"
-                      onPress={() => sendCommand('LIGAR')}
-                      style={[styles.button, { backgroundColor: 'green' }]}
-                    >
-                      LIGAR
-                    </Button>
-                    <Button
-                      mode="contained"
-                      onPress={() => sendCommand('DESLIGAR')}
-                      style={[styles.button, { backgroundColor: 'red' }]}
-                    >
-                      DESLIGAR
-                    </Button>
-                  </View>
-                );
-              case 'logs':
-                return (
-                  <View style={styles.tabContent}>
-                    <Text style={styles.logsText}>{message}</Text>
-                  </View>
-                );
-              default:
-                return null;
-            }
-          }}
-        />
-      </View>
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: Dimensions.get('window').width }}
+        renderTabBar={props =>
+          <TabBar
+            {...props}
+            indicatorStyle={{ backgroundColor: 'blue' }}
+            style={{ backgroundColor: 'white' }}
+            labelStyle={{ color: 'black' }}
+          />
+        }
+      />
     </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   tabContent: {
     flex: 1,
     alignItems: 'center',
