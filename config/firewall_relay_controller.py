@@ -4,7 +4,7 @@ import platform
 import subprocess
 
 class FirewallRelayController:
-    def __init__(self, arduino_host="192.168.15.138", arduino_port=8080, test_host="whois.iana.org", firewall_port=43, timeout=3):
+    def __init__(self, arduino_host="192.168.15.8", arduino_port=8080, test_host="whois.iana.org", firewall_port=43, timeout=3):
         self.test_host = test_host
         self.firewall_port = firewall_port
         self.timeout = timeout
