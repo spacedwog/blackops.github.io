@@ -12,7 +12,7 @@ class GitHubDashboard:
     def __init__(self, user_data):
         self.user_data = user_data
         self.serial_relay = None
-        self.porta_serial = "COM3"
+        self.porta_serial = "COM5"
         self.baud_rate = 9600
         self.raw_response = None
         self.latencia = None

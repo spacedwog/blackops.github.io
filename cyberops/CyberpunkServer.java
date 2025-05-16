@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,15 +12,12 @@ public class CyberpunkServer {
     public static void main(String[] args) {
         int port = 8080;
 
-        try (ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("192.168.15.8"))) {
+        try (ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("192.168.15.138"))) {
             System.out.println("Cyberpunk Java Server is running on port " + port + "...");
 
             while (true) {
                 try (
-                    Socket clientSocket = serverSocket.accept();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
-                ) {
+                        Socket clientSocket = serverSocket.accept(); BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
                     String requestLine = in.readLine();
                     System.out.println("Received: " + requestLine);
 
@@ -57,7 +55,8 @@ public class CyberpunkServer {
                                         sendResponse(out, 200, "application/json", body);
                                     }
 
-                                    default -> sendResponse(out, 404, "text/plain", "404 Not Found");
+                                    default ->
+                                        sendResponse(out, 404, "text/plain", "404 Not Found");
                                 }
                             } else {
                                 sendResponse(out, 405, "text/plain", "405 Method Not Allowed");
@@ -77,10 +76,14 @@ public class CyberpunkServer {
 
     private static void sendResponse(PrintWriter out, int statusCode, String contentType, String body) {
         String statusText = switch (statusCode) {
-            case 200 -> "OK";
-            case 404 -> "Not Found";
-            case 405 -> "Method Not Allowed";
-            default -> "Error";
+            case 200 ->
+                "OK";
+            case 404 ->
+                "Not Found";
+            case 405 ->
+                "Method Not Allowed";
+            default ->
+                "Error";
         };
 
         out.print("[JAVA]HTTP/1.1 " + statusCode + " " + statusText + "\r\n");
