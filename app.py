@@ -1,6 +1,3 @@
-# -----------------------------
-# ./app.py
-# -----------------------------
 import platform
 import streamlit as st
 from framework.app import App
@@ -16,12 +13,6 @@ import os
 import pytesseract
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
-# Verifica o sistema operacional e ajusta o caminho do Tesseract
-if platform.system() == "Windows":
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-elif platform.system() == "Linux":
-    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"  # geralmente o local padrão
 
 if platform.system() == "Windows":
     path_win = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -42,7 +33,6 @@ class GitHubDashboardApp:
         self.user_data = None
     
     def run(self):
-        # sourcery skip: extract-duplicate-method, extract-method, remove-redundant-fstring
         st.set_page_config(page_title="BlackOps", page_icon="⚫")
         st.title("🔐 Blackops Intelligence")
 
@@ -99,16 +89,27 @@ class GitHubDashboardApp:
                     st.write(controller.detect_active_block_reasons())
                     st.write(controller.diagnose_common_block_reasons())
 
-                    # Criação de um botão para verificar o status
-                    if st.button("🔍 Verificar Firewall Relay"):# Ajuste conforme necessário
+                    if st.button("🔍 Verificar Firewall Relay"):
                         status = controller.get_firewall_status_and_control_relay()
                         st.write(status)
-                        print("\n📋 Motivos possíveis:")
+                        st.markdown("### 📋 Motivos possíveis:")
                         for reason in controller.list_possible_reasons():
                             st.write("-", reason)
-                            
+
+                    # Botões para consultar rotas simuladas do servidor Java
+                    if st.button("Consultar rota /STATUS do servidor Java"):
+                        response = controller.get_status()
+                        st.code(response)
+
+                    if st.button("Consultar rota /BLOCKED do servidor Java"):
+                        response = controller.get_blocked_reasons()
+                        st.code(response)
+
+                    if st.button("Consultar rota /DIAGNOSE do servidor Java"):
+                        response = controller.run_diagnose()
+                        st.code(response)
+
                 with abas[4]:
-                            
                     aba = st.tabs(["📜 Regras de Firewall", "📦 Simular Pacotes", "📁 Exportar/Importar(JSON)"])
                     
                     with aba[0]:
@@ -125,7 +126,6 @@ class GitHubDashboardApp:
                     st.title("🤖 Cyber-Brain: Inteligência Artificial na Nuvem")
                     st.header("🧠 Transferência Segura de Conhecimento com Firewall")
 
-                    # Entradas do usuário
                     diretorio = st.text_input("📂 Diretório para salvar o arquivo JSON", "./dados_github")
                     nome_arquivo = st.text_input("📝 Nome do arquivo JSON", "dados_usuario.json")
 
@@ -142,7 +142,6 @@ class GitHubDashboardApp:
                                 firewall.registrar_transferencia("github_info", recurso=login_usuario)
                                 st.success(f"✅ Dados exportados com sucesso para: `{caminho_final}`")
 
-                                # Visualização dos dados exportados
                                 st.subheader("📑 Prévia dos dados exportados:")
                                 st.json(dados)
                             else:
@@ -161,7 +160,6 @@ class GitHubDashboardApp:
                 st.session_state.access_token = None
                 st.rerun()
 
-# Executa a aplicação
 if __name__ == "__main__":
     app = GitHubDashboardApp()
     app.run()

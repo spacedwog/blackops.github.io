@@ -1,4 +1,6 @@
-# app.py
+# -----------------------------
+# framework/app.py
+# -----------------------------
 import streamlit as st
 from framework.firewall import Firewall, FirewallRule
 

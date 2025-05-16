@@ -1,6 +1,5 @@
 import time
 import socket
-import logging
 import platform
 import subprocess
 
@@ -128,9 +127,9 @@ class FirewallRelayController:
                 capture_output=True,
                 text=True,
                 check=True,
-                shell=True  # Certifique-se de usar shell=True no Windows
+                shell=True  # Importante para Windows
             )
-            output = netsh_check.stdout or ""  # Garante que é string, mesmo que seja None
+            output = netsh_check.stdout or ""
             if f"Port: {self.firewall_port}" in output:
                 return f"🔴 A porta {self.firewall_port} está bloqueada."
             else:
@@ -140,16 +139,30 @@ class FirewallRelayController:
         except Exception as e:
             return f"Erro inesperado ao verificar regras de firewall: {e}"
 
-# Exemplo de uso
-if __name__ == "__main__":
-    controller = FirewallRelayController(arduino_host="192.168.15.8", arduino_port=8080)
-    print(controller.get_firewall_status_and_control_relay())
-    print("\n📋 Motivos possíveis:")
-    for reason in controller.list_possible_reasons():
-        print("-", reason)
-    print("\n📋 Diagnóstico dos motivos mais prováveis para o bloqueio da porta 43:")
-    for reason in controller.diagnose_common_block_reasons():
-        print("-", reason)
-    logging.basicConfig(level=logging.DEBUG)
-    resultado = controller.detect_active_block_reasons()
-    print(resultado)
+    def fetch_java_server_route(self, route="/STATUS"):
+        """Consulta a rota HTTP simulada do servidor Java via socket TCP."""
+        try:
+            with socket.create_connection((self.arduino_host, self.arduino_port), timeout=self.timeout) as sock:
+                request = f"GET {route} HTTP/1.1\r\nHost: {self.arduino_host}\r\n\r\n"
+                sock.sendall(request.encode())
+                time.sleep(0.5)
+                response = sock.recv(4096).decode()
+                return response.strip()
+        except Exception as e:
+            return f"❌ Erro ao requisitar {route}: {e}"
+
+    # Métodos prontos para acessar as rotas específicas do servidor Java
+    def get_status(self):
+        return self.fetch_java_server_route("/STATUS")
+
+    def get_blocked_reasons(self):
+        return self.fetch_java_server_route("/BLOCKED")
+
+    def run_diagnose(self):
+        return self.fetch_java_server_route("/DIAGNOSE")
+
+    def get_cyberbrain_status(self):
+        return self.fetch_java_server_route("/CYBERBRAIN")
+
+    def get_export_status(self):
+        return self.fetch_java_server_route("/EXPORT")

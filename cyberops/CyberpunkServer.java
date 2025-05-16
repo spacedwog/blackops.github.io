@@ -15,10 +15,11 @@ public class CyberpunkServer {
             System.out.println("Cyberpunk Java Server is running on port " + port + "...");
 
             while (true) {
-                try (Socket clientSocket = serverSocket.accept();
-                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-
+                try (
+                    Socket clientSocket = serverSocket.accept();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
+                ) {
                     String requestLine = in.readLine();
                     System.out.println("Received: " + requestLine);
 
@@ -27,36 +28,69 @@ public class CyberpunkServer {
                         if (parts.length >= 2) {
                             String method = parts[0];
                             String path = parts[1];
+                            String body;
 
-                            if ("GET".equals(method) && "/STATUS".equals(path)) {
-                                String body = "STATE:ON";
+                            if ("GET".equals(method)) {
+                                switch (path) {
+                                    case "/STATUS":
+                                        body = "STATE:ON";
+                                        sendResponse(out, 200, "text/plain", body);
+                                        break;
 
-                                out.print("[JAVA]HTTP/1.1 200 OK\r\n<br>");
-                                out.print("Content-Type: text/plain\r\n<br>");
-                                out.print("Content-Length: " + body.length() + "\r\n<br>");
-                                out.print("Connection: close\r\n<br>");
-                                out.print("\r\n");
-                                out.print(body);
+                                    case "/BLOCKED":
+                                        body = "BLOCKED_REASONS:\n- IP Suspeito\n- DNS inválido\n- Firewall ativo";
+                                        sendResponse(out, 200, "text/plain", body);
+                                        break;
+
+                                    case "/DIAGNOSE":
+                                        body = "DIAGNOSIS:\n- Verifique a conexão com o GitHub\n- Certifique-se de que os pacotes estão autorizados";
+                                        sendResponse(out, 200, "text/plain", body);
+                                        break;
+
+                                    case "/CYBERBRAIN":
+                                        body = "{\"ai\":\"active\",\"level\":\"autonomous\",\"protection\":\"enabled\"}";
+                                        sendResponse(out, 200, "application/json", body);
+                                        break;
+
+                                    case "/EXPORT":
+                                        body = "{\"status\":\"success\",\"path\":\"/dados_github/dados_usuario.json\"}";
+                                        sendResponse(out, 200, "application/json", body);
+                                        break;
+
+                                    default:
+                                        sendResponse(out, 404, "text/plain", "404 Not Found");
+                                        break;
+                                }
                             } else {
-                                String body = "404 Not Found";
-                                out.print("HTTP/1.1 404 Not Found\r\n");
-                                out.print("Content-Type: text/plain\r\n");
-                                out.print("Content-Length: " + body.length() + "\r\n");
-                                out.print("Connection: close\r\n");
-                                out.print("\r\n");
-                                out.print(body);
+                                sendResponse(out, 405, "text/plain", "405 Method Not Allowed");
                             }
-                            out.flush();
                         }
                     }
 
                 } catch (IOException e) {
-                    System.out.println("Erro ao processar cliente: " + e.getMessage());
+                    System.err.println("Erro ao processar cliente: " + e.getMessage());
                 }
             }
 
         } catch (IOException e) {
-            System.out.println("Erro ao iniciar o servidor: " + e);
+            System.err.println("Erro ao iniciar o servidor: " + e);
         }
+    }
+
+    private static void sendResponse(PrintWriter out, int statusCode, String contentType, String body) {
+        String statusText = switch (statusCode) {
+            case 200 -> "OK";
+            case 404 -> "Not Found";
+            case 405 -> "Method Not Allowed";
+            default -> "Error";
+        };
+
+        out.print("HTTP/1.1 " + statusCode + " " + statusText + "\r\n");
+        out.print("Content-Type: " + contentType + "\r\n");
+        out.print("Content-Length: " + body.length() + "\r\n");
+        out.print("Connection: close\r\n");
+        out.print("\r\n");
+        out.print(body);
+        out.flush();
     }
 }
