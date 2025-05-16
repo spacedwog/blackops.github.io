@@ -1,72 +1,129 @@
+import { WebView } from 'react-native-webview'; // coloque no topo
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
 import { Text, Button, Provider as PaperProvider } from 'react-native-paper';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 
 const NODEMCU_IP = 'http://192.168.15.8:8080';
 
 export default function App() {
-  const [message, setMessage] = useState('Conectando ao NodeMCU...');
+  const [statusMessage, setStatusMessage] = useState('Conectando ao NodeMCU...');
   const [statusColor, setStatusColor] = useState('orange');
+
+  const [diagnosesMessage, setDiagnosesMessage] = useState('Carregando diagnósticos...');
+  const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
+
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     { key: 'status', title: 'Status' },
     { key: 'controle', title: 'Controle' },
-    { key: 'logs', title: 'Logs' },
+    { key: 'diagnoses', title: 'Diagnoses' },
+    { key: 'blocked', title: 'Blocked' },
   ]);
 
+  // Função para formatar mensagens que contenham [JAVA]
+  const formatJavaMessage = (data) => {
+    if (data.includes('[JAVA]')) {
+      return "♨️ Conexão com servidor Java estabelecida.\n" + data.replace('[JAVA]', '').trim();
+    }
+    return data;
+  };
+
+  // Função para obter STATUS
   const fetchStatus = () => {
     fetch(`${NODEMCU_IP}/STATUS`)
       .then(res => res.text())
       .then(data => {
-        if(data.startsWith("[JAVA]")){
+        if (data.includes('[JAVA]')) {
           if (data.match('STATE:ON')) {
-            setMessage("✅ Relé ligado (NodeMCU)");
+            setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n✅ Relé ligado (NodeMCU)");
             setStatusColor("green");
           } else if (data.match('STATE:OFF')) {
-            setMessage("⚠️ Relé desligado (NodeMCU)");
+            setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n⚠️ Relé desligado (NodeMCU)");
             setStatusColor("red");
           } else {
-            setMessage("🔄 Status desconhecido: " + data);
+            setStatusMessage(formatJavaMessage(data));
             setStatusColor("gray");
           }
         } else {
-          setMessage("🔄 Status desconhecido: " + data);
+          setStatusMessage("🔄 Status desconhecido: " + data);
           setStatusColor("gray");
         }
       })
       .catch(error => {
-        setMessage("Erro ao conectar ao NodeMCU: " + error.message);
+        setStatusMessage("Erro ao conectar ao NodeMCU: " + error.message);
         setStatusColor("red");
       });
   };
 
+  // Função para obter DIAGNOSES
+  const fetchDiagnoses = () => {
+    fetch(`${NODEMCU_IP}/DIAGNOSES`)
+      .then(res => res.text())
+      .then(data => {
+        setDiagnosesMessage(formatJavaMessage(data) || 'Nenhum diagnóstico disponível.');
+      })
+      .catch(error => {
+        setDiagnosesMessage("Erro ao obter diagnósticos: " + error.message);
+      });
+  };
+
+  // Função para obter BLOCKED
+  const fetchBlocked = () => {
+    fetch(`${NODEMCU_IP}/BLOCKED`)
+      .then(res => res.text())
+      .then(data => {
+        setBlockedMessage(formatJavaMessage(data) || 'Nenhum bloqueio ativo.');
+      })
+      .catch(error => {
+        setBlockedMessage("Erro ao obter bloqueios: " + error.message);
+      });
+  };
+
+  // Envia comandos LIGAR/DESLIGAR
   const sendCommand = (cmd) => {
     fetch(`${NODEMCU_IP}/${cmd}`)
       .then(res => res.text())
       .then(data => {
-        setMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
+        if (data.includes('[JAVA]')) {
+          setStatusMessage(`🔗 Conexão com servidor Java estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[JAVA]', '').trim()}`);
+        } else {
+          setStatusMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
+        }
         fetchStatus();
       })
       .catch(error => {
-        setMessage(`Erro ao enviar comando ${cmd}: ` + error.message);
+        setStatusMessage(`Erro ao enviar comando ${cmd}: ` + error.message);
+        setStatusColor('red');
       });
   };
 
+  // Atualiza dados periodicamente
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 5000);
+    fetchDiagnoses();
+    fetchBlocked();
+    const interval = setInterval(() => {
+      fetchStatus();
+      fetchDiagnoses();
+      fetchBlocked();
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  // Componentes para cada aba
   const StatusRoute = () => (
     <View style={styles.tabContent}>
-      <Text style={[styles.statusText, { color: statusColor }]}>{message}</Text>
+      <Text style={[styles.statusText, { color: statusColor }]}>{statusMessage}</Text>
     </View>
   );
 
   const ControleRoute = () => (
     <View style={styles.tabContent}>
+      <WebView
+        source={{ uri: `${NODEMCU_IP}/stream` }}
+        style={styles.webcam}
+      />
       <Button
         mode="contained"
         onPress={() => sendCommand('LIGAR')}
@@ -84,16 +141,29 @@ export default function App() {
     </View>
   );
 
-  const LogsRoute = () => (
-    <View style={styles.tabContent}>
-      <Text style={styles.logsText}>{message}</Text>
-    </View>
+  const DiagnosesRoute = () => (
+    <ScrollView style={styles.scrollContent}>
+      <Text style={styles.logsText}>{diagnosesMessage}</Text>
+      <Button mode="outlined" onPress={fetchDiagnoses} style={styles.refreshButton}>
+        Atualizar Diagnósticos
+      </Button>
+    </ScrollView>
+  );
+
+  const BlockedRoute = () => (
+    <ScrollView style={styles.scrollContent}>
+      <Text style={styles.logsText}>{blockedMessage}</Text>
+      <Button mode="outlined" onPress={fetchBlocked} style={styles.refreshButton}>
+        Atualizar Bloqueios
+      </Button>
+    </ScrollView>
   );
 
   const renderScene = SceneMap({
     status: StatusRoute,
     controle: ControleRoute,
-    logs: LogsRoute,
+    diagnoses: DiagnosesRoute,
+    blocked: BlockedRoute,
   });
 
   return (
@@ -123,6 +193,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  scrollContent: {
+    flex: 1,
+    padding: 20,
+  },
   statusText: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -133,8 +207,21 @@ const styles = StyleSheet.create({
     width: '70%',
     alignSelf: 'center',
   },
+  refreshButton: {
+    marginTop: 20,
+    alignSelf: 'center',
+    width: '60%',
+  },
   logsText: {
     fontSize: 16,
     fontFamily: 'monospace',
+  },
+  webcam: {
+    width: '100%',
+    height: 200,
+    marginBottom: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
 });

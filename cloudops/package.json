@@ -18,7 +18,8 @@
     "react-native": "0.79.2",
     "react-native-paper": "^5.14.4",
     "react-native-tab-view": "^4.1.0",
-    "react-native-tcp-socket": "^6.3.0"
+    "react-native-tcp-socket": "^6.3.0",
+    "react-native-webview": "^13.13.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
