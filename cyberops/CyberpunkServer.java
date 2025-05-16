@@ -33,27 +33,27 @@ public class CyberpunkServer {
                             if ("GET".equals(method)) {
                                 switch (path) {
                                     case "/STATUS":
-                                        body = "STATE:ON";
+                                        body = "[JAVA]STATE:ON";
                                         sendResponse(out, 200, "text/plain", body);
                                         break;
 
                                     case "/BLOCKED":
-                                        body = "BLOCKED_REASONS:\n- IP Suspeito\n- DNS inválido\n- Firewall ativo";
+                                        body = "[JAVA]BLOCKED_REASONS:\n- IP Suspeito\n- DNS inválido\n- Firewall ativo";
                                         sendResponse(out, 200, "text/plain", body);
                                         break;
 
                                     case "/DIAGNOSE":
-                                        body = "DIAGNOSIS:\n- Verifique a conexão com o GitHub\n- Certifique-se de que os pacotes estão autorizados";
+                                        body = "[JAVA]DIAGNOSIS:\n- Verifique a conexão com o GitHub\n- Certifique-se de que os pacotes estão autorizados";
                                         sendResponse(out, 200, "text/plain", body);
                                         break;
 
                                     case "/CYBERBRAIN":
-                                        body = "{\"ai\":\"active\",\"level\":\"autonomous\",\"protection\":\"enabled\"}";
+                                        body = "[JAVA]{\"ai\":\"active\",\"level\":\"autonomous\",\"protection\":\"enabled\"}";
                                         sendResponse(out, 200, "application/json", body);
                                         break;
 
                                     case "/EXPORT":
-                                        body = "{\"status\":\"success\",\"path\":\"/dados_github/dados_usuario.json\"}";
+                                        body = "[JAVA]{\"status\":\"success\",\"path\":\"/dados_github/dados_usuario.json\"}";
                                         sendResponse(out, 200, "application/json", body);
                                         break;
 
@@ -85,7 +85,7 @@ public class CyberpunkServer {
             default -> "Error";
         };
 
-        out.print("HTTP/1.1 " + statusCode + " " + statusText + "\r\n");
+        out.print("[JAVA]HTTP/1.1 " + statusCode + " " + statusText + "\r\n");
         out.print("Content-Type: " + contentType + "\r\n");
         out.print("Content-Length: " + body.length() + "\r\n");
         out.print("Connection: close\r\n");
