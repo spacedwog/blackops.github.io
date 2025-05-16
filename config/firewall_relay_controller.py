@@ -11,6 +11,7 @@ class FirewallRelayController:
         self.system = platform.system()
         self.arduino_host = arduino_host
         self.arduino_port = arduino_port
+        self.response = self.send_arduino_command("GET /STATUS HTTP/1.1")
 
     def send_arduino_command(self, command):
         try:
@@ -87,16 +88,15 @@ class FirewallRelayController:
 
     def get_relay_status(self):
         """Envia STATUS e obtém o estado atual do relé."""
-        response = self.send_arduino_command("GET /STATUS HTTP/1.1")
-        if response.startswith("STATE:"):
-            return "🟢 O relé está ligado." if response[6:] == "ON" else "🔴 O relé está desligado."
-        elif response.startswith("LED:"):
-            return "🟢 O LED está ligado." if response[4:] == "ON" else "🔴 O LED está desligado."
-        elif response.startswith("[JAVA]"):
-            mensagem = f"🟢 Conexão com JAVA estabelecida.<br>♨️ {response}"
+        if self.response.startswith("STATE:"):
+            return "🟢 O relé está ligado." if self.response[6:] == "ON" else "🔴 O relé está desligado."
+        elif self.response.startswith("LED:"):
+            return "🟢 O LED está ligado." if self.response[4:] == "ON" else "🔴 O LED está desligado."
+        elif self.response.startswith("[JAVA]"):
+            mensagem = f"🟢 Conexão com JAVA estabelecida.<br>♨️ {self.response}"
             return mensagem
         else:
-            return f"⚠️ Resposta inesperada: {response}"
+            return f"⚠️ Resposta inesperada: {self.response}"
 
     def diagnose_common_block_reasons(self):
         reasons = [
