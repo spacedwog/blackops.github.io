@@ -5,9 +5,9 @@ import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { RNCamera } from 'react-native-camera';
 
 const NODEMCU_IP = 'http://192.168.15.8:8080';
-const [isCameraOn, setIsCameraOn] = useState(false);
 
 export default function App() {
+  const [isCameraOn, setIsCameraOn] = useState(false);
   const [statusMessage, setStatusMessage] = useState('Conectando ao NodeMCU...');
   const [statusColor, setStatusColor] = useState('orange');
 
