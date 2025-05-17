@@ -185,7 +185,7 @@ export default function App() {
     </ScrollView>
   );
 
-  const CameraRoute = () => (
+  const CameraRoute = ({ isCameraOn, setIsCameraOn }) => (
     <View style={styles.tabContent}>
       <Button
         mode="contained"
@@ -203,6 +203,7 @@ export default function App() {
       )}
     </View>
   );
+
 
   const renderScene = SceneMap({
     status: StatusRoute,
@@ -249,6 +250,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
+    marginBottom: 10,
     marginVertical: 10,
     width: '70%',
     alignSelf: 'center',
