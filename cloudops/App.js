@@ -48,16 +48,29 @@ export default function App() {
 
       if (data.includes('[JAVA]')) {
         if (data.includes('STATE:ON')) {
-          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n✅ Relé ligado (NodeMCU)");
+          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n✅ Led ligado (NodeMCU)");
           setStatusColor("green");
         } else if (data.includes('STATE:OFF')) {
-          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n⚠️ Relé desligado (NodeMCU)");
+          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n❌ Led desligado (NodeMCU)");
           setStatusColor("red");
         } else {
           setStatusMessage(formatJavaMessage(data));
           setStatusColor("gray");
         }
-      } else {
+      }
+      else if (data.includes('[ARDUINO]')) {
+        if (data.includes('STATE:ON')) {
+          setStatusMessage("♨️ Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n" + data);
+          setStatusColor("green");
+        } else if (data.includes('STATE:OFF')) {
+          setStatusMessage("♨️ Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n" + data);
+          setStatusColor("red");
+        } else {
+          setStatusMessage(formatJavaMessage(data));
+          setStatusColor("gray");
+        }
+      }
+      else {
         setStatusMessage("🔄 Status desconhecido: " + data);
         setStatusColor("gray");
       }
@@ -97,7 +110,11 @@ export default function App() {
       .then(data => {
         if (data.includes('[JAVA]')) {
           setStatusMessage(`🔗 Conexão com servidor Java estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[JAVA]', '').trim()}`);
-        } else {
+        }
+        if(data.includes('[ARDUINO]')){
+          setStatusMessage(`🔗 Conexão com servidor NODEMCU estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[ARDUINO]', '').trim()}`)
+        }
+        else {
           setStatusMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
         }
         fetchStatus();

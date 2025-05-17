@@ -12,7 +12,7 @@ public class CyberpunkServer {
     public static void main(String[] args) {
         int port = 8080;
 
-        try (ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("192.168.15.8"))) {
+        try (ServerSocket serverSocket = new ServerSocket(port, 50, InetAddress.getByName("192.168.15.138"))) {
             System.out.println("Cyberpunk Java Server is running on port " + port + "...");
 
             while (true) {
@@ -89,7 +89,7 @@ public class CyberpunkServer {
         out.print("[JAVA]HTTP/1.1 " + statusCode + " " + statusText + "\r\n");
         out.print("Content-Type: " + contentType + "\r\n");
         out.print("Content-Length: " + body.length() + "\r\n");
-        out.print("Connection: close\r\n");
+        out.print("Connection: open\r\n");
         out.print("\r\n");
         out.print(body);
         out.flush();
