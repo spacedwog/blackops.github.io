@@ -69,27 +69,25 @@ export default function App() {
   };
 
   // Função para obter DIAGNOSES
-  const fetchDiagnoses = () => {
-    fetch(`${NODEMCU_IP}/DIAGNOSES`)
-      .then(res => res.text())
-      .then(data => {
-        setDiagnosesMessage(formatJavaMessage(data) || 'Nenhum diagnóstico disponível.');
-      })
-      .catch(error => {
-        setDiagnosesMessage("Erro ao obter diagnósticos: " + error.message);
-      });
+  const fetchDiagnoses = async () => {
+    try {
+      const response = await fetch(`${NODEMCU_IP}/DIAGNOSES`);
+      const data = await response.text();
+      setDiagnosesMessage(formatJavaMessage(data) || 'Nenhum diagnóstico disponível.');
+    } catch (error) {
+      setDiagnosesMessage("Erro ao obter diagnósticos: " + error.message);
+    }
   };
 
   // Função para obter BLOCKED
-  const fetchBlocked = () => {
-    fetch(`${NODEMCU_IP}/BLOCKED`)
-      .then(res => res.text())
-      .then(data => {
-        setBlockedMessage(formatJavaMessage(data) || 'Nenhum bloqueio ativo.');
-      })
-      .catch(error => {
-        setBlockedMessage("Erro ao obter bloqueios: " + error.message);
-      });
+  const fetchBlocked = async () => {
+    try {
+      const response = await fetch(`${NODEMCU_IP}/BLOCKED`);
+      const data = await response.text();
+      setBlockedMessage(formatJavaMessage(data) || 'Nenhum bloqueio ativo.');
+    } catch (error) {
+      setBlockedMessage("Erro ao obter bloqueios: " + error.message);
+    }
   };
 
   // Envia comandos LIGAR/DESLIGAR
