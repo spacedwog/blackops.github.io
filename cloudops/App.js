@@ -25,12 +25,12 @@ export default function App() {
   ]);
 
   // Função para formatar mensagens que contenham [JAVA]
-  const formatJavaMessage = (data) => {
+  const formatMessage = (data) => {
     if (data.includes('[JAVA]')) {
       return "♨️ Conexão com servidor Java estabelecida.\n" + data.replace('[JAVA]', '').trim();
     }
     else if(data.includes('[ARDUINO]')){
-      return "♾️ Conexão com servidor Arduino estabelecida.\n" + data.replace('[ARDUINO]', '').trim();
+      return "🤖 Conexão com servidor Arduino estabelecida.\n" + data.replace('[ARDUINO]', '').trim();
     }
     return data;
   };
@@ -57,19 +57,19 @@ export default function App() {
           setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n❌ Led desligado (NodeMCU)");
           setStatusColor("red");
         } else {
-          setStatusMessage(formatJavaMessage(data));
+          setStatusMessage(formatMessage(data));
           setStatusColor("gray");
         }
       }
       else if (data.includes('[ARDUINO]')) {
         if (data.includes('STATE:ON')) {
-          setStatusMessage("♾️ Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n" + data.replace('[ARDUINO]', '').trim());
+          setStatusMessage("🤖 Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n" + data.replace('[ARDUINO]', '').trim());
           setStatusColor("green");
         } else if (data.includes('STATE:OFF')) {
-          setStatusMessage("♾️ Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n" + data.replace('[ARDUINO]', '').trim());
+          setStatusMessage("🤖 Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n" + data.replace('[ARDUINO]', '').trim());
           setStatusColor("red");
         } else {
-          setStatusMessage(formatJavaMessage(data));
+          setStatusMessage(formatMessage(data));
           setStatusColor("gray");
         }
       }
@@ -89,7 +89,7 @@ export default function App() {
     try {
       const response = await fetch(`${NODEMCU_IP}/DIAGNOSES`);
       const data = await response.text();
-      setDiagnosesMessage(formatJavaMessage(data) || 'Nenhum diagnóstico disponível.');
+      setDiagnosesMessage(formatMessage(data) || 'Nenhum diagnóstico disponível.');
     } catch (error) {
       setDiagnosesMessage("Erro ao obter diagnósticos: " + error.message);
     }
@@ -100,7 +100,7 @@ export default function App() {
     try {
       const response = await fetch(`${NODEMCU_IP}/BLOCKED`);
       const data = await response.text();
-      setBlockedMessage(formatJavaMessage(data) || 'Nenhum bloqueio ativo.');
+      setBlockedMessage(formatMessage(data) || 'Nenhum bloqueio ativo.');
     } catch (error) {
       setBlockedMessage("Erro ao obter bloqueios: " + error.message);
     }
