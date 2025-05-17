@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
-import { Text, Button, Provider as PaperProvider } from 'react-native-paper';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
-import { RNCamera } from 'react-native-camera';
+import { Text, TextInput, Button, Provider as PaperProvider } from 'react-native-paper';
+import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from "@react-native-community/netinfo";
 
 const NODEMCU_IP = 'http://192.168.15.138:8080';
 
 export default function App() {
-  const [isCameraOn, setIsCameraOn] = useState(false);
   const [statusMessage, setStatusMessage] = useState('Conectando ao NodeMCU...');
   const [statusColor, setStatusColor] = useState('orange');
-
   const [diagnosesMessage, setDiagnosesMessage] = useState('Carregando diagnósticos...');
   const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
 
@@ -21,21 +18,18 @@ export default function App() {
     { key: 'controle', title: 'Controle' },
     { key: 'diagnoses', title: 'Diagnoses' },
     { key: 'blocked', title: 'Blocked' },
-    { key: 'camera', title: 'Câmera' },
+    { key: 'comandos', title: 'Comandos' },
   ]);
 
-  // Função para formatar mensagens que contenham [JAVA]
   const formatMessage = (data) => {
     if (data.includes('[JAVA]')) {
       return "♨️ Conexão com servidor Java estabelecida.\n" + data.replace('[JAVA]', '').trim();
-    }
-    else if(data.includes('[ARDUINO]')){
+    } else if (data.includes('[ARDUINO]')) {
       return "🤖 Conexão com servidor Arduino estabelecida.\n" + data.replace('[ARDUINO]', '').trim();
     }
     return data;
   };
 
-  // Função para obter STATUS
   const fetchStatus = async () => {
     try {
       const state = await NetInfo.fetch();
@@ -60,8 +54,7 @@ export default function App() {
           setStatusMessage(formatMessage(data));
           setStatusColor("gray");
         }
-      }
-      else if (data.includes('[ARDUINO]')) {
+      } else if (data.includes('[ARDUINO]')) {
         if (data.includes('STATE:ON')) {
           setStatusMessage("🤖 Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n" + data.replace('[ARDUINO]', '').trim());
           setStatusColor("green");
@@ -72,8 +65,7 @@ export default function App() {
           setStatusMessage(formatMessage(data));
           setStatusColor("gray");
         }
-      }
-      else {
+      } else {
         setStatusMessage("🔄 Status desconhecido: " + data);
         setStatusColor("gray");
       }
@@ -84,7 +76,6 @@ export default function App() {
     }
   };
 
-  // Função para obter DIAGNOSES
   const fetchDiagnoses = async () => {
     try {
       const response = await fetch(`${NODEMCU_IP}/DIAGNOSES`);
@@ -95,7 +86,6 @@ export default function App() {
     }
   };
 
-  // Função para obter BLOCKED
   const fetchBlocked = async () => {
     try {
       const response = await fetch(`${NODEMCU_IP}/BLOCKED`);
@@ -106,18 +96,48 @@ export default function App() {
     }
   };
 
-  // Envia comandos LIGAR/DESLIGAR
+  const ComandosRoute = () => {
+    const [commandInput, setCommandInput] = useState('');
+    const [commandOutput, setCommandOutput] = useState('');
+
+    const handleSendCommand = () => {
+      if (!commandInput.trim()) return;
+
+      sendCommand(commandInput.trim());
+      setCommandOutput(`Comando "${commandInput.trim()}" enviado.`);
+      setCommandInput('');
+    };
+
+    return (
+      <ScrollView contentContainerStyle={styles.tabContent}>
+        <TextInput
+          label="Comando"
+          value={commandInput}
+          onChangeText={setCommandInput}
+          style={styles.input}
+          mode="outlined"
+        />
+        <Button
+          mode="contained"
+          onPress={handleSendCommand}
+          style={styles.button}
+        >
+          Enviar Comando
+        </Button>
+        <Text style={styles.logsText}>{commandOutput}</Text>
+      </ScrollView>
+    );
+  };
+
   const sendCommand = (cmd) => {
     fetch(`${NODEMCU_IP}/${cmd}`)
       .then(res => res.text())
       .then(data => {
         if (data.includes('[JAVA]')) {
           setStatusMessage(`♨️ Conexão com servidor Java estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[JAVA]', '').trim()}`);
-        }
-        if(data.includes('[ARDUINO]')){
-          setStatusMessage(`♾️ Conexão com servidor NODEMCU estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[ARDUINO]', '').trim()}`)
-        }
-        else {
+        } else if (data.includes('[ARDUINO]')) {
+          setStatusMessage(`♾️ Conexão com servidor NODEMCU estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[ARDUINO]', '').trim()}`);
+        } else {
           setStatusMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
         }
         fetchStatus();
@@ -128,7 +148,6 @@ export default function App() {
       });
   };
 
-  // Atualiza dados periodicamente
   useEffect(() => {
     fetchStatus();
     fetchDiagnoses();
@@ -141,7 +160,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Componentes para cada aba
+  // Abas individuais
   const StatusRoute = () => (
     <View style={styles.tabContent}>
       <Text style={[styles.statusText, { color: statusColor }]}>{statusMessage}</Text>
@@ -185,33 +204,23 @@ export default function App() {
     </ScrollView>
   );
 
-  const CameraRoute = ({ isCameraOn, setIsCameraOn }) => (
-    <View style={styles.tabContent}>
-      <Button
-        mode="contained"
-        onPress={() => setIsCameraOn(!isCameraOn)}
-        style={styles.button}
-      >
-        {isCameraOn ? 'Desligar Câmera' : 'Ligar Câmera'}
-      </Button>
-      {isCameraOn && (
-        <RNCamera
-          style={{ flex: 1, width: '100%', marginTop: 10 }}
-          type={RNCamera.Constants.Type.back}
-          captureAudio={false}
-        />
-      )}
-    </View>
-  );
-
-
-  const renderScene = SceneMap({
-    status: StatusRoute,
-    controle: ControleRoute,
-    diagnoses: DiagnosesRoute,
-    blocked: BlockedRoute,
-    camera: CameraRoute,
-  });
+  // ✅ renderScene como função que passa props
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'status':
+        return <StatusRoute />;
+      case 'controle':
+        return <ControleRoute />;
+      case 'diagnoses':
+        return <DiagnosesRoute />;
+      case 'blocked':
+        return <BlockedRoute />;
+      case 'comandos':
+        return <ComandosRoute />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <PaperProvider>
@@ -260,6 +269,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '60%',
   },
+  input: {
+    width: '100%',
+    marginBottom: 20,
+  },
+
   logsText: {
     fontSize: 16,
     fontFamily: 'monospace',
