@@ -29,6 +29,9 @@ export default function App() {
     if (data.includes('[JAVA]')) {
       return "♨️ Conexão com servidor Java estabelecida.\n" + data.replace('[JAVA]', '').trim();
     }
+    else if(data.includes('[ARDUINO]')){
+      return "♾️ Conexão com servidor Arduino estabelecida.\n" + data.replace('[ARDUINO]', '').trim();
+    }
     return data;
   };
 
@@ -60,10 +63,10 @@ export default function App() {
       }
       else if (data.includes('[ARDUINO]')) {
         if (data.includes('STATE:ON')) {
-          setStatusMessage("♨️ Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n" + data);
+          setStatusMessage("♾️ Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n" + data.replace('[ARDUINO]', '').trim());
           setStatusColor("green");
         } else if (data.includes('STATE:OFF')) {
-          setStatusMessage("♨️ Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n" + data);
+          setStatusMessage("♾️ Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n" + data.replace('[ARDUINO]', '').trim());
           setStatusColor("red");
         } else {
           setStatusMessage(formatJavaMessage(data));
@@ -109,10 +112,10 @@ export default function App() {
       .then(res => res.text())
       .then(data => {
         if (data.includes('[JAVA]')) {
-          setStatusMessage(`🔗 Conexão com servidor Java estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[JAVA]', '').trim()}`);
+          setStatusMessage(`♨️ Conexão com servidor Java estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[JAVA]', '').trim()}`);
         }
         if(data.includes('[ARDUINO]')){
-          setStatusMessage(`🔗 Conexão com servidor NODEMCU estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[ARDUINO]', '').trim()}`)
+          setStatusMessage(`♾️ Conexão com servidor NODEMCU estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[ARDUINO]', '').trim()}`)
         }
         else {
           setStatusMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
