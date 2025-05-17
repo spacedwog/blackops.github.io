@@ -3,6 +3,7 @@ import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
 import { Text, Button, Provider as PaperProvider } from 'react-native-paper';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { RNCamera } from 'react-native-camera';
+import NetInfo from "@react-native-community/netinfo";
 
 const NODEMCU_IP = 'http://192.168.15.138:8080';
 
@@ -32,30 +33,39 @@ export default function App() {
   };
 
   // Função para obter STATUS
-  const fetchStatus = () => {
-    fetch(`${NODEMCU_IP}/STATUS`)
-      .then(res => res.text())
-      .then(data => {
-        if (data.includes('[JAVA]')) {
-          if (data.match('STATE:ON')) {
-            setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n✅ Relé ligado (NodeMCU)");
-            setStatusColor("green");
-          } else if (data.match('STATE:OFF')) {
-            setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n⚠️ Relé desligado (NodeMCU)");
-            setStatusColor("red");
-          } else {
-            setStatusMessage(formatJavaMessage(data));
-            setStatusColor("gray");
-          }
+  const fetchStatus = async () => {
+    try {
+      const state = await NetInfo.fetch();
+
+      if (!state.isConnected) {
+        setStatusMessage("Sem conexão com a internet/Wi-Fi.");
+        setStatusColor("gray");
+        return;
+      }
+
+      const response = await fetch(`${NODEMCU_IP}/STATUS`);
+      const data = await response.text();
+
+      if (data.includes('[JAVA]')) {
+        if (data.includes('STATE:ON')) {
+          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n✅ Relé ligado (NodeMCU)");
+          setStatusColor("green");
+        } else if (data.includes('STATE:OFF')) {
+          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n⚠️ Relé desligado (NodeMCU)");
+          setStatusColor("red");
         } else {
-          setStatusMessage("🔄 Status desconhecido: " + data);
+          setStatusMessage(formatJavaMessage(data));
           setStatusColor("gray");
         }
-      })
-      .catch(error => {
-        setStatusMessage("Erro ao conectar ao NodeMCU: " + error.message);
-        setStatusColor("red");
-      });
+      } else {
+        setStatusMessage("🔄 Status desconhecido: " + data);
+        setStatusColor("gray");
+      }
+
+    } catch (error) {
+      setStatusMessage("Erro ao conectar: " + error.message);
+      setStatusColor("red");
+    }
   };
 
   // Função para obter DIAGNOSES
