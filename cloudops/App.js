@@ -3,6 +3,7 @@ import { StyleSheet, Dimensions, ScrollView, RefreshControl, requireNativeCompon
 import { Text, Button, Provider as PaperProvider, ActivityIndicator, } from 'react-native-paper';
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from '@react-native-community/netinfo';
+import ThreeBackground from './ThreeBackground';
 
 const NODEMCU_IP = 'http://192.168.15.138:8080';
 
@@ -268,20 +269,25 @@ export default function App() {
 
   return (
     <PaperProvider>
-      <TabView
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        onIndexChange={setIndex}
-        initialLayout={{ width: Dimensions.get('window').width }}
-        renderTabBar={(props) => (
-          <TabBar
-            {...props}
-            indicatorStyle={{ backgroundColor: 'blue' }}
-            style={{ backgroundColor: 'white' }}
-            labelStyle={{ color: 'black' }}
+      <View style={{ flex: 1 }}>
+        <ThreeBackground />
+        {
+          <TabView
+            navigationState={{ index, routes }}
+            renderScene={renderScene}
+            onIndexChange={setIndex}
+            initialLayout={{ width: Dimensions.get('window').width }}
+            renderTabBar={(props) => (
+              <TabBar
+                {...props}
+                indicatorStyle={{ backgroundColor: 'blue' }}
+                style={{ backgroundColor: 'white' }}
+                labelStyle={{ color: 'black' }}
+              />
+            )}
           />
-        )}
-      />
+        }
+      </View>
     </PaperProvider>
   );
 }
