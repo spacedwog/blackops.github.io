@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
-import { Text, TextInput, Button, Provider as PaperProvider } from 'react-native-paper';
+import { Text, Button, Provider as PaperProvider, ActivityIndicator } from 'react-native-paper';
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from "@react-native-community/netinfo";
 
@@ -11,6 +11,7 @@ export default function App() {
   const [statusColor, setStatusColor] = useState('orange');
   const [diagnosesMessage, setDiagnosesMessage] = useState('Carregando diagnósticos...');
   const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
+  const [isSendingCommand, setIsSendingCommand] = useState(false);
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
@@ -18,7 +19,6 @@ export default function App() {
     { key: 'controle', title: 'Controle' },
     { key: 'diagnoses', title: 'Diagnoses' },
     { key: 'blocked', title: 'Blocked' },
-    { key: 'comandos', title: 'Comandos' },
   ]);
 
   const formatMessage = (data) => {
@@ -96,40 +96,8 @@ export default function App() {
     }
   };
 
-  const ComandosRoute = () => {
-    const [commandInput, setCommandInput] = useState('');
-    const [commandOutput, setCommandOutput] = useState('');
-
-    const handleSendCommand = () => {
-      if (!commandInput.trim()) return;
-
-      sendCommand(commandInput.trim());
-      setCommandOutput(`Comando "${commandInput.trim()}" enviado.`);
-      setCommandInput('');
-    };
-
-    return (
-      <ScrollView contentContainerStyle={styles.tabContent}>
-        <TextInput
-          label="Comando"
-          value={commandInput}
-          onChangeText={setCommandInput}
-          style={styles.input}
-          mode="outlined"
-        />
-        <Button
-          mode="contained"
-          onPress={handleSendCommand}
-          style={styles.button}
-        >
-          Enviar Comando
-        </Button>
-        <Text style={styles.logsText}>{commandOutput}</Text>
-      </ScrollView>
-    );
-  };
-
   const sendCommand = (cmd) => {
+    setIsSendingCommand(true);
     fetch(`${NODEMCU_IP}/${cmd}`)
       .then(res => res.text())
       .then(data => {
@@ -145,7 +113,8 @@ export default function App() {
       .catch(error => {
         setStatusMessage(`Erro ao enviar comando ${cmd}: ` + error.message);
         setStatusColor('red');
-      });
+      })
+      .finally(() => setIsSendingCommand(false));
   };
 
   useEffect(() => {
@@ -160,7 +129,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Abas individuais
   const StatusRoute = () => (
     <View style={styles.tabContent}>
       <Text style={[styles.statusText, { color: statusColor }]}>{statusMessage}</Text>
@@ -172,16 +140,18 @@ export default function App() {
       <Button
         mode="contained"
         onPress={() => sendCommand('LIGAR')}
+        disabled={isSendingCommand}
         style={[styles.button, { backgroundColor: 'green' }]}
       >
-        LIGAR
+        {isSendingCommand ? 'Enviando...' : 'LIGAR'}
       </Button>
       <Button
         mode="contained"
         onPress={() => sendCommand('DESLIGAR')}
+        disabled={isSendingCommand}
         style={[styles.button, { backgroundColor: 'red' }]}
       >
-        DESLIGAR
+        {isSendingCommand ? 'Enviando...' : 'DESLIGAR'}
       </Button>
     </View>
   );
@@ -204,7 +174,6 @@ export default function App() {
     </ScrollView>
   );
 
-  // ✅ renderScene como função que passa props
   const renderScene = ({ route }) => {
     switch (route.key) {
       case 'status':
@@ -215,8 +184,6 @@ export default function App() {
         return <DiagnosesRoute />;
       case 'blocked':
         return <BlockedRoute />;
-      case 'comandos':
-        return <ComandosRoute />;
       default:
         return null;
     }
@@ -269,11 +236,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '60%',
   },
-  input: {
-    width: '100%',
-    marginBottom: 20,
-  },
-
   logsText: {
     fontSize: 16,
     fontFamily: 'monospace',
