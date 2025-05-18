@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Dimensions, ScrollView } from 'react-native';
-import { Text, Button, Provider as PaperProvider, ActivityIndicator } from 'react-native-paper';
+import { StyleSheet, Dimensions, ScrollView, RefreshControl, } from 'react-native';
+import { Text, Button, Provider as PaperProvider, ActivityIndicator, } from 'react-native-paper';
 import { TabView, TabBar } from 'react-native-tab-view';
-import NetInfo from "@react-native-community/netinfo";
+import NetInfo from '@react-native-community/netinfo';
 
 const NODEMCU_IP = 'http://192.168.15.138:8080';
 
@@ -13,6 +13,11 @@ export default function App() {
   const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
   const [isSendingCommand, setIsSendingCommand] = useState(false);
 
+  const [refreshingStatus, setRefreshingStatus] = useState(false);
+  const [refreshingControle, setRefreshingControle] = useState(false);
+  const [refreshingDiagnoses, setRefreshingDiagnoses] = useState(false);
+  const [refreshingBlocked, setRefreshingBlocked] = useState(false);
+
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     { key: 'status', title: 'Status' },
@@ -22,10 +27,8 @@ export default function App() {
   ]);
 
   const formatMessage = (data) => {
-    if (data.includes('[JAVA]')) {
-      return "♨️ Conexão com servidor Java estabelecida.\n" + data.replace('[JAVA]', '').trim();
-    } else if (data.includes('[ARDUINO]')) {
-      return "🤖 Conexão com servidor Arduino estabelecida.\n" + data.replace('[ARDUINO]', '').trim();
+    if (data.includes('[ARDUINO]')) {
+      return '🤖 Conexão com servidor Arduino estabelecida.\n' + data.replace('[ARDUINO]', '').trim();
     }
     return data;
   };
@@ -33,46 +36,33 @@ export default function App() {
   const fetchStatus = async () => {
     try {
       const state = await NetInfo.fetch();
-
       if (!state.isConnected) {
-        setStatusMessage("Sem conexão com a internet/Wi-Fi.");
-        setStatusColor("gray");
+        setStatusMessage('Sem conexão com a internet/Wi-Fi.');
+        setStatusColor('gray');
         return;
       }
 
       const response = await fetch(`${NODEMCU_IP}/STATUS`);
       const data = await response.text();
 
-      if (data.includes('[JAVA]')) {
+      if (data.includes('[ARDUINO]')) {
         if (data.includes('STATE:ON')) {
-          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n✅ Led ligado (NodeMCU)");
-          setStatusColor("green");
+          setStatusMessage('🤖 Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n' + data.replace('[ARDUINO]', '').trim());
+          setStatusColor('green');
         } else if (data.includes('STATE:OFF')) {
-          setStatusMessage("♨️ Conexão com servidor Java estabelecida.\n❌ Led desligado (NodeMCU)");
-          setStatusColor("red");
+          setStatusMessage('🤖 Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n' + data.replace('[ARDUINO]', '').trim());
+          setStatusColor('red');
         } else {
           setStatusMessage(formatMessage(data));
-          setStatusColor("gray");
-        }
-      } else if (data.includes('[ARDUINO]')) {
-        if (data.includes('STATE:ON')) {
-          setStatusMessage("🤖 Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n" + data.replace('[ARDUINO]', '').trim());
-          setStatusColor("green");
-        } else if (data.includes('STATE:OFF')) {
-          setStatusMessage("🤖 Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n" + data.replace('[ARDUINO]', '').trim());
-          setStatusColor("red");
-        } else {
-          setStatusMessage(formatMessage(data));
-          setStatusColor("gray");
+          setStatusColor('gray');
         }
       } else {
-        setStatusMessage("🔄 Status desconhecido: " + data);
-        setStatusColor("gray");
+        setStatusMessage('🔄 Status desconhecido: ' + data);
+        setStatusColor('gray');
       }
-
     } catch (error) {
-      setStatusMessage("Erro ao conectar: " + error.message);
-      setStatusColor("red");
+      setStatusMessage('Erro ao conectar: ' + error.message);
+      setStatusColor('red');
     }
   };
 
@@ -82,7 +72,7 @@ export default function App() {
       const data = await response.text();
       setDiagnosesMessage(formatMessage(data) || 'Nenhum diagnóstico disponível.');
     } catch (error) {
-      setDiagnosesMessage("Erro ao obter diagnósticos: " + error.message);
+      setDiagnosesMessage('Erro ao obter diagnósticos: ' + error.message);
     }
   };
 
@@ -92,25 +82,23 @@ export default function App() {
       const data = await response.text();
       setBlockedMessage(formatMessage(data) || 'Nenhum bloqueio ativo.');
     } catch (error) {
-      setBlockedMessage("Erro ao obter bloqueios: " + error.message);
+      setBlockedMessage('Erro ao obter bloqueios: ' + error.message);
     }
   };
 
   const sendCommand = (cmd) => {
     setIsSendingCommand(true);
     fetch(`${NODEMCU_IP}/${cmd}`)
-      .then(res => res.text())
-      .then(data => {
-        if (data.includes('[JAVA]')) {
-          setStatusMessage(`♨️ Conexão com servidor Java estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[JAVA]', '').trim()}`);
-        } else if (data.includes('[ARDUINO]')) {
+      .then((res) => res.text())
+      .then((data) => {
+        if (data.includes('[ARDUINO]')) {
           setStatusMessage(`♾️ Conexão com servidor NODEMCU estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[ARDUINO]', '').trim()}`);
         } else {
           setStatusMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
         }
         fetchStatus();
       })
-      .catch(error => {
+      .catch((error) => {
         setStatusMessage(`Erro ao enviar comando ${cmd}: ` + error.message);
         setStatusColor('red');
       })
@@ -130,13 +118,39 @@ export default function App() {
   }, []);
 
   const StatusRoute = () => (
-    <View style={styles.tabContent}>
+    <ScrollView
+      style={styles.scrollContent}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshingStatus}
+          onRefresh={async () => {
+            setRefreshingStatus(true);
+            await fetchStatus();
+            setRefreshingStatus(false);
+          }}
+        />
+      }
+    >
+      {refreshingStatus && <ActivityIndicator animating size="small" />}
       <Text style={[styles.statusText, { color: statusColor }]}>{statusMessage}</Text>
-    </View>
+    </ScrollView>
   );
 
   const ControleRoute = () => (
-    <View style={styles.tabContent}>
+    <ScrollView
+      contentContainerStyle={styles.tabContent}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshingControle}
+          onRefresh={async () => {
+            setRefreshingControle(true);
+            await fetchStatus();
+            setRefreshingControle(false);
+          }}
+        />
+      }
+    >
+      {refreshingControle && <ActivityIndicator animating size="small" />}
       <Button
         mode="contained"
         onPress={() => sendCommand('LIGAR')}
@@ -153,11 +167,24 @@ export default function App() {
       >
         {isSendingCommand ? 'Enviando...' : 'DESLIGAR'}
       </Button>
-    </View>
+    </ScrollView>
   );
 
   const DiagnosesRoute = () => (
-    <ScrollView style={styles.scrollContent}>
+    <ScrollView
+      style={styles.scrollContent}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshingDiagnoses}
+          onRefresh={async () => {
+            setRefreshingDiagnoses(true);
+            await fetchDiagnoses();
+            setRefreshingDiagnoses(false);
+          }}
+        />
+      }
+    >
+      {refreshingDiagnoses && <ActivityIndicator animating size="small" />}
       <Text style={styles.logsText}>{diagnosesMessage}</Text>
       <Button mode="outlined" onPress={fetchDiagnoses} style={styles.refreshButton}>
         Atualizar Diagnósticos
@@ -166,7 +193,20 @@ export default function App() {
   );
 
   const BlockedRoute = () => (
-    <ScrollView style={styles.scrollContent}>
+    <ScrollView
+      style={styles.scrollContent}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshingBlocked}
+          onRefresh={async () => {
+            setRefreshingBlocked(true);
+            await fetchBlocked();
+            setRefreshingBlocked(false);
+          }}
+        />
+      }
+    >
+      {refreshingBlocked && <ActivityIndicator animating size="small" />}
       <Text style={styles.logsText}>{blockedMessage}</Text>
       <Button mode="outlined" onPress={fetchBlocked} style={styles.refreshButton}>
         Atualizar Bloqueios
@@ -196,14 +236,14 @@ export default function App() {
         renderScene={renderScene}
         onIndexChange={setIndex}
         initialLayout={{ width: Dimensions.get('window').width }}
-        renderTabBar={props =>
+        renderTabBar={(props) => (
           <TabBar
             {...props}
             indicatorStyle={{ backgroundColor: 'blue' }}
             style={{ backgroundColor: 'white' }}
             labelStyle={{ color: 'black' }}
           />
-        }
+        )}
       />
     </PaperProvider>
   );
