@@ -33,7 +33,7 @@
     "react-native-voice": "^0.3.0",
     "react-native-webgl": "^0.8.0",
     "react-native-webview": "^13.13.5",
-    "three": "^0.166.1"
+    "three": "^0.125.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
