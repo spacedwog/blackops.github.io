@@ -12,11 +12,13 @@ export default function App() {
   const [diagnosesMessage, setDiagnosesMessage] = useState('Carregando diagnósticos...');
   const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
   const [isSendingCommand, setIsSendingCommand] = useState(false);
+  const [wireMessage, setWireMessage] = useState('Carregando dados I2C...');
 
   const [refreshingStatus, setRefreshingStatus] = useState(false);
   const [refreshingControle, setRefreshingControle] = useState(false);
   const [refreshingDiagnoses, setRefreshingDiagnoses] = useState(false);
   const [refreshingBlocked, setRefreshingBlocked] = useState(false);
+  const [refreshingWire, setRefreshingWire] = useState(false);
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
@@ -24,6 +26,7 @@ export default function App() {
     { key: 'controle', title: 'Controle' },
     { key: 'diagnoses', title: 'Diagnoses' },
     { key: 'blocked', title: 'Blocked' },
+    { key: 'wire', title: 'Wire' },
   ]);
 
   const formatMessage = (data) => {
@@ -83,6 +86,16 @@ export default function App() {
       setBlockedMessage(formatMessage(data) || 'Nenhum bloqueio ativo.');
     } catch (error) {
       setBlockedMessage('Erro ao obter bloqueios: ' + error.message);
+    }
+  };
+
+  const fetchWire = async () => {
+    try {
+      const response = await fetch(`${NODEMCU_IP}/I2C`);
+      const data = await response.text();
+      setWireMessage(data || 'Nenhum dado I2C disponível.');
+    } catch (error) {
+      setWireMessage('Erro ao obter dados I2C: ' + error.message);
     }
   };
 
@@ -214,6 +227,28 @@ export default function App() {
     </ScrollView>
   );
 
+  const WireRoute = () => (
+    <ScrollView
+      style={styles.scrollContent}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshingWire}
+          onRefresh={async () => {
+            setRefreshingWire(true);
+            await fetchWire();
+            setRefreshingWire(false);
+          }}
+        />
+      }
+    >
+      {refreshingWire && <ActivityIndicator animating size="small" />}
+      <Text style={styles.logsText}>{wireMessage}</Text>
+      <Button mode="outlined" onPress={fetchWire} style={styles.refreshButton}>
+        Atualizar Dados I2C
+      </Button>
+    </ScrollView>
+  );
+
   const renderScene = ({ route }) => {
     switch (route.key) {
       case 'status':
@@ -224,6 +259,8 @@ export default function App() {
         return <DiagnosesRoute />;
       case 'blocked':
         return <BlockedRoute />;
+      case 'wire':
+        return <WireRoute />;
       default:
         return null;
     }
