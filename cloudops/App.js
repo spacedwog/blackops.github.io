@@ -93,7 +93,7 @@ export default function App() {
     try {
       const response = await fetch(`${NODEMCU_IP}/I2C`);
       const data = await response.text();
-      setWireMessage(formatMessage(data) || 'Nenhum dado I2C disponível.');
+      setWireMessage(data || 'Nenhum dado I2C disponível.');
     } catch (error) {
       setWireMessage('Erro ao obter dados I2C: ' + error.message);
     }
