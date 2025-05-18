@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Dimensions, ScrollView, RefreshControl, } from 'react-native';
+import { StyleSheet, Dimensions, ScrollView, RefreshControl, requireNativeComponent, View, } from 'react-native';
 import { Text, Button, Provider as PaperProvider, ActivityIndicator, } from 'react-native-paper';
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from '@react-native-community/netinfo';
@@ -13,6 +13,7 @@ export default function App() {
   const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
   const [isSendingCommand, setIsSendingCommand] = useState(false);
   const [wireMessage, setWireMessage] = useState('Carregando dados I2C...');
+  const ARKitView = requireNativeComponent('ARKitView');
 
   const [refreshingStatus, setRefreshingStatus] = useState(false);
   const [refreshingControle, setRefreshingControle] = useState(false);
@@ -27,6 +28,7 @@ export default function App() {
     { key: 'diagnoses', title: 'Diagnoses' },
     { key: 'blocked', title: 'Blocked' },
     { key: 'wire', title: 'Wire' },
+    { key: 'ar', title: 'Augment Reality' },
   ]);
 
   const formatMessage = (data) => {
@@ -249,6 +251,12 @@ export default function App() {
     </ScrollView>
   );
 
+  const ARRoute = () => (
+    <View style={{ flex: 1 }}>
+      <ARKitView style={{ flex: 1 }} />
+    </View>
+  );
+
   const renderScene = ({ route }) => {
     switch (route.key) {
       case 'status':
@@ -261,6 +269,8 @@ export default function App() {
         return <BlockedRoute />;
       case 'wire':
         return <WireRoute />;
+      case 'ar':
+        return <ARRoute />;
       default:
         return null;
     }
