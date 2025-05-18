@@ -3,7 +3,7 @@ import { GLView } from 'expo-gl';
 import { Renderer } from 'expo-three';
 import * as THREE from 'three';
 import { PanResponder, TouchableOpacity, Text, View } from 'react-native';
-import Voice from '@react-native-voice/voice';
+import Voice from 'react-native-voice';
 import * as Linking from 'expo-linking';
 
 export default function ThreeBackground() {
