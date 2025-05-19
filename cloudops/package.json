@@ -26,6 +26,7 @@
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-camera": "^4.2.1",
+    "react-native-linear-gradient": "^2.8.3",
     "react-native-paper": "^5.14.4",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-tab-view": "^4.1.0",
