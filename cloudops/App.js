@@ -16,7 +16,7 @@ import {
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from '@react-native-community/netinfo';
 import { ImageBackground } from 'react-native';
-import bgIdle from './assets/futurist_bg.jpg';
+import bgIdle from './assets/futuristic_bg.jpg';
 import bgOn from './assets/bg_on.jpg';
 import bgOff from './assets/bg_off.jpg';
 
