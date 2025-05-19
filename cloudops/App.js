@@ -15,10 +15,6 @@ import {
 } from 'react-native-paper';
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from '@react-native-community/netinfo';
-import { ImageBackground } from 'react-native';
-import bgIdle from './assets/futuristic_bg.jpg';
-import bgOn from './assets/bg_on.jpg';
-import bgOff from './assets/bg_off.jpg';
 
 const NODEMCU_IP = 'http://192.168.15.138:8080';
 
@@ -40,16 +36,14 @@ export default function App() {
   const [refreshingClient, setRefreshingClient] = useState(false);
   const [refreshingWire, setRefreshingWire] = useState(false);
 
-  const [backgroundImage, setBackgroundImage] = useState(bgOff);
-
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'status', title: '\nStat' },
-    { key: 'controle', title: '\nControl' },
-    { key: 'diagnoses', title: '\nDiag' },
-    { key: 'blocked', title: '\nBlck' },
-    { key: 'search', title: '\nSrch'},
-    { key: 'client', title: '\nClnt'},
+    { key: 'status', title: '\nStatus' },
+    { key: 'controle', title: '\nControle' },
+    { key: 'diagnoses', title: '\nDiagnoses' },
+    { key: 'blocked', title: '\nBlocked' },
+    { key: 'search', title: '\nSearch'},
+    { key: 'client', title: '\nClient'},
     { key: 'wire', title: '\nWire' },
   ]);
 
@@ -76,21 +70,17 @@ export default function App() {
       const response = await fetch(`${NODEMCU_IP}/STATUS`);
       const data = await response.text();
 
-      setBackgroundImage(bgIdle);
-
       if (data.includes('STATE:ON')) {
         setStatusMessage(`🤖 NODEMCU conectado\n✅ Led ligado\n${data}`);
         setStatusColor('green');
-        setBackgroundImage(bgOn);
       } else if (data.includes('STATE:OFF')) {
         setStatusMessage(`🤖 NODEMCU conectado\n❌ Led desligado\n${data}`);
         setStatusColor('red');
-        setBackgroundImage(bgOff);
-      } else {
+      }
+      else {
         setStatusMessage('🔄 Status desconhecido: ' + data);
         setStatusColor('gray');
       }
-
     } catch (error) {
       setStatusMessage('Erro ao conectar: ' + error.message);
       setStatusColor('red');
@@ -102,9 +92,10 @@ export default function App() {
     try {
       const response = await fetch(`${NODEMCU_IP}/${cmd}`);
       const data = await response.text();
+      const cleanData = data.replace('[ARDUINO]', '').trim();
 
       setStatusMessage(
-        `📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`
+        `📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${cleanData}`
       );
       fetchStatus();
     } catch (error) {
@@ -306,36 +297,27 @@ export default function App() {
 
   return (
     <PaperProvider>
-      <ImageBackground
-        source={backgroundImage}
-      >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }}>
-          <TabView
-            navigationState={{ index, routes }}
-            renderScene={renderScene}
-            onIndexChange={setIndex}
-            initialLayout={{ width: Dimensions.get('window').width }}
-            renderTabBar={(props) => (
-              <TabBar
-                {...props}
-                indicatorStyle={{ backgroundColor: '#00ffff' }}
-                style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-                labelStyle={{ color: '#00ffff' }}
-              />
-            )}
-          />
-        </View>
-      </ImageBackground>
+      <View style={{ flex: 1 }}>
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+          initialLayout={{ width: Dimensions.get('window').width }}
+          renderTabBar={(props) => (
+            <TabBar
+              {...props}
+              indicatorStyle={{ backgroundColor: 'blue' }}
+              style={{ backgroundColor: 'white' }}
+              labelStyle={{ color: 'black' }}
+            />
+          )}
+        />
+      </View>
     </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
   tabContent: {
     flex: 1,
     alignItems: 'center',
