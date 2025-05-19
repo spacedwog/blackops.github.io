@@ -7,12 +7,15 @@ import {
   View,
   Animated,
   TouchableWithoutFeedback,
+  ImageBackground,
 } from 'react-native';
+
 import {
   Text,
   Button,
   Provider as PaperProvider,
 } from 'react-native-paper';
+
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from '@react-native-community/netinfo';
 
