@@ -38,13 +38,13 @@ export default function App() {
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'status', title: '\nStatus' },
-    { key: 'controle', title: '\nControle' },
-    { key: 'diagnoses', title: '\nDiagnoses' },
-    { key: 'blocked', title: '\nBlocked' },
-    { key: 'search', title: '\nSearch'},
-    { key: 'client', title: '\nClient'},
-    { key: 'wire', title: '\nWire' },
+    { key: 'status', title: 'Sts' },
+    { key: 'controle', title: 'Cntr' },
+    { key: 'diagnoses', title: 'Diag' },
+    { key: 'blocked', title: 'Blck' },
+    { key: 'search', title: 'Srch'},
+    { key: 'client', title: 'Clnt'},
+    { key: 'wire', title: 'Wire' },
   ]);
 
   // ✅ Função genérica para buscar dados
@@ -307,10 +307,11 @@ export default function App() {
             <TabBar
               {...props}
               indicatorStyle={{ backgroundColor: 'blue' }}
-              style={{ backgroundColor: 'white' }}
+              style={{ backgroundColor: 'blue' }}
               labelStyle={{ color: 'black' }}
             />
           )}
+          tabBarPosition="bottom" // <- Adicione isso aqui
         />
       </View>
     </PaperProvider>
@@ -322,7 +323,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 10,
   },
   scrollContent: {
     flex: 1,
