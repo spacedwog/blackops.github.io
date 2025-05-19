@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@react-native-community/netinfo": "^11.4.1",
-    "@react-three/drei": "^10.0.8",
+    "@react-three/drei": "^7.27.1",
     "@react-three/fiber": "^9.1.2",
     "@viro-community/react-viro": "^2.41.1",
     "axios": "^1.9.0",
@@ -33,7 +33,7 @@
     "react-native-voice": "^0.3.0",
     "react-native-webgl": "^0.8.0",
     "react-native-webview": "^13.13.5",
-    "three": "^0.125.2"
+    "three": "^0.159.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

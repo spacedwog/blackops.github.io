@@ -1,18 +1,31 @@
+// App.js ou App.tsx
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Dimensions, ScrollView, RefreshControl, requireNativeComponent, View, } from 'react-native';
-import { Text, Button, Provider as PaperProvider, ActivityIndicator, } from 'react-native-paper';
+import {
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  RefreshControl,
+  View,
+} from 'react-native';
+import {
+  Text,
+  Button,
+  Provider as PaperProvider,
+  ActivityIndicator,
+} from 'react-native-paper';
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from '@react-native-community/netinfo';
+import { NODEMCU_IP as ENV_IP } from './.env'; // Para .env
 
-const NODEMCU_IP = 'http://192.168.15.138:8080';
+const NODEMCU_IP = ENV_IP || 'http://192.168.15.138:8080'; // Fallback se .env não for usado
 
 export default function App() {
   const [statusMessage, setStatusMessage] = useState('Conectando ao NodeMCU...');
   const [statusColor, setStatusColor] = useState('orange');
   const [diagnosesMessage, setDiagnosesMessage] = useState('Carregando diagnósticos...');
   const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
-  const [isSendingCommand, setIsSendingCommand] = useState(false);
   const [wireMessage, setWireMessage] = useState('Carregando dados I2C...');
+  const [isSendingCommand, setIsSendingCommand] = useState(false);
 
   const [refreshingStatus, setRefreshingStatus] = useState(false);
   const [refreshingControle, setRefreshingControle] = useState(false);
@@ -29,6 +42,17 @@ export default function App() {
     { key: 'wire', title: 'Wire' },
   ]);
 
+  // ✅ Função genérica para buscar dados
+  const fetchData = async (endpoint, setter, fallbackMsg = '') => {
+    try {
+      const response = await fetch(`${NODEMCU_IP}/${endpoint}`);
+      const data = await response.text();
+      setter(data || fallbackMsg);
+    } catch (error) {
+      setter(`Erro ao obter ${endpoint.toLowerCase()}: ${error.message}`);
+    }
+  };
+
   const fetchStatus = async () => {
     try {
       const state = await NetInfo.fetch();
@@ -41,12 +65,11 @@ export default function App() {
       const response = await fetch(`${NODEMCU_IP}/STATUS`);
       const data = await response.text();
 
-      
       if (data.includes('STATE:ON')) {
-        setStatusMessage('🤖 Conexão com servidor NODEMCU estabelecida.\n✅ Led ligado\n' + data);
+        setStatusMessage(`🤖 NODEMCU conectado\n✅ Led ligado\n${data}`);
         setStatusColor('green');
       } else if (data.includes('STATE:OFF')) {
-        setStatusMessage('🤖 Conexão com servidor NODEMCU estabelecida.\n❌ Led desligado\n' + data);
+        setStatusMessage(`🤖 NODEMCU conectado\n❌ Led desligado\n${data}`);
         setStatusColor('red');
       }
       else {
@@ -59,64 +82,45 @@ export default function App() {
     }
   };
 
-  const fetchDiagnoses = async () => {
-    try {
-      const response = await fetch(`${NODEMCU_IP}/DIAGNOSES`);
-      const data = await response.text();
-      setDiagnosesMessage(data || 'Nenhum diagnóstico disponível.');
-    } catch (error) {
-      setDiagnosesMessage('Erro ao obter diagnósticos: ' + error.message);
-    }
-  };
-
-  const fetchBlocked = async () => {
-    try {
-      const response = await fetch(`${NODEMCU_IP}/BLOCKED`);
-      const data = await response.text();
-      setBlockedMessage(data || 'Nenhum bloqueio ativo.');
-    } catch (error) {
-      setBlockedMessage('Erro ao obter bloqueios: ' + error.message);
-    }
-  };
-
-  const fetchWire = async () => {
-    try {
-      const response = await fetch(`${NODEMCU_IP}/I2C`);
-      const data = await response.text();
-      setWireMessage(data || 'Nenhum dado I2C disponível.');
-    } catch (error) {
-      setWireMessage('Erro ao obter dados I2C: ' + error.message);
-    }
-  };
-
-  const sendCommand = (cmd) => {
+  const sendCommand = async (cmd) => {
     setIsSendingCommand(true);
-    fetch(`${NODEMCU_IP}/${cmd}`)
-      .then((res) => res.text())
-      .then((data) => {
-        if (data.includes('HTTP')) {
-          setStatusMessage(`♾️ Conexão com servidor NODEMCU estabelecida.\n📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data.replace('[ARDUINO]', '').trim()}`);
-        } else {
-          setStatusMessage(`📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${data}`);
-        }
-        fetchStatus();
-      })
-      .catch((error) => {
-        setStatusMessage(`Erro ao enviar comando ${cmd}: ` + error.message);
-        setStatusColor('red');
-      })
-      .finally(() => setIsSendingCommand(false));
+    try {
+      const response = await fetch(`${NODEMCU_IP}/${cmd}`);
+      const data = await response.text();
+      const cleanData = data.replace('[ARDUINO]', '').trim();
+
+      setStatusMessage(
+        `📤 Comando ${cmd.toUpperCase()} enviado\n📥 Resposta: ${cleanData}`
+      );
+      fetchStatus();
+    } catch (error) {
+      setStatusMessage(`Erro ao enviar comando ${cmd}: ` + error.message);
+      setStatusColor('red');
+    } finally {
+      setIsSendingCommand(false);
+    }
   };
 
+  // ✅ Atualização automática com espaçamento entre chamadas
   useEffect(() => {
-    const interval = setInterval(async () => {
-      await fetchStatus();
-      setTimeout(fetchDiagnoses, 1000);
-      setTimeout(fetchBlocked, 2000);
-    }, 10000); // intervalo maior
+    fetchStatus();
+    fetchData('DIAGNOSES', setDiagnosesMessage, 'Nenhum diagnóstico disponível.');
+    fetchData('BLOCKED', setBlockedMessage, 'Nenhum bloqueio ativo.');
+
+    const interval = setInterval(() => {
+      fetchStatus();
+      setTimeout(() => fetchData('DIAGNOSES', setDiagnosesMessage, 'Sem diagnóstico'), 1000);
+      setTimeout(() => fetchData('BLOCKED', setBlockedMessage, 'Sem bloqueios'), 2000);
+    }, 15000);
+
     return () => clearInterval(interval);
   }, []);
 
+  const TopStatusBanner = () => (
+    <View style={[styles.topBanner, { backgroundColor: statusColor }]}>
+      <Text style={styles.bannerText}>{statusMessage}</Text>
+    </View>
+  );
 
   const StatusRoute = () => (
     <ScrollView
@@ -132,8 +136,7 @@ export default function App() {
         />
       }
     >
-      {refreshingStatus && <ActivityIndicator animating size="small" />}
-      <Text style={[styles.statusText, { color: statusColor }]}>{statusMessage}</Text>
+      <TopStatusBanner />
     </ScrollView>
   );
 
@@ -151,7 +154,7 @@ export default function App() {
         />
       }
     >
-      {refreshingControle && <ActivityIndicator animating size="small" />}
+      <TopStatusBanner />
       <Button
         mode="contained"
         onPress={() => sendCommand('LIGAR')}
@@ -179,17 +182,14 @@ export default function App() {
           refreshing={refreshingDiagnoses}
           onRefresh={async () => {
             setRefreshingDiagnoses(true);
-            await fetchDiagnoses();
+            await fetchData('DIAGNOSES', setDiagnosesMessage, 'Sem dados');
             setRefreshingDiagnoses(false);
           }}
         />
       }
     >
-      {refreshingDiagnoses && <ActivityIndicator animating size="small" />}
+      <TopStatusBanner />
       <Text style={styles.logsText}>{diagnosesMessage}</Text>
-      <Button mode="outlined" onPress={fetchDiagnoses} style={styles.refreshButton}>
-        Atualizar Diagnósticos
-      </Button>
     </ScrollView>
   );
 
@@ -201,17 +201,14 @@ export default function App() {
           refreshing={refreshingBlocked}
           onRefresh={async () => {
             setRefreshingBlocked(true);
-            await fetchBlocked();
+            await fetchData('BLOCKED', setBlockedMessage, 'Sem bloqueios');
             setRefreshingBlocked(false);
           }}
         />
       }
     >
-      {refreshingBlocked && <ActivityIndicator animating size="small" />}
+      <TopStatusBanner />
       <Text style={styles.logsText}>{blockedMessage}</Text>
-      <Button mode="outlined" onPress={fetchBlocked} style={styles.refreshButton}>
-        Atualizar Bloqueios
-      </Button>
     </ScrollView>
   );
 
@@ -223,17 +220,14 @@ export default function App() {
           refreshing={refreshingWire}
           onRefresh={async () => {
             setRefreshingWire(true);
-            await fetchWire();
+            await fetchData('I2C', setWireMessage, 'Sem dados I2C');
             setRefreshingWire(false);
           }}
         />
       }
     >
-      {refreshingWire && <ActivityIndicator animating size="small" />}
+      <TopStatusBanner />
       <Text style={styles.logsText}>{wireMessage}</Text>
-      <Button mode="outlined" onPress={fetchWire} style={styles.refreshButton}>
-        Atualizar Dados I2C
-      </Button>
     </ScrollView>
   );
 
@@ -257,22 +251,20 @@ export default function App() {
   return (
     <PaperProvider>
       <View style={{ flex: 1 }}>
-        {
-          <TabView
-            navigationState={{ index, routes }}
-            renderScene={renderScene}
-            onIndexChange={setIndex}
-            initialLayout={{ width: Dimensions.get('window').width }}
-            renderTabBar={(props) => (
-              <TabBar
-                {...props}
-                indicatorStyle={{ backgroundColor: 'blue' }}
-                style={{ backgroundColor: 'white' }}
-                labelStyle={{ color: 'black' }}
-              />
-            )}
-          />
-        }
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+          initialLayout={{ width: Dimensions.get('window').width }}
+          renderTabBar={(props) => (
+            <TabBar
+              {...props}
+              indicatorStyle={{ backgroundColor: 'blue' }}
+              style={{ backgroundColor: 'white' }}
+              labelStyle={{ color: 'black' }}
+            />
+          )}
+        />
       </View>
     </PaperProvider>
   );
@@ -308,5 +300,15 @@ const styles = StyleSheet.create({
   logsText: {
     fontSize: 16,
     fontFamily: 'monospace',
+  },
+  topBanner: {
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  bannerText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
