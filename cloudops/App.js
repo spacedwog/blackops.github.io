@@ -24,7 +24,6 @@ export default function App() {
   const [diagnosesMessage, setDiagnosesMessage] = useState('Carregando diagnósticos...');
   const [blockedMessage, setBlockedMessage] = useState('Carregando bloqueios...');
   const [searchMessage, setSearchMessage] = useState('Efetuando Pesquisa...');
-  const [apiMessage, setApiMessage] = useState('Baixando API...');
   const [clientMessage, setClientMessage] = useState('Carregando lista de client...');
   const [wireMessage, setWireMessage] = useState('Carregando dados I2C...');
   const [isSendingCommand, setIsSendingCommand] = useState(false);
@@ -34,7 +33,6 @@ export default function App() {
   const [refreshingDiagnoses, setRefreshingDiagnoses] = useState(false);
   const [refreshingBlocked, setRefreshingBlocked] = useState(false);
   const [refreshingSearch, setRefreshingSearch] = useState(false);
-  const [refreshingApi, setRefreshingApi] = useState(false);
   const [refreshingClient, setRefreshingClient] = useState(false);
   const [refreshingWire, setRefreshingWire] = useState(false);
 
@@ -45,7 +43,6 @@ export default function App() {
     { key: 'diagnoses', title: 'Diagnoses' },
     { key: 'blocked', title: 'Blocked' },
     { key: 'search', title: 'Search'},
-    { key: 'api', title: 'Api'},
     { key: 'client', title: 'Client'},
     { key: 'wire', title: 'Wire' },
   ]);
@@ -239,25 +236,6 @@ export default function App() {
     </ScrollView>
   );
 
-  const ApiRoute = () => (
-    <ScrollView
-      style={styles.scrollContent}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshingApi}
-          onRefresh={async () => {
-            setRefreshingApi(true);
-            await fetchData('API', setApiMessage, 'Sem dados');
-            setRefreshingApi(false);
-          }}
-        />
-      }
-    >
-      <TopStatusBanner />
-      <Text style={styles.logsText}>{apiMessage}</Text>
-    </ScrollView>
-  );
-
   const ClientRoute = () => (
     <ScrollView
       style={styles.scrollContent}
@@ -308,8 +286,6 @@ export default function App() {
         return <BlockedRoute />;
       case 'search':
         return <SearchRoute />;
-      case 'api':
-        return <ApiRoute />;
       case 'client':
         return <ClientRoute />;
       case 'wire':
