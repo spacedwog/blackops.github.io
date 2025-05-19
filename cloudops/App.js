@@ -16,7 +16,7 @@ import {
 import { TabView, TabBar } from 'react-native-tab-view';
 import NetInfo from '@react-native-community/netinfo';
 
-const NODEMCU_IP = 'http://192.168.15.138:8080'; // Fallback se .env não for usado
+const NODEMCU_IP = 'http://192.168.15.138:8080';
 
 export default function App() {
   const [statusMessage, setStatusMessage] = useState('Conectando ao NodeMCU...');
